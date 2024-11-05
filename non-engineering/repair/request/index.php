@@ -142,7 +142,7 @@ if ($user) {
                                 <h5>KSK Food Products</h5>
                             </div>
                             <div class="col-3">
-                                <p><strong>Employee ID: </strong><?=$employee_id?></p>
+                                <p><strong>Employee ID: <span id="employee-id-text"><?= $employee_id ?></span></strong></p>
                                 <p><strong>Department: </strong><?=$department?></p>
                             </div>
                         </div>
@@ -160,32 +160,27 @@ if ($user) {
                     <h1><strong>Request for Machine Repair</strong></h1>
                     <p>Please fill out the form below to request for any machine repair in your department.</p>
                     <div class="container mt-4 p-4 border rounded bg-light">
-                        <form class="w-100">
+                        <form id="repairRequestForm" class="w-100" method="POST">
                             <div class="row">
                                 <!-- Left Side Top Section -->
                                 <div class="col-md-8">
                                     <!-- Department (Disabled) -->
                                     <div class="mb-3">
                                         <label for="department" class="form-label">Department</label>
-                                        <input type="text" class="form-control" id="department" value="<?=$department?>" disabled>
+                                        <input type="text" class="form-control" id="department" name="department" value="<?=$department?>" disabled>
                                     </div>
 
                                     <!-- Machine Dropdown -->
                                     <div class="mb-3">
-                                        <label for="machine" class="form-label">Machine</label>
-                                        <select class="form-select" id="machine" required>
-                                            <option value="" selected disabled>Select a machine</option>
-                                            <option value="1">Machine 1 - ID: 001 - Description: Cutter</option>
-                                            <option value="2">Machine 2 - ID: 002 - Description: Press</option>
-                                            <option value="3">Machine 3 - ID: 003</option>
-                                            <!-- Additional machine options can be added here -->
+                                        <label for="machine" class="form-label text-danger">Machine*</label>
+                                        <select class="form-select" id="machine" name="machine" required>
                                         </select>
                                     </div>
 
                                     <!-- Urgency Dropdown -->
                                     <div class="mb-3">
-                                        <label for="urgency" class="form-label">Urgency</label>
-                                        <select class="form-select" id="urgency" required>
+                                        <label for="urgency" class="form-label text-danger">Urgency*</label>
+                                        <select class="form-select" id="urgency" name="urgency" required>
                                             <option value="low">Low</option>
                                             <option value="medium">Medium</option>
                                             <option value="high">High</option>
@@ -198,7 +193,7 @@ if ($user) {
                                     <!-- Current Timestamp -->
                                     <div class="mb-3">
                                         <label for="timestamp" class="form-label">Current Timestamp</label>
-                                        <input type="text" class="form-control" id="timestamp" value="<?= date('Y-m-d H:i:s'); ?>" disabled>
+                                        <input type="text" class="form-control" id="timestamp" name="remarks" value="<?= date('Y-m-d H:i:s'); ?>" disabled>
                                     </div>
                                 </div>
                             </div>
@@ -208,8 +203,8 @@ if ($user) {
                                 <div class="col-12">
                                     <!-- Remarks Text Area -->
                                     <div class="mb-3">
-                                        <label for="remarks" class="form-label">Remarks</label>
-                                        <textarea class="form-control" id="remarks" rows="4" placeholder="Enter any additional remarks here..."></textarea>
+                                        <label for="remarks" class="form-label text-danger">Problem Description*</label>
+                                        <textarea class="form-control" id="remarks" rows="4" placeholder="Describe the problem to be fixed."></textarea>
                                     </div>
 
                                     <!-- Submit Button -->

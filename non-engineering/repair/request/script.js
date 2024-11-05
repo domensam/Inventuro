@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function () {
   showContent("dashboard");
 
   // Fetch announcements from fetch_announcements.php
-  fetch('fetch_announcements.php')
+  fetch('../../fetch_announcements.php')
     .then(response => {
       if (!response.ok) {
           throw new Error('Network response was not ok');
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 </div>
                 <div class="col-11">
                   <div class="timeline-content">
-                    <div class="icon"><img src="../images/megaphone.png" alt="Announcement Icon" class="icon-img"></div>
+                    <div class="icon"><img src="../../../images/megaphone.png" alt="Announcement Icon" class="icon-img"></div>
                     <div class="content-text">
                       <h3>${announcement.title}</h3>
                       <p>${formattedContent}</p>
@@ -114,4 +114,86 @@ document.addEventListener('DOMContentLoaded', function () {
     .catch(error => {
       console.error('Error fetching announcements:', error);
     });
+
+    const department = document.getElementById('department').value;
+    const machineDropdown = document.getElementById('machine');
+
+    // Fetch machines based on department
+    function fetchMachines(department) {
+        fetch(`fetch_machines.php?department=${encodeURIComponent(department)}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(machines => {
+                // Clear existing options
+                machineDropdown.innerHTML = '<option value="" selected disabled>Select a machine</option>';
+                
+                // Populate dropdown with new options
+                machines.forEach(machine => {
+                    const option = document.createElement('option');
+                    option.value = machine.machine_id;
+                    option.textContent = `${machine.machine_name} - ID #${machine.machine_id}`;
+                    machineDropdown.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching machines:', error);
+            });
+    }
+
+    // Fetch machines for the initial department value
+    if (department) {
+        fetchMachines(department);
+    }
+
+    const repairForm = document.getElementById('repairRequestForm');
+
+    repairForm.addEventListener('submit', function (event) {
+
+      event.preventDefault(); // Prevent the form from submitting traditionally
+
+      // Capture form data
+      const formData = new FormData(repairForm);
+
+      // Capture form data
+      const machineId = document.getElementById('machine').value;
+      const urgency = document.getElementById('urgency').value;
+      const remarks = document.getElementById('remarks').value;
+      const requestedBy = document.getElementById('employee-id-text').textContent; // Get the employee ID from PHP session
+
+      // Send the data to a PHP script for processing
+      formData.append('machine_id', machineId);
+      formData.append('urgency', urgency);
+      formData.append('details', remarks);
+      formData.append('requested_by', requestedBy);
+
+      // Log form data to the console
+      console.log("Form data to be sent:");
+      console.log("Machine ID:", document.getElementById('machine').value);
+      console.log("Urgency:", document.getElementById('urgency').value);
+      console.log("Remarks:", document.getElementById('remarks').value);
+      console.log("Requested By:", document.getElementById('employee-id-text').textContent); // logged from PHP session
+
+      // Send the data to a PHP script for processing
+      fetch('submit_repair_request.php', {
+        method: 'POST',
+        body: formData,
+      })
+      .then(response => response.json())
+      .then(data => {
+          if (data.success) {
+              alert("Repair request submitted successfully.");
+              repairForm.reset(); // Optionally reset the form after submission
+          } else {
+              alert("Error: " + data.message);
+          }
+      })
+      .catch(error => {
+          console.error('Error:', error);
+          alert("There was an error submitting the repair request.");
+      });
+  });
 });
