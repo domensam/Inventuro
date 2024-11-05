@@ -143,4 +143,27 @@ document.addEventListener('DOMContentLoaded', function () {
           alert("There was an error submitting the repair request.");
       });
   });
+
+  $(document).ready(function() {
+    $('#historyTable').DataTable({
+        dom: '<"row"<"col-md-6"f><"col-md-6"B>>tip',
+        buttons: [
+            'copy', 'csv', 'excel', 'pdf', 'print'
+        ],
+        paging: true,
+        searching: true,
+        ordering: true,
+        info: true,
+        columnDefs: [
+            { orderable: false, targets: 0 }
+        ]
+    });
+
+    // Handle "Select All" checkbox
+    $('#selectAll').click(function() {
+        var rows = $('#historyTable').DataTable().rows({ 'search': 'applied' }).nodes();
+        $('input[type="checkbox"]', rows).prop('checked', this.checked);
+    });
+});
+
 });

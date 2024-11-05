@@ -46,6 +46,9 @@ if ($user) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.dataTables.min.css" rel="stylesheet">
+
     <link rel="stylesheet" href="style.css">
     <title>Home</title>
 </head>
@@ -78,7 +81,7 @@ if ($user) {
                             <a href="index.php" class="sidebar-link">Request</a>
                         </li>
                         <li class="sidebar-item">
-                            <a href="../history/index.php" class="sidebar-link">History</a>
+                            <a href="#" class="sidebar-link">History</a>
                         </li>
                     </ul>
                 </li>
@@ -151,12 +154,12 @@ if ($user) {
                 </div>
                 <div id="main-content-links">
                     <a id="request-link" class="link-hover-effect text-primary" href="index.php">Request</a>
-                    <a id="history-link" class="link-hover-effect text-primary" href="../history/index.php">History</a>
+                    <a id="history-link" class="link-hover-effect text-primary" href="#">History</a>
                 </div>
             </div>
-            <div id="main-content" class="p-5">
+            <div id="main-content">
                 <!-- Repair Request Section -->
-                <div id="request-content" class="content-section active">
+                <div id="request-content" class="content-section active p-5">
                     <h1><strong>Request for Machine Repair</strong></h1>
                     <p>Please fill out the form below to request for any machine repair in your department.</p>
                     <div class="container mt-4 p-4 border rounded bg-light">
@@ -219,8 +222,10 @@ if ($user) {
                 </div>
                 <!-- Repair Request History Section -->
                 <div id="history-content" class="content-section">
-                    <h1><strong>History of Your Repair Request</strong></h1>
-                    <p>Click on a repair request to view details</p>
+                    <div class="p-5 pb-1">
+                        <h1><strong>History of Your Repair Request</strong></h1>
+                        <p>Click on a repair request to view details</p>
+                    </div>
                     <!-- Table -->
                     <table id="historyTable" class="table table-striped table-hover w-100">
                         <thead>
@@ -235,41 +240,82 @@ if ($user) {
                         <tbody>
                         <?php
                             try {
-                                $sql = "SELECT * FROM repair_request JOIN employee ON users.employee_id = employee.employee_id"; // Join machine, repair, and employee tables din
-                                $result = $conn->query($sql);
+                                $requested_by = $_SESSION['employee_id'];
 
-                                while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-                                    // Initialize image-related variables
-                                    $mimeType = null;
-                                    $base64Image = null;
-                                    $imageData = '';
+                                $sql = "SELECT * FROM repair_request 
+                                    LEFT JOIN repair ON repair_request.repair_request_id = repair.repair_request_id
+                                    LEFT JOIN employee ON repair.handled_by = employee.employee_id
+                                    LEFT JOIN machine ON repair_request.machine_id = machine.machine_id
+                                    WHERE repair_request.requested_by = ?
+                                    ORDER BY repair_request.date_requested ASC";
 
-                                    // Check if the user has an image
-                                    if (isset($row['image']) && !empty($row['image'])) {
-                                        // Detect MIME type and convert BLOB to base64
-                                        $finfo = new finfo(FILEINFO_MIME_TYPE);
-                                        $mimeType = $finfo->buffer($row['image']);
-                                        $base64Image = base64_encode($row['image']);
-                                        $imageData = "data:$mimeType;base64,$base64Image";  // Store the base64 image
-                                    }
-                                    else {
-                                        $imageData = "../../images/person-circle.png";
-                                    }
+                                // Prepare the statement
+                                $stmt = $conn->prepare($sql);
 
+                                // Bind the parameter
+                                $stmt->bindParam(1, $requested_by, PDO::PARAM_STR);
+
+                                // Execute the query
+                                $stmt->execute();
+                                
+                                // Fetch data and display
+                                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                                    $imageData = isset($row['image']) && !empty($row['image'])
+                                        ? "data:" . (new finfo(FILEINFO_MIME_TYPE))->buffer($row['image']) . ";base64," . base64_encode($row['image'])
+                                        : "../../../images/gallery.png";
+
+                                // Determine status color class
+                                $statusClass = '';
+                                $statusText = htmlspecialchars($row['status']);
+                                switch ($row['status']) {
+                                    case 'Not Started':
+                                        $statusClass = 'bg-light text-secondary'; // Gray
+                                        break;
+                                    case 'Started':
+                                        $statusClass = 'bg-warning text-dark'; // Yellow
+                                        break;
+                                    case 'Done':
+                                        $statusClass = 'bg-success text-white'; // Green
+                                        break;
+                                }
+
+                                // Determine urgency text color class
+                                $urgencyClass = '';
+                                $urgencyText = htmlspecialchars($row['urgency']);
+                                switch ($row['urgency']) {
+                                    case 'Low':
+                                        $urgencyClass = 'text-success'; // Green
+                                        break;
+                                    case 'Medium':
+                                        $urgencyClass = 'text-warning'; // Yellow
+                                        break;
+                                    case 'High':
+                                        $urgencyClass = 'text-danger'; // Red
+                                        break;
+                                }
                                     // Construct the table row
                                     echo "<tr
-                                        data-employee-id='" . htmlspecialchars($row['employee_id']) . "' 
-                                        data-date-created='" . htmlspecialchars($row['date_created']) . "' 
-                                        data-first-name='" . htmlspecialchars($row['first_name']) . "' 
-                                        data-middle-name='" . htmlspecialchars($row['middle_name']) . "' 
-                                        data-last-name='" . htmlspecialchars($row['last_name']) . "' 
+                                        data-date-requested='" . htmlspecialchars(date("d M Y g:i A", strtotime($row['date_requested']))) . "'
+                                        data-repair-request-id='" . htmlspecialchars($row['repair_request_id']) . "'
+                                        data-machine-name='" . htmlspecialchars($row['machine_name']) . "'
+                                        data-status ='" . htmlspecialchars($row['status']) . "'
+                                        data-urgency='" . htmlspecialchars($row['urgency']) . "'
+                                        data-department='" . htmlspecialchars($department) . "'
+                                        data-requested-by='" . htmlspecialchars($first_name . " " . $last_name . " (" . $employee_id . ")") . "'
+                                        data-handled-by='" . (
+                                            !empty($row['first_name']) && !empty($row['last_name']) 
+                                                ? htmlspecialchars($row['first_name'] . ' ' . $row['last_name'])
+                                                : 'Not assigned yet'
+                                            ) . "'
+                                        data-details ='" . htmlspecialchars($row['details']) . "'
                                         data-image='" . htmlspecialchars($imageData) . "'>
                                         <td class='text-center align-middle'><input type='checkbox' class='row-checkbox'></td>
-                                        <td class='text-start'><img src='" . htmlspecialchars($imageData) . "' 
-                                            alt='Profile Picture' class='profile-icon me-2 align-middle' style='width: 40px; height: 40px; object-fit: cover;'>
-                                            <span>" . htmlspecialchars($row['first_name'] . " " . $row['last_name']) . "</span></td>
-                                        <td class='text-start align-middle'>" . htmlspecialchars($row['role']) . "</td>
-                                        <td class='text-start align-middle'>" . htmlspecialchars($row['department']) . "</td>
+                                        <td class='text-start align-middle'>" . htmlspecialchars(date("d M Y g:i A", strtotime($row['date_requested']))) . "</td>
+                                        <td class='text-start align-middle'>" . htmlspecialchars($row['repair_request_id']) . "</td>
+                                        <td class='text-start align-middle'>
+                                            <span class='badge $statusClass p-2 rounded fs-6'>$statusText</span>
+                                        </td>
+                                        <td class='text-start align-middle $urgencyClass'>$urgencyText</td>
                                     </tr>";
                                 }
                             } catch (PDOException $e) {
@@ -285,10 +331,20 @@ if ($user) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
         crossorigin="anonymous"></script>
+    <!-- Include jQuery and DataTables JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.print.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    
     <script src="script.js"></script>
 </body>
 </html>
 <?php
 } else {
-    header(header: "Location: ../login.php");}
+    header(header: "Location: ../../../login.php");}
 ?>
