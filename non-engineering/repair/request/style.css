@@ -324,11 +324,40 @@ h2 {
 }
 
 /* Custom styles to align search and buttons */
-.dt-buttons {
-    float: right;
-    margin-bottom: 10px;
-}
 .dataTables_filter {
     float: left;
     margin-bottom: 10px;
+    margin-left: 5px; /* Left margin for the search bar */
+}
+
+.dataTables_filter input {
+    width: 400px; /* Make search bar longer */
+}
+
+.dt-buttons {
+    float: right;
+    margin-bottom: 10px;
+    margin-right: 5px; /* Right margin for the buttons */
+}
+
+/* Dropdown menu styling */
+.dropdown-menu button {
+    width: 100%; /* Full width inside dropdown */
+    text-align: left; /* Align text to the left */
+}
+
+/* Aligning items in a flex container */
+.dataTables_wrapper .row:first-child {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dataTables_info {
+    margin-left: 20px; /* Adjust the left margin as needed */
+}
+
+/* Aligning pagination to the right */
+.dataTables_paginate {
+    margin-right: 10px; /* Adjust the right margin as needed */
 }

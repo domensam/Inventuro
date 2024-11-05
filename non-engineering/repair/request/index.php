@@ -48,9 +48,10 @@ if ($user) {
     <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet" />
     <link href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" rel="stylesheet">
     <link href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.dataTables.min.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 
     <link rel="stylesheet" href="style.css">
-    <title>Home</title>
+    <title>Repair Request</title>
 </head>
 <body>
     <div class="wrapper">
@@ -222,7 +223,7 @@ if ($user) {
                 </div>
                 <!-- Repair Request History Section -->
                 <div id="history-content" class="content-section">
-                    <div class="p-5 pb-1">
+                    <div class="p-5 pb-0">
                         <h1><strong>History of Your Repair Request</strong></h1>
                         <p>Click on a repair request to view details</p>
                     </div>
@@ -232,7 +233,7 @@ if ($user) {
                             <tr>
                                 <th class="text-center" style="width: 5%;"><input type="checkbox" id="selectAll"></th>
                                 <th class="text-start" style="padding-left: 13px;">Date</th>
-                                <th class="text-start" style="padding-left: 13px;">Repair No.</th>
+                                <th class="text-start" style="padding-left: 13px;">Repair Request No.</th>
                                 <th class="text-start" style="padding-left: 13px;">Status</th>
                                 <th class="text-start" style="padding-left: 13px;">Urgency</th>
                             </tr>
@@ -340,7 +341,7 @@ if ($user) {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-    
+
     <script src="script.js"></script>
 </body>
 </html>

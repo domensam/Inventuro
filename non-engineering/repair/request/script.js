@@ -146,9 +146,26 @@ document.addEventListener('DOMContentLoaded', function () {
 
   $(document).ready(function() {
     $('#historyTable').DataTable({
-        dom: '<"row"<"col-md-6"f><"col-md-6"B>>tip',
+        dom: '<"row"<"col-md-6"f><"col-md-6 text-end"B>>tip',
         buttons: [
-            'copy', 'csv', 'excel', 'pdf', 'print'
+            {
+                extend: 'copy',
+                text: 'Copy'
+            },
+            {
+                extend: 'collection',
+                text: 'Export',
+                className: 'btn',
+                buttons: [
+                    { extend: 'csv', text: 'CSV' },
+                    { extend: 'excel', text: 'Excel' },
+                    { extend: 'pdf', text: 'PDF' }
+                ]
+            },
+            {
+                extend: 'print',
+                text: 'Print'
+            }
         ],
         paging: true,
         searching: true,
@@ -164,6 +181,6 @@ document.addEventListener('DOMContentLoaded', function () {
         var rows = $('#historyTable').DataTable().rows({ 'search': 'applied' }).nodes();
         $('input[type="checkbox"]', rows).prop('checked', this.checked);
     });
-});
+  });
 
 });
