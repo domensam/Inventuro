@@ -56,84 +56,47 @@ document.addEventListener('DOMContentLoaded', function () {
   // Load settings by default
   setActiveLink("settings");
   showContent("settings");
+
+  // Fetch activity log from fetch_activity_log.php
+  $(document).ready(function() {
+    $('#activityLogTable').DataTable({
+        dom: '<"d-flex align-items-center custom-toolbar"fB>tip',
+        buttons: [
+            {
+                extend: 'copy',
+                text: 'Copy'
+            },
+            {
+                extend: 'collection',
+                text: 'Download',
+                buttons: [
+                    { extend: 'csv', text: 'CSV' },
+                    { extend: 'excel', text: 'Excel' },
+                    { extend: 'pdf', text: 'PDF' }
+                ]
+            },
+            {
+                extend: 'print',
+                text: 'Print'
+            }
+        ],
+        paging: true,
+        searching: true,
+        ordering: true,
+        info: true
+    });
+});
+
+document.getElementById('toggle-password-visibility').addEventListener('change', function () {
+  const passwordFields = [
+      document.getElementById('current-password'),
+      document.getElementById('new-password'),
+      document.getElementById('confirm-password')
+  ];
   
-  const department = document.getElementById('department').value;
-  const machineDropdown = document.getElementById('machine');
-
-  // Fetch machines based on department
-  function fetchMachines(department) {
-      fetch(`fetch_machines.php?department=${encodeURIComponent(department)}`)
-          .then(response => {
-              if (!response.ok) {
-                  throw new Error('Network response was not ok');
-              }
-              return response.json();
-          })
-          .then(machines => {
-              // Clear existing options
-              machineDropdown.innerHTML = '<option value="" selected disabled>Select a machine</option>';
-              
-              // Populate dropdown with new options
-              machines.forEach(machine => {
-                  const option = document.createElement('option');
-                  option.value = machine.machine_id;
-                  option.textContent = `${machine.machine_name} - ID #${machine.machine_id}`;
-                  machineDropdown.appendChild(option);
-              });
-          })
-          .catch(error => {
-              console.error('Error fetching machines:', error);
-          });
-  }
-
-  // Fetch machines for the initial department value
-  if (department) {
-      fetchMachines(department);
-  }
-
-  // Form submission handling
-  const repairForm = document.getElementById('repairRequestForm');
-  repairForm.addEventListener('submit', function (event) {
-      event.preventDefault(); // Prevent the form from submitting traditionally
-
-      // Capture form data
-      const formData = new FormData(repairForm);
-      const machineId = document.getElementById('machine').value;
-      const urgency = document.getElementById('urgency').value;
-      const remarks = document.getElementById('remarks').value;
-      const requestedBy = document.getElementById('employee-id-text').textContent; // Get the employee ID from PHP session
-
-      // Send the data to a PHP script for processing
-      formData.append('machine_id', machineId);
-      formData.append('urgency', urgency);
-      formData.append('details', remarks);
-      formData.append('requested_by', requestedBy);
-
-      // Log form data to the console
-      console.log("Form data to be sent:", {
-          "Machine ID": machineId,
-          "Urgency": urgency,
-          "Remarks": remarks,
-          "Requested By": requestedBy
-      });
-
-      // Send the data to a PHP script for processing
-      fetch('submit_repair_request.php', {
-          method: 'POST',
-          body: formData,
-      })
-      .then(response => response.json())
-      .then(data => {
-          if (data.success) {
-              alert("Repair request submitted successfully.");
-              repairForm.reset(); // Optionally reset the form after submission
-          } else {
-              alert("Error: " + data.message);
-          }
-      })
-      .catch(error => {
-          console.error('Error:', error);
-          alert("There was an error submitting the repair request.");
-      });
+  passwordFields.forEach(field => {
+      field.type = this.checked ? 'text' : 'password';
   });
+});
+
 });

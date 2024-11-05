@@ -37,6 +37,7 @@ if ($user) {
     $employee_id = $user['employee_id'];
     $department = $user['department'];
     $role = $user['role'];
+    $date_created = $user['date_created'];
 }
 
 ?>
@@ -48,8 +49,10 @@ if ($user) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.dataTables.min.css" rel="stylesheet">
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
+
     <link rel="stylesheet" href="style.css">
 
     <title>Repair Request</title>
@@ -158,11 +161,11 @@ if ($user) {
                                 <div class="col-4 col-sm-auto mb-3">
                                     <div class="mx-auto" style="width: 140px;">
                                         <?php if (isset($base64Image)): ?>
-                                            <img src="data:<?=$mimeType?>;base64,<?=$base64Image?>"
+                                            <img id="profile-picture" src="data:<?=$mimeType?>;base64,<?=$base64Image?>"
                                                 alt="Profile Picture" 
                                                 class="profile-icon" style="height: 140px; width: 140px;">
                                         <?php else: ?>
-                                            <img src="../../images/person-circle.png"
+                                            <img id="profile-picture" src="../../images/person-circle.png"
                                                 alt="Profile Picture" 
                                                 class="profile-icon" style="height: 140px; width: 140px;">
                                         <?php endif; ?>
@@ -172,17 +175,17 @@ if ($user) {
                                     <div class="text-center text-sm-left mb-2 mb-sm-0">
                                         <h4 class="pt-sm-2 pb-1 mb-0 text-nowrap"><?=$first_name?> <?=$last_name?> <small><span class="badge badge-secondary"><?=$role?> of <?=$department?></span></small></h4>
                                         <p class="mb-0"><?=$employee_id?></p>
-                                        <div class="text-muted"><small>Joined 03 Jan 2024</small></div>
+                                        <div class="text-muted"><small><?= date("d M Y", strtotime($date_created)) ?></small></div>
                                         <div class="mt-2">
-                                            <button class="btn btn-primary" type="button">
+                                            <button class="btn btn-primary" type="button" onclick="document.getElementById('profile-picture-input').click()">
                                                 <i class="fa fa-fw fa-camera"></i>
                                                 <span>Change Photo</span>
                                             </button>
+                                            <input type="file" id="profile-picture-input" accept="image/*" style="display: none;" onchange="previewProfilePicture(event)">
                                         </div>
                                     </div>
                                 </div>
                             </div>
-
                             <!-- Settings Tab -->
                             <ul class="nav nav-tabs">
                                 <li class="nav-item"><a href="" class="active nav-link">Settings</a></li>
@@ -212,39 +215,30 @@ if ($user) {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="row">
-                                                    <div class="col">
-                                                        <div class="form-group">
-                                                            <label>Email</label>
-                                                            <input class="form-control" type="text" placeholder="user@example.com">
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col mb-3">
-                                                        <div class="form-group">
-                                                            <label>About</label>
-                                                            <textarea class="form-control" rows="5" placeholder="Enter a few words about yourself..."></textarea>
-                                                        </div>
-                                                    </div>
-                                                </div>
                                             </div>
                                         </div>
                                         <div class="row">
-                                            <!-- Left Section: Change Password -->
                                             <div class="col-6 mb-3">
                                                 <div class="mb-2"><b>Change Password</b></div>
+                                                
                                                 <div class="form-group">
                                                     <label>Current Password</label>
-                                                    <input class="form-control" type="password" placeholder="••••••">
+                                                    <input id="current-password" class="form-control" type="password" placeholder="••••••">
                                                 </div>
+
                                                 <div class="form-group">
                                                     <label>New Password</label>
-                                                    <input class="form-control" type="password" placeholder="••••••">
+                                                    <input id="new-password" class="form-control" type="password" placeholder="••••••">
                                                 </div>
+
                                                 <div class="form-group">
                                                     <label>Confirm Password</label>
-                                                    <input class="form-control" type="password" placeholder="••••••">
+                                                    <input id="confirm-password" class="form-control" type="password" placeholder="••••••">
+                                                </div>
+                                                
+                                                <div class="form-check mt-2">
+                                                    <input type="checkbox" id="toggle-password-visibility" class="form-check-input">
+                                                    <label class="form-check-label" for="toggle-password-visibility">Show Password</label>
                                                 </div>
                                             </div>
                                         </div>
@@ -261,7 +255,50 @@ if ($user) {
                 </div>
                 <!-- Activity Log Content Section -->
                 <div id="activity-log-content" class="content-section">
-                    
+                    <div class="p-3">
+                        <h1><strong>Your Activity Log</strong></h1>
+                    </div>
+                    <!-- Table -->
+                    <table id="activityLogTable" class="table table-striped table-hover w-100">
+                        <thead>
+                            <tr>
+                                <th class="text-start" style="padding-left: 13px;">Date</th>
+                                <th class="text-start" style="padding-left: 13px;">Activity</th>
+                                <th class="text-start" style="padding-left: 13px;">IP Address</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <?php
+                            try {
+                                // Get the user ID from the session
+                                $user_id = $_SESSION['user_id'];
+
+                                // SQL query to fetch activity logs for the logged-in user
+                                $sql = "SELECT * FROM activity_log WHERE user_id = ? ORDER BY timestamp DESC";
+                                
+                                // Prepare the statement
+                                $stmt = $conn->prepare($sql);
+
+                                // Bind the user_id parameter
+                                $stmt->bindParam(1, $user_id, PDO::PARAM_INT);
+
+                                // Execute the query
+                                $stmt->execute();
+                                
+                                // Fetch and display each activity log
+                                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                                    echo "<tr>
+                                        <td class='text-start align-middle'>" . htmlspecialchars(date("d M Y g:i A", strtotime($row['timestamp']))) . "</td>
+                                        <td class='text-start align-middle'>" . htmlspecialchars($row['activity']) . "</td>
+                                        <td class='text-start align-middle'>" . htmlspecialchars($row['ip_address'] ?? '') . "</td>
+                                    </tr>";
+                                }
+                            } catch (PDOException $e) {
+                                echo "<tr><td colspan='3'>Error fetching data: " . htmlspecialchars($e->getMessage()) . "</td></tr>";
+                            }
+                        ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -269,6 +306,30 @@ if ($user) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
         crossorigin="anonymous"></script>
+
+    <!-- Include jQuery and DataTables JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.print.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+
+    <script>
+    function previewProfilePicture(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('profile-picture').src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+    </script>
+    
     <script src="script.js"></script>
 </body>
 </html>
