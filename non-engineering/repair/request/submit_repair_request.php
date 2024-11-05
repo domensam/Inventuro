@@ -16,7 +16,10 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['employee_id']) && $_SESSION[
         $status = 'Not Started'; // Default status for new requests
 
         try {
-            // Prepare SQL statement for inserting the repair request
+            // Start transaction
+            $conn->beginTransaction();
+
+            // Insert into repair_request
             $stmt = $conn->prepare("
                 INSERT INTO repair_request (machine_id, date_requested, status, requested_by, urgency, details)
                 VALUES (:machine_id, NOW(), :status, :requested_by, :urgency, :details)
@@ -29,15 +32,36 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['employee_id']) && $_SESSION[
             $stmt->bindParam(':urgency', $urgency, PDO::PARAM_STR);
             $stmt->bindParam(':details', $details, PDO::PARAM_STR);
 
-            // Execute the query and check for success
+            // Execute the repair_request insertion
             if ($stmt->execute()) {
-                echo json_encode(['success' => true, 'message' => 'Repair request submitted successfully.']);
+                // Get the last inserted repair_request_id
+                $repair_request_id = $conn->lastInsertId();
+
+                // Insert into repair using the repair_request_id
+                $stmtRepair = $conn->prepare("
+                    INSERT INTO repair (repair_request_id, machine_id)
+                    VALUES (:repair_request_id, :machine_id)
+                ");
+                $stmtRepair->bindParam(':repair_request_id', $repair_request_id, PDO::PARAM_INT);
+                $stmtRepair->bindParam(':machine_id', $machine_id, PDO::PARAM_INT);
+
+                // Execute the repair insertion
+                if ($stmtRepair->execute()) {
+                    // Commit transaction
+                    $conn->commit();
+                    echo json_encode(['success' => true, 'message' => 'Repair request and repair details submitted successfully.']);
+                } else {
+                    // Roll back if the repair insertion fails
+                    $conn->rollBack();
+                    echo json_encode(['success' => false, 'message' => 'Failed to insert repair details.']);
+                }
             } else {
-                echo json_encode(['success' => false, 'message' => 'Failed to insert data into the database.']);
+                echo json_encode(['success' => false, 'message' => 'Failed to insert repair request.']);
             }
 
         } catch (Exception $e) {
-            // Handle any errors and send an error response
+            // Roll back the transaction on error
+            $conn->rollBack();
             http_response_code(500);
             echo json_encode(['success' => false, 'message' => 'Database error: ' . $e->getMessage()]);
         }

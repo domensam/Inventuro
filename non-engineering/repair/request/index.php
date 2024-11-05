@@ -142,7 +142,7 @@ if ($user) {
                                 <h5>KSK Food Products</h5>
                             </div>
                             <div class="col-3">
-                                <p><strong>Employee ID: <span id="employee-id-text"><?= $employee_id ?></span></strong></p>
+                                <p><strong>Employee ID:</strong> <span id="employee-id-text"><?= $employee_id ?></span></p>
                                 <p><strong>Department: </strong><?=$department?></p>
                             </div>
                         </div>
@@ -214,12 +214,70 @@ if ($user) {
                                 </div>
                             </div>
                         </form>
+
                     </div>
                 </div>
                 <!-- Repair Request History Section -->
                 <div id="history-content" class="content-section">
-                    <!-- Timeline Container for dynamically loaded announcements -->
-                    <div class="timeline"></div>
+                    <h1><strong>History of Your Repair Request</strong></h1>
+                    <p>Click on a repair request to view details</p>
+                    <!-- Table -->
+                    <table id="historyTable" class="table table-striped table-hover w-100">
+                        <thead>
+                            <tr>
+                                <th class="text-center" style="width: 5%;"><input type="checkbox" id="selectAll"></th>
+                                <th class="text-start" style="padding-left: 13px;">Date</th>
+                                <th class="text-start" style="padding-left: 13px;">Repair No.</th>
+                                <th class="text-start" style="padding-left: 13px;">Status</th>
+                                <th class="text-start" style="padding-left: 13px;">Urgency</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <?php
+                            try {
+                                $sql = "SELECT * FROM repair_request JOIN employee ON users.employee_id = employee.employee_id"; // Join machine, repair, and employee tables din
+                                $result = $conn->query($sql);
+
+                                while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+                                    // Initialize image-related variables
+                                    $mimeType = null;
+                                    $base64Image = null;
+                                    $imageData = '';
+
+                                    // Check if the user has an image
+                                    if (isset($row['image']) && !empty($row['image'])) {
+                                        // Detect MIME type and convert BLOB to base64
+                                        $finfo = new finfo(FILEINFO_MIME_TYPE);
+                                        $mimeType = $finfo->buffer($row['image']);
+                                        $base64Image = base64_encode($row['image']);
+                                        $imageData = "data:$mimeType;base64,$base64Image";  // Store the base64 image
+                                    }
+                                    else {
+                                        $imageData = "../../images/person-circle.png";
+                                    }
+
+                                    // Construct the table row
+                                    echo "<tr
+                                        data-employee-id='" . htmlspecialchars($row['employee_id']) . "' 
+                                        data-date-created='" . htmlspecialchars($row['date_created']) . "' 
+                                        data-first-name='" . htmlspecialchars($row['first_name']) . "' 
+                                        data-middle-name='" . htmlspecialchars($row['middle_name']) . "' 
+                                        data-last-name='" . htmlspecialchars($row['last_name']) . "' 
+                                        data-image='" . htmlspecialchars($imageData) . "'>
+                                        <td class='text-center align-middle'><input type='checkbox' class='row-checkbox'></td>
+                                        <td class='text-start'><img src='" . htmlspecialchars($imageData) . "' 
+                                            alt='Profile Picture' class='profile-icon me-2 align-middle' style='width: 40px; height: 40px; object-fit: cover;'>
+                                            <span>" . htmlspecialchars($row['first_name'] . " " . $row['last_name']) . "</span></td>
+                                        <td class='text-start align-middle'>" . htmlspecialchars($row['role']) . "</td>
+                                        <td class='text-start align-middle'>" . htmlspecialchars($row['department']) . "</td>
+                                    </tr>";
+                                }
+                            } catch (PDOException $e) {
+                                echo "<tr><td colspan='5'>Error fetching data: " . htmlspecialchars($e->getMessage()) . "</td></tr>";
+                            }
+                        ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
