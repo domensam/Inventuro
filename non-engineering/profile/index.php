@@ -192,62 +192,65 @@ if ($user) {
                             </ul>
                             <div class="tab-content pt-3">
                                 <div class="tab-pane active">
-                                    <form class="form" novalidate="">
-                                        <div class="row">
-                                            <div class="col">
-                                                <div class="row">
-                                                    <div class="col">
-                                                        <div class="form-group">
-                                                            <label>First Name</label>
-                                                            <input class="form-control" type="text" name="name" placeholder="Juan" value="<?= htmlspecialchars($first_name ?? '') ?>">
-                                                        </div>
+                                <form id="updateProfileForm" class="form" method="POST" novalidate="">
+                                    <div class="row">
+                                        <div class="col">
+                                            <div class="row">
+                                                <div class="col">
+                                                    <div class="form-group">
+                                                        <label>First Name</label>
+                                                        <input class="form-control" type="text" name="first_name" placeholder="Juan" value="<?= htmlspecialchars($first_name ?? '') ?>">
                                                     </div>
-                                                    <div class="col">
-                                                        <div class="form-group">
-                                                            <label>Middle Name</label>
-                                                            <input class="form-control" type="text" name="name" placeholder="Apolinario" value="<?= htmlspecialchars($middle_name ?? '') ?>">
-                                                        </div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="form-group">
+                                                        <label>Middle Name</label>
+                                                        <input class="form-control" type="text" name="middle_name" placeholder="Apolinario" value="<?= htmlspecialchars($middle_name ?? '') ?>">
                                                     </div>
-                                                    <div class="col">
-                                                        <div class="form-group">
-                                                            <label>Last Name</label>
-                                                            <input class="form-control" type="text" name="name" placeholder="Dela Cruz" value="<?= htmlspecialchars($last_name ?? '') ?>">
-                                                        </div>
+                                                </div>
+                                                <div class="col">
+                                                    <div class="form-group">
+                                                        <label>Last Name</label>
+                                                        <input class="form-control" type="text" name="last_name" placeholder="Dela Cruz" value="<?= htmlspecialchars($last_name ?? '') ?>">
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="row">
-                                            <div class="col-6 mb-3">
-                                                <div class="mb-2"><b>Change Password</b></div>
-                                                
-                                                <div class="form-group">
-                                                    <label>Current Password</label>
-                                                    <input id="current-password" class="form-control" type="password" placeholder="••••••">
-                                                </div>
-
-                                                <div class="form-group">
-                                                    <label>New Password</label>
-                                                    <input id="new-password" class="form-control" type="password" placeholder="••••••">
-                                                </div>
-
-                                                <div class="form-group">
-                                                    <label>Confirm Password</label>
-                                                    <input id="confirm-password" class="form-control" type="password" placeholder="••••••">
-                                                </div>
-                                                
-                                                <div class="form-check mt-2">
-                                                    <input type="checkbox" id="toggle-password-visibility" class="form-check-input">
-                                                    <label class="form-check-label" for="toggle-password-visibility">Show Password</label>
-                                                </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6 mb-3">
+                                            <div class="mb-2"><b>Change Password</b></div>
+                                            <div class="form-group">
+                                                <label>Current Password</label>
+                                                <input id="current-password" class="form-control" type="password" name="current_password" placeholder="••••••">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>New Password</label>
+                                                <input id="new-password" class="form-control" type="password" name="new_password" placeholder="••••••">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Confirm Password</label>
+                                                <input id="confirm-password" class="form-control" type="password" name="confirm_password" placeholder="••••••">
+                                            </div>
+                                            <div class="form-check mt-2">
+                                                <input type="checkbox" id="toggle-password-visibility" class="form-check-input">
+                                                <label class="form-check-label" for="toggle-password-visibility">Show Password</label>
                                             </div>
                                         </div>
-                                        <div class="row mb-3">
-                                            <div class="col d-flex justify-content-start">
-                                                <button class="btn btn-primary" type="submit">Save Changes</button>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col">
+                                            <div class="form-group">
+                                                <input type="file" id="profile-picture-input" accept="image/*" onchange="previewProfilePicture(event)" style="display: none;">
                                             </div>
                                         </div>
-                                    </form>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col d-flex justify-content-start">
+                                            <button class="btn btn-primary" type="submit">Save Changes</button>
+                                        </div>
+                                    </div>
+                                </form>
                                 </div>
                             </div>
                         </div>
