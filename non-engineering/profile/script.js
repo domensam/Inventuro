@@ -12,18 +12,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Search functionality
   const searchBar = document.getElementById('search-bar');
-  searchBar.addEventListener('input', function () {
-      const searchTerm = searchBar.value.toLowerCase();
-      const announcements = document.querySelectorAll('.timeline-item');
 
-      announcements.forEach(announcement => {
-          const date = announcement.querySelector('.timeline-date span').textContent.toLowerCase();
-          const title = announcement.querySelector('h3').textContent.toLowerCase();
-          const content = announcement.querySelector('p').textContent.toLowerCase();
-          
-          // Check if either the title or content includes the search term
-          announcement.style.display = (title.includes(searchTerm) || content.includes(searchTerm) || date.includes(searchTerm)) ? '' : 'none';
-      });
+  searchBar.addEventListener('input', function () {
+    const searchTerm = searchBar.value.toLowerCase();
+    const activityLogTable = document.getElementById('activityLogTable');
+    const activityRows = activityLogTable.querySelectorAll('tbody tr');
+
+    // Loop through each row in the table body
+    activityRows.forEach(row => {
+      const dateCell = row.cells[0].textContent.toLowerCase(); // Date
+      const activityCell = row.cells[1].textContent.toLowerCase(); // Activity
+      const ipCell = row.cells[2].textContent.toLowerCase(); // IP Address
+
+      // Check if any of the cells contain the search term
+      if (
+        dateCell.includes(searchTerm) ||
+        activityCell.includes(searchTerm) ||
+        ipCell.includes(searchTerm)
+      ) {
+        row.style.display = ''; // Show the row if it matches
+      } else {
+        row.style.display = 'none'; // Hide the row if it doesn't match
+      }
+    });
   });
 
   const mainContentLinks = {
