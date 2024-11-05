@@ -256,4 +256,38 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
+  $('#saveRepairRequestBtn').on('click', function() {
+    const repairRequestId = $('#repairRequestIdLabel').text();
+    const urgency = $('#modalUrgency').val();
+    const details = $('#modalDetails').val();
+
+    if (!urgency) {
+        alert('Please select an urgency level.');
+        return;
+    }
+
+    if (!details) {
+        alert('Please enter details.');
+        return;
+    }
+
+    $.ajax({
+        url: 'update_repair_request.php', // Adjust to your actual PHP script path
+        type: 'POST',
+        data: {
+            repair_request_id: repairRequestId,
+            urgency: urgency,
+            details: details
+        },
+        success: function(response) {
+          console.log('Response:', response);
+          window.location.reload();
+        },
+        error: function(xhr) {
+            alert('Error: ' + xhr.responseJSON.message);
+        }
+    });
+});
+
+
 });
