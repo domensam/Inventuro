@@ -323,9 +323,12 @@ if ($user) {
     </div>
     <!-- Offcanvas Modal for Repair Request Details -->
     <div class="offcanvas offcanvas-end w-50 p-5 pt-2" tabindex="-1" id="repairRequestModal" aria-labelledby="repairRequestModalLabel">
-        <div class="offcanvas-header">
-            <h4 class="offcanvas-title" id="repairRequestModalLabel"><strong>Repair Request Details</strong></h4>
-            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        <div class="offcanvas-header d-flex align-items-center">
+            <div class="d-flex flex-column me-auto">
+                <h4 class="offcanvas-title" id="repairRequestModalLabel"><strong>Repair Request Details</strong></h4>
+                <p class="text-secondary">Repair Request ID: <strong><span id="repairRequestIdLabel"></span></strong></p>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>          
         </div>
         <div class="offcanvas-body">
             <div id="repairRequestDetails">

@@ -186,16 +186,17 @@ document.addEventListener('DOMContentLoaded', function () {
             { orderable: false, targets: 0 }
         ]
     });
+  });
 
-    // Handle "Select All" checkbox
-    $('#selectAll').click(function() {
-        var rows = $('#historyTable').DataTable().rows({ 'search': 'applied' }).nodes();
-        $('input[type="checkbox"]', rows).prop('checked', this.checked);
-    });
+  // Handle "Select All" checkbox
+  $('#selectAll').click(function() {
+    var rows = $('#historyTable').DataTable().rows({ 'search': 'applied' }).nodes();
+    $('input[type="checkbox"]', rows).prop('checked', this.checked);
   });
 
   // Open modal and populate it with repair request data when a row is clicked
   $('#historyTable tbody').on('click', 'tr', function () {
+    const repairRequestId = $(this).data('repair-request-id'); // Capture repair request ID
     const dateRequested = $(this).data('date-requested');
     const machineId = $(this).data('machine-id');
     const status = $(this).data('status');
@@ -205,6 +206,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const department = $('#department').val(); // This should be the relevant department for the request
 
     // Populate the modal fields
+    $('#repairRequestIdLabel').text(repairRequestId);
     $('#modalDateRequested').text(dateRequested);
     $('#modalStatus').text(status);
     $('#modalRequestedBy').text(requestedBy);
@@ -238,7 +240,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Delete repair request functionality
   $('#deleteRepairRequestBtn').on('click', function() {
-    const repairRequestId = $('#historyTable .selected').data('repair-request-id');
+    const repairRequestId = $('#repairRequestIdLabel').text();
+    console.log('repairRequestId:', repairRequestId);
     $.ajax({
       url: 'delete_repair_request.php',
       method: 'POST',
