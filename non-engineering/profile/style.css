@@ -14,6 +14,13 @@ a {
 a:hover {
     text-decoration: none; /* Prevents default underline on hover */
 }
+/* Sidebar link active style */
+a.sidebar-link.active, 
+a.sidebar-link:hover {
+    background-color: #1d3854;
+    color: white;
+    border-left: 3px solid #3a7abead;
+}
 
 li {
     list-style: none;

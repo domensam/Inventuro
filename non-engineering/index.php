@@ -137,7 +137,6 @@ if ($user) {
                                 <p><strong>Department: </strong><?=$department?></p>
                             </div>
                         </div>
-                        
                     </div>
                 </div>
                 <div id="main-content-links">

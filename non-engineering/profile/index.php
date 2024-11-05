@@ -32,25 +32,26 @@ if ($user) {
     $base64Image = base64_encode($profileImage);
 
     $first_name = $user['first_name'];
+    $middle_name = $user['middle_name'];
     $last_name = $user['last_name'];
     $employee_id = $user['employee_id'];
     $department = $user['department'];
+    $role = $user['role'];
 }
 
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://cdn.lineicons.com/4.0/lineicons.css" rel="stylesheet" />
-    <link href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" rel="stylesheet">
-    <link href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.dataTables.min.css" rel="stylesheet">
     <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+
     <title>Repair Request</title>
 </head>
 <body>
@@ -78,7 +79,7 @@ if ($user) {
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a href="index.php" class="sidebar-link">
+                    <a href="index.php" class="sidebar-link active">
                     <i class="bi bi-person"></i>
                         <span>Profile</span>
                     </a>
@@ -141,181 +142,126 @@ if ($user) {
                                 <p><strong>Department: </strong><?=$department?></p>
                             </div>
                         </div>
-                        
                     </div>
                 </div>
                 <div id="main-content-links">
-                    <a id="request-link" class="link-hover-effect text-primary" href="index.php">Request</a>
-                    <a id="history-link" class="link-hover-effect text-primary" href="#">History</a>
+                    <a id="settings-link" class="link-hover-effect text-primary active" href="#">Settings</a>
+                    <a id="activity-log-link" class="link-hover-effect text-primary" href="#">Activity Log</a>
                 </div>
             </div>
-            <div id="main-content">
-                <!-- Repair Request Section -->
-                <div id="request-content" class="content-section active p-5">
-                    <h1><strong>Request for Machine Repair</strong></h1>
-                    <p>Please fill out the form below to request for any machine repair in your department.</p>
-                    <div class="container mt-4 p-4 border rounded bg-light">
-                        <form id="repairRequestForm" class="w-100" method="POST">
-                            <div class="row">
-                                <!-- Left Side Top Section -->
-                                <div class="col-md-8">
-                                    <!-- Department (Disabled) -->
-                                    <div class="mb-3">
-                                        <label for="department" class="form-label">Department</label>
-                                        <input type="text" class="form-control" id="department" name="department" value="<?=$department?>" disabled>
-                                    </div>
-
-                                    <!-- Machine Dropdown -->
-                                    <div class="mb-3">
-                                        <label for="machine" class="form-label text-danger">Machine*</label>
-                                        <select class="form-select" id="machine" name="machine" required>
-                                        </select>
-                                    </div>
-
-                                    <!-- Urgency Dropdown -->
-                                    <div class="mb-3">
-                                        <label for="urgency" class="form-label text-danger">Urgency*</label>
-                                        <select class="form-select" id="urgency" name="urgency" required>
-                                            <option value="low">Low</option>
-                                            <option value="medium">Medium</option>
-                                            <option value="high">High</option>
-                                        </select>
+            <div id="main-content" class="p-4">
+                <!-- Settings Content Section -->
+                <div id="settings-content" class="content-section active">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-4 col-sm-auto mb-3">
+                                    <div class="mx-auto" style="width: 140px;">
+                                        <?php if (isset($base64Image)): ?>
+                                            <img src="data:<?=$mimeType?>;base64,<?=$base64Image?>"
+                                                alt="Profile Picture" 
+                                                class="profile-icon" style="height: 140px; width: 140px;">
+                                        <?php else: ?>
+                                            <img src="../../images/person-circle.png"
+                                                alt="Profile Picture" 
+                                                class="profile-icon" style="height: 140px; width: 140px;">
+                                        <?php endif; ?>
                                     </div>
                                 </div>
-
-                                <!-- Right Side Top Section -->
-                                <div class="col-md-4">
-                                    <!-- Current Timestamp -->
-                                    <div class="mb-3">
-                                        <label for="timestamp" class="form-label">Current Timestamp</label>
-                                        <input type="text" class="form-control" id="timestamp" name="remarks" value="<?= date('Y-m-d H:i:s'); ?>" disabled>
+                                <div class="col-8 d-flex flex-column flex-sm-row justify-content-between mb-3">
+                                    <div class="text-center text-sm-left mb-2 mb-sm-0">
+                                        <h4 class="pt-sm-2 pb-1 mb-0 text-nowrap"><?=$first_name?> <?=$last_name?> <small><span class="badge badge-secondary"><?=$role?> of <?=$department?></span></small></h4>
+                                        <p class="mb-0"><?=$employee_id?></p>
+                                        <div class="text-muted"><small>Joined 03 Jan 2024</small></div>
+                                        <div class="mt-2">
+                                            <button class="btn btn-primary" type="button">
+                                                <i class="fa fa-fw fa-camera"></i>
+                                                <span>Change Photo</span>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Center Bottom Section -->
-                            <div class="row">
-                                <div class="col-12">
-                                    <!-- Remarks Text Area -->
-                                    <div class="mb-3">
-                                        <label for="remarks" class="form-label text-danger">Problem Description*</label>
-                                        <textarea class="form-control" id="remarks" rows="4" placeholder="Describe the problem to be fixed."></textarea>
-                                    </div>
-
-                                    <!-- Submit Button -->
-                                    <div class="text-center">
-                                        <button type="submit" class="btn btn-primary">Submit</button>
-                                    </div>
+                            <!-- Settings Tab -->
+                            <ul class="nav nav-tabs">
+                                <li class="nav-item"><a href="" class="active nav-link">Settings</a></li>
+                            </ul>
+                            <div class="tab-content pt-3">
+                                <div class="tab-pane active">
+                                    <form class="form" novalidate="">
+                                        <div class="row">
+                                            <div class="col">
+                                                <div class="row">
+                                                    <div class="col">
+                                                        <div class="form-group">
+                                                            <label>First Name</label>
+                                                            <input class="form-control" type="text" name="name" placeholder="Juan" value="<?= htmlspecialchars($first_name ?? '') ?>">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col">
+                                                        <div class="form-group">
+                                                            <label>Middle Name</label>
+                                                            <input class="form-control" type="text" name="name" placeholder="Apolinario" value="<?= htmlspecialchars($middle_name ?? '') ?>">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col">
+                                                        <div class="form-group">
+                                                            <label>Last Name</label>
+                                                            <input class="form-control" type="text" name="name" placeholder="Dela Cruz" value="<?= htmlspecialchars($last_name ?? '') ?>">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col">
+                                                        <div class="form-group">
+                                                            <label>Email</label>
+                                                            <input class="form-control" type="text" placeholder="user@example.com">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col mb-3">
+                                                        <div class="form-group">
+                                                            <label>About</label>
+                                                            <textarea class="form-control" rows="5" placeholder="Enter a few words about yourself..."></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <!-- Left Section: Change Password -->
+                                            <div class="col-6 mb-3">
+                                                <div class="mb-2"><b>Change Password</b></div>
+                                                <div class="form-group">
+                                                    <label>Current Password</label>
+                                                    <input class="form-control" type="password" placeholder="••••••">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>New Password</label>
+                                                    <input class="form-control" type="password" placeholder="••••••">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Confirm Password</label>
+                                                    <input class="form-control" type="password" placeholder="••••••">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row mb-3">
+                                            <div class="col d-flex justify-content-start">
+                                                <button class="btn btn-primary" type="submit">Save Changes</button>
+                                            </div>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
-                        </form>
-
+                        </div>
                     </div>
                 </div>
-                <!-- Repair Request History Section -->
-                <div id="history-content" class="content-section">
-                    <div class="p-5 pb-0">
-                        <h1><strong>History of Your Repair Request</strong></h1>
-                        <p>Click on a repair request to view details</p>
-                    </div>
-                    <!-- Table -->
-                    <table id="historyTable" class="table table-striped table-hover w-100">
-                        <thead>
-                            <tr>
-                                <th class="text-center" style="width: 5%;"><input type="checkbox" id="selectAll"></th>
-                                <th class="text-start" style="padding-left: 13px;">Date</th>
-                                <th class="text-start" style="padding-left: 13px;">Repair Request No.</th>
-                                <th class="text-start" style="padding-left: 13px;">Status</th>
-                                <th class="text-start" style="padding-left: 13px;">Urgency</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        <?php
-                            try {
-                                $requested_by = $_SESSION['employee_id'];
-
-                                $sql = "SELECT * FROM repair_request 
-                                    LEFT JOIN repair ON repair_request.repair_request_id = repair.repair_request_id
-                                    LEFT JOIN employee ON repair.handled_by = employee.employee_id
-                                    LEFT JOIN machine ON repair_request.machine_id = machine.machine_id
-                                    WHERE repair_request.requested_by = ?
-                                    ORDER BY repair_request.date_requested ASC";
-
-                                // Prepare the statement
-                                $stmt = $conn->prepare($sql);
-
-                                // Bind the parameter
-                                $stmt->bindParam(1, $requested_by, PDO::PARAM_STR);
-
-                                // Execute the query
-                                $stmt->execute();
-                                
-                                // Fetch data and display
-                                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                                    $imageData = isset($row['image']) && !empty($row['image'])
-                                        ? "data:" . (new finfo(FILEINFO_MIME_TYPE))->buffer($row['image']) . ";base64," . base64_encode($row['image'])
-                                        : "../../../images/gallery.png";
-
-                                // Determine status color class
-                                $statusClass = '';
-                                $statusText = htmlspecialchars($row['status']);
-                                switch ($row['status']) {
-                                    case 'Not Started':
-                                        $statusClass = 'bg-light text-secondary'; // Gray
-                                        break;
-                                    case 'Started':
-                                        $statusClass = 'bg-warning text-dark'; // Yellow
-                                        break;
-                                    case 'Done':
-                                        $statusClass = 'bg-success text-white'; // Green
-                                        break;
-                                }
-
-                                // Determine urgency text color class
-                                $urgencyClass = '';
-                                $urgencyText = htmlspecialchars($row['urgency']);
-                                switch ($row['urgency']) {
-                                    case 'Low':
-                                        $urgencyClass = 'text-success'; // Green
-                                        break;
-                                    case 'Medium':
-                                        $urgencyClass = 'text-warning'; // Yellow
-                                        break;
-                                    case 'High':
-                                        $urgencyClass = 'text-danger'; // Red
-                                        break;
-                                }
-                                    // Construct the table row
-                                    echo "<tr
-                                        data-date-requested='" . htmlspecialchars(date("d M Y g:i A", strtotime($row['date_requested']))) . "'
-                                        data-repair-request-id='" . htmlspecialchars($row['repair_request_id']) . "'
-                                        data-machine-name='" . htmlspecialchars($row['machine_name']) . "'
-                                        data-status ='" . htmlspecialchars($row['status']) . "'
-                                        data-urgency='" . htmlspecialchars($row['urgency']) . "'
-                                        data-department='" . htmlspecialchars($department) . "'
-                                        data-requested-by='" . htmlspecialchars($first_name . " " . $last_name . " (" . $employee_id . ")") . "'
-                                        data-handled-by='" . (
-                                            !empty($row['first_name']) && !empty($row['last_name']) 
-                                                ? htmlspecialchars($row['first_name'] . ' ' . $row['last_name'])
-                                                : 'Not assigned yet'
-                                            ) . "'
-                                        data-details ='" . htmlspecialchars($row['details']) . "'
-                                        data-image='" . htmlspecialchars($imageData) . "'>
-                                        <td class='text-center align-middle'><input type='checkbox' class='row-checkbox'></td>
-                                        <td class='text-start align-middle'>" . htmlspecialchars(date("d M Y g:i A", strtotime($row['date_requested']))) . "</td>
-                                        <td class='text-start align-middle'>" . htmlspecialchars($row['repair_request_id']) . "</td>
-                                        <td class='text-start align-middle'>
-                                            <span class='badge $statusClass p-2 rounded fs-6'>$statusText</span>
-                                        </td>
-                                        <td class='text-start align-middle $urgencyClass'>$urgencyText</td>
-                                    </tr>";
-                                }
-                            } catch (PDOException $e) {
-                                echo "<tr><td colspan='5'>Error fetching data: " . htmlspecialchars($e->getMessage()) . "</td></tr>";
-                            }
-                        ?>
-                        </tbody>
-                    </table>
+                <!-- Activity Log Content Section -->
+                <div id="activity-log-content" class="content-section">
+                    
                 </div>
             </div>
         </div>
@@ -323,16 +269,6 @@ if ($user) {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
         crossorigin="anonymous"></script>
-    <!-- Include jQuery and DataTables JS -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/2.2.2/js/dataTables.buttons.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.html5.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.print.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
-
     <script src="script.js"></script>
 </body>
 </html>
