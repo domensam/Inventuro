@@ -3,7 +3,7 @@ session_start();
 if (isset($_SESSION['user_id']) && isset($_SESSION['employee_id']) && $_SESSION['user_type'] === "non-engineering") {
 
 // Include the database connection file
-include '../../../connect.php';
+include '../../connect.php';
 
 // SQL query to get the most recent BLOB from the image column
 $stmt = $conn->prepare("
@@ -61,40 +61,31 @@ if ($user) {
                     <i class="bi bi-box-seam-fill"></i>
                 </button>
                 <div class="sidebar-logo">
-                    <a href="index.php">Inventuro</a>
+                    <a href="../index.php">Inventuro</a>
                 </div>
             </div>
             <ul class="sidebar-nav">
                 <li class="sidebar-item">
-                    <a href="../../index.php" class="sidebar-link">
+                    <a href="../index.php" class="sidebar-link">
                     <i class="bi bi-house-door"></i>
                         <span>Home</span>
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a href="index.php" class="sidebar-link collapsed has-dropdown" data-bs-toggle="collapse"
-                        data-bs-target="#requests" aria-expanded="false" aria-controls="requests">
+                    <a href="../repair/request/index.php" class="sidebar-link">
                         <i class="bi bi-tools"></i>
                         <span>Repair</span>
                     </a>
-                    <ul id="requests" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
-                        <li class="sidebar-item">
-                            <a href="index.php" class="sidebar-link">Request</a>
-                        </li>
-                        <li class="sidebar-item">
-                            <a href="#" class="sidebar-link">History</a>
-                        </li>
-                    </ul>
                 </li>
                 <li class="sidebar-item">
-                    <a href="people/index.php" class="sidebar-link">
+                    <a href="index.php" class="sidebar-link">
                     <i class="bi bi-person"></i>
                         <span>Profile</span>
                     </a>
                 </li>
             </ul>
             <div class="sidebar-footer">
-                <a href="../../../logout.php" class="sidebar-link">
+                <a href="../../logout.php" class="sidebar-link">
                     <i class="lni lni-exit"></i>
                     <span>Logout</span>
                 </a>
@@ -126,7 +117,7 @@ if ($user) {
                                     alt="Profile Picture" 
                                     class="profile-icon" style="height: 1.7rem; width: 1.7rem">
                             <?php else: ?>
-                                <img src="../../../images/person-circle.png"
+                                <img src="../../images/person-circle.png"
                                     alt="Profile Picture" 
                                     class="profile-icon">
                             <?php endif; ?>
@@ -137,15 +128,15 @@ if ($user) {
             <div class="second-nav">
                 <div class="container p-2">
                     <div class="box left-box">
-                        <img src="../../../images/ksk-logo.png" alt="KSK Logo" style="max-width: 100%; height: auto;">
+                        <img src="../../images/ksk-logo.png" alt="KSK Logo" style="max-width: 100%; height: auto;">
                     </div>
                     <div class="box right-box">
                         <div class="row">
-                            <div class="col-9">
+                            <div class="col-8">
                                 <h1 class="name-display">Hello, <?=$first_name?> <?=$last_name?></h1>
                                 <h5>KSK Food Products</h5>
                             </div>
-                            <div class="col-3">
+                            <div class="col-4">
                                 <p><strong>Employee ID:</strong> <span id="employee-id-text"><?= $employee_id ?></span></p>
                                 <p><strong>Department: </strong><?=$department?></p>
                             </div>
@@ -347,5 +338,5 @@ if ($user) {
 </html>
 <?php
 } else {
-    header(header: "Location: ../../../login.php");}
+    header(header: "Location: ../../login.php");}
 ?>

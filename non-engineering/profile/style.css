@@ -11,6 +11,10 @@ a {
     text-decoration: none;
 }
 
+a:hover {
+    text-decoration: none; /* Prevents default underline on hover */
+}
+
 li {
     list-style: none;
 }
@@ -224,9 +228,11 @@ h2 {
     vertical-align: middle;  /* Align it vertically like the icon */
 }
 
+
+/* Custom 2px underline effect for links with the 'link-hover-effect' class */
 .link-hover-effect {
-    color: #0d6efd; /* text color */
-    text-decoration: none; /* remove default underline */
+    color: #0d6efd; /* Text color */
+    text-decoration: none; /* Remove default underline */
     position: relative;
 }
 
@@ -234,15 +240,15 @@ h2 {
     content: '';
     position: absolute;
     width: 0;
-    height: 2px; /* underline thickness */
-    background-color: #0d6efd; /* underline color */
+    height: 2px; /* Underline thickness */
+    background-color: #0d6efd; /* Underline color */
     bottom: 0;
     left: 0;
-    transition: width 0.3s; /* smooth transition */
+    transition: width 0.3s; /* Smooth transition */
 }
 
 .link-hover-effect:hover::after {
-    width: 100%; /* underline expands on hover */
+    width: 100%; /* Expands underline on hover */
 }
 
 .link-hover-effect.active::after {
@@ -331,7 +337,7 @@ h2 {
 }
 
 .dataTables_filter input {
-    width: 400px; /* Make search bar longer */
+    width: 500px; /* Make search bar longer */
 }
 
 .dt-buttons {

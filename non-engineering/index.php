@@ -68,22 +68,13 @@ if ($user) {
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a href="#" class="sidebar-link collapsed has-dropdown" data-bs-toggle="collapse"
-                        data-bs-target="#requests" aria-expanded="false" aria-controls="requests">
+                    <a href="repair/request/index.php" class="sidebar-link">
                         <i class="bi bi-tools"></i>
                         <span>Repair</span>
                     </a>
-                    <ul id="requests" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
-                        <li class="sidebar-item">
-                            <a href="repair/request/index.php" class="sidebar-link">Request</a>
-                        </li>
-                        <li class="sidebar-item">
-                            <a href="repair/history/index.php" class="sidebar-link">History</a>
-                        </li>
-                    </ul>
                 </li>
                 <li class="sidebar-item">
-                    <a href="people/index.php" class="sidebar-link">
+                    <a href="profile/index.php" class="sidebar-link">
                     <i class="bi bi-person"></i>
                         <span>Profile</span>
                     </a>
@@ -137,11 +128,11 @@ if ($user) {
                     </div>
                     <div class="box right-box">
                         <div class="row">
-                            <div class="col-9">
+                            <div class="col-8">
                                 <h1 class="name-display">Hello, <?=$first_name?> <?=$last_name?></h1>
                                 <h5>KSK Food Products</h5>
                             </div>
-                            <div class="col-3">
+                            <div class="col-4">
                                 <p><strong>Employee ID: </strong><?=$employee_id?></p>
                                 <p><strong>Department: </strong><?=$department?></p>
                             </div>
