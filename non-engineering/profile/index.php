@@ -55,7 +55,7 @@ if ($user) {
 
     <link rel="stylesheet" href="style.css">
 
-    <title>Repair Request</title>
+    <title>Profile</title>
 </head>
 <body>
     <div class="wrapper">

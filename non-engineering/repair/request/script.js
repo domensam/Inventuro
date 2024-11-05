@@ -9,21 +9,28 @@ document.addEventListener('DOMContentLoaded', function () {
   const searchBar = document.getElementById('search-bar');
 
   searchBar.addEventListener('input', function () {
-    const searchTerm = searchBar.value.toLowerCase();
-    const announcements = document.querySelectorAll('.timeline-item');
+    // Search functionality
+    const searchBar = document.getElementById('search-bar');
+    const historyTable = document.getElementById('historyTable');
+    const historyRows = historyTable.querySelectorAll('tbody tr');
 
-    announcements.forEach(announcement => {
-      const date = announcement.querySelector('.timeline-date span').textContent.toLowerCase();
-      const title = announcement.querySelector('h3').textContent.toLowerCase();
-      const content = announcement.querySelector('p').textContent.toLowerCase();
-      
-      // Check if either the title or content includes the search term
-      if (title.includes(searchTerm) || content.includes(searchTerm) || date.includes(searchTerm)) {
-        announcement.style.display = ''; // Show matching items
-      } else {
-        announcement.style.display = 'none'; // Hide non-matching items
-      }
+    const searchTerm = searchBar.value.toLowerCase();
+
+    // Check if any of the cells contain the search term
+    historyRows.forEach(row => {
+        const dateCell = row.cells[1].textContent.toLowerCase(); // Date
+        const requestNoCell = row.cells[2].textContent.toLowerCase(); // Repair Request No.
+        const statusCell = row.cells[3].textContent.toLowerCase(); // Status
+        const urgencyCell = row.cells[4].textContent.toLowerCase(); // Urgency
+
+        // Check if any of the cells contain the search term
+        if (dateCell.includes(searchTerm) || requestNoCell.includes(searchTerm) || statusCell.includes(searchTerm) || urgencyCell.includes(searchTerm)) {
+            row.style.display = ''; // Show the row if it matches
+        } else {
+            row.style.display = 'none'; // Hide the row if it doesn't match
+        }
     });
+    
   });
 
   const mainContentLinks = {
