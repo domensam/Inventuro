@@ -62,7 +62,7 @@ if ($user) {
             </div>
             <ul class="sidebar-nav">
                 <li class="sidebar-item">
-                    <a href="index.php" class="sidebar-link">
+                    <a href="index.php" class="sidebar-link active">
                     <i class="bi bi-house-door"></i>
                         <span>Home</span>
                     </a>

@@ -72,7 +72,7 @@ if ($user) {
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a href="index.php" class="sidebar-link">
+                    <a href="index.php" class="sidebar-link active">
                         <i class="bi bi-tools"></i>
                         <span>Repair</span>
                     </a>
