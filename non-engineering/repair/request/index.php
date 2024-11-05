@@ -289,6 +289,7 @@ if ($user) {
                                     echo "<tr
                                         data-date-requested='" . htmlspecialchars(date("d M Y g:i A", strtotime($row['date_requested']))) . "'
                                         data-repair-request-id='" . htmlspecialchars($row['repair_request_id']) . "'
+                                        data-machine-id='" . htmlspecialchars($row['machine_id']) . "'
                                         data-machine-name='" . htmlspecialchars($row['machine_name']) . "'
                                         data-status ='" . htmlspecialchars($row['status']) . "'
                                         data-urgency='" . htmlspecialchars($row['urgency']) . "'
@@ -320,23 +321,51 @@ if ($user) {
             </div>
         </div>
     </div>
-        <!-- Offcanvas Modal for Repair Request Details -->
-        <div class="offcanvas offcanvas-end" tabindex="-1" id="repairRequestModal" aria-labelledby="repairRequestModalLabel">
+    <!-- Offcanvas Modal for Repair Request Details -->
+    <div class="offcanvas offcanvas-end w-50 p-5 pt-2" tabindex="-1" id="repairRequestModal" aria-labelledby="repairRequestModalLabel">
         <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="repairRequestModalLabel">Repair Request Details</h5>
+            <h4 class="offcanvas-title" id="repairRequestModalLabel"><strong>Repair Request Details</strong></h4>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">
             <div id="repairRequestDetails">
-                <p><strong>Date Requested:</strong> <span id="modalDateRequested"></span></p>
-                <p><strong>Machine ID:</strong> <span id="modalMachineId"></span></p>
-                <p><strong>Status:</strong> <span id="modalStatus"></span></p>
-                <p><strong>Urgency:</strong> <span id="modalUrgency"></span></p>
-                <p><strong>Requested By:</strong> <span id="modalRequestedBy"></span></p>
-                <p><strong>Details:</strong> <span id="modalDetails"></span></p>
+                <div class="row">
+                    <div class="col-4">
+                        <p><strong>Date Requested:</strong></p>
+                        <p><strong>Machine:</strong></p>
+                        <p><strong>Status:</strong></p>
+                        <p><strong>Urgency:</strong></p>
+                        <p><strong>Requested By:</strong></p>
+                        <p><strong>Details:</strong></p>
+                    </div>
+                    <div class="col-8">
+                        <p><span id="modalDateRequested"></span></p>
+                        <p>
+                            <select id="machineName" class="form-select" name="machineName" required>
+                                <!-- Options can be populated dynamically using JavaScript or PHP -->
+                            </select>
+                        </p>
+                        <p><span id="modalStatus"></span></p>
+                        <p>
+                            <select id="modalUrgency" class="form-select">
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </p>
+                        <p><span id="modalRequestedBy"></span></p>
+                        <p>
+                            <textarea id="modalDetails" class="form-control" rows="3" placeholder="Enter details about the repair request..."></textarea>
+                        </p>
+                    </div>
+                </div>
+                <div class="text-end">
+                    <button id="deleteRepairRequestBtn" class="btn btn-danger">Delete Repair Request</button>
+                </div>
             </div>
         </div>
     </div>
+
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"

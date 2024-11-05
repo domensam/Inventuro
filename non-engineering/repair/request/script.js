@@ -72,35 +72,39 @@ document.addEventListener('DOMContentLoaded', function () {
     const department = document.getElementById('department').value;
     const machineDropdown = document.getElementById('machine');
 
-    // Fetch machines based on department
-    function fetchMachines(department) {
-        fetch(`fetch_machines.php?department=${encodeURIComponent(department)}`)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(machines => {
-                // Clear existing options
-                machineDropdown.innerHTML = '<option value="" selected disabled>Select a machine</option>';
-                
-                // Populate dropdown with new options
-                machines.forEach(machine => {
-                    const option = document.createElement('option');
-                    option.value = machine.machine_id;
-                    option.textContent = `${machine.machine_name} - ID #${machine.machine_id}`;
-                    machineDropdown.appendChild(option);
-                });
-            })
-            .catch(error => {
-                console.error('Error fetching machines:', error);
-            });
+    // Function to fetch and populate machines based on department
+    function fetchMachines(department, dropdownId, selectedMachineId = null) {
+      fetch(`fetch_machines.php?department=${encodeURIComponent(department)}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(machines => {
+          const machineDropdown = document.getElementById(dropdownId);
+          machineDropdown.innerHTML = '<option value="" selected disabled>Select a machine</option>';
+
+          machines.forEach(machine => {
+            const option = document.createElement('option');
+            option.value = machine.machine_id;
+            option.textContent = `${machine.machine_name} - ID #${machine.machine_id}`;
+            machineDropdown.appendChild(option);
+          });
+
+          // Set the selected machine ID if provided
+          if (selectedMachineId) {
+            machineDropdown.value = selectedMachineId;
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching machines:', error);
+        });
     }
 
     // Fetch machines for the initial department value
     if (department) {
-        fetchMachines(department);
+        fetchMachines(department, 'machine');
     }
 
     const repairForm = document.getElementById('repairRequestForm');
@@ -191,36 +195,62 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   // Open modal and populate it with repair request data when a row is clicked
-$('#historyTable tbody').on('click', 'tr', function () {
-  // Extract data attributes from the clicked row
-  const dateRequested = $(this).data('date-requested');
-  const machineId = $(this).data('machine-id');
-  const status = $(this).data('status');
-  const urgency = $(this).data('urgency');
-  const requestedBy = $(this).data('requested-by');
-  const details = $(this).data('details');
+  $('#historyTable tbody').on('click', 'tr', function () {
+    const dateRequested = $(this).data('date-requested');
+    const machineId = $(this).data('machine-id');
+    const status = $(this).data('status');
+    const urgency = $(this).data('urgency');
+    const requestedBy = $(this).data('requested-by');
+    const details = $(this).data('details');
+    const department = $('#department').val(); // This should be the relevant department for the request
 
-  // Populate the modal fields
-  $('#modalDateRequested').text(dateRequested);
-  $('#modalMachineId').text(machineId);
-  $('#modalStatus').text(status);
-  $('#modalUrgency').text(urgency);
-  $('#modalRequestedBy').text(requestedBy);
-  $('#modalDetails').text(details);
+    // Populate the modal fields
+    $('#modalDateRequested').text(dateRequested);
+    $('#modalStatus').text(status);
+    $('#modalRequestedBy').text(requestedBy);
+    $('#modalDetails').val(details);
 
-  // Show the offcanvas modal
-  const modal = new bootstrap.Offcanvas(document.getElementById('repairRequestModal'));
-  modal.show();
-});
+    // Populate the machine dropdown in the modal and set the selected machine
+    if (department) {
+      fetchMachines(department, 'machineName', machineId);
+    }
 
-// Prevent opening the modal if multiple rows are selected
-$('.row-checkbox').on('change', function () {
-  const selectedCount = $('.row-checkbox:checked').length;
+    // Populate and set urgency dropdown
+    const urgencyDropdown = document.getElementById('modalUrgency');
+    urgencyDropdown.innerHTML = `
+      <option value="low">Low</option>
+      <option value="medium">Medium</option>
+      <option value="high">High</option>
+    `;
+    urgencyDropdown.value = urgency;
 
-  if (selectedCount > 1) {
-      const modal = bootstrap.Offcanvas.getInstance('#repairRequestModal');
-      if (modal) modal.hide();
-  } 
-});
+    // Enable or disable fields based on the status
+    const isEditable = status === 'Not Started';
+    $('#modalMachineName').prop('disabled', !isEditable);
+    $('#modalUrgency').prop('disabled', !isEditable);
+    $('#modalDetails').prop('disabled', !isEditable);
+    $('#deleteRepairRequestBtn').toggle(isEditable);
+
+    // Show the offcanvas modal
+    const modal = new bootstrap.Offcanvas(document.getElementById('repairRequestModal'));
+    modal.show();
+  });
+
+  // Delete repair request functionality
+  $('#deleteRepairRequestBtn').on('click', function() {
+    const repairRequestId = $('#historyTable .selected').data('repair-request-id');
+    $.ajax({
+      url: 'delete_repair_request.php',
+      method: 'POST',
+      data: { repair_request_id: repairRequestId },
+      success: function(response) {
+        window.location.reload();
+      },
+      error: function(xhr, status, error) {
+        alert('Error deleting repair request. Please try again.');
+        console.error('Error:', xhr.responseText);
+      }
+    });
+  });
 
 });
