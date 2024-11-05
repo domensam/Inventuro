@@ -231,17 +231,36 @@ document.addEventListener('DOMContentLoaded', function () {
     $('#modalMachineName').prop('disabled', !isEditable);
     $('#modalUrgency').prop('disabled', !isEditable);
     $('#modalDetails').prop('disabled', !isEditable);
+    $('#saveRepairRequestBtn').toggle(isEditable);
     $('#deleteRepairRequestBtn').toggle(isEditable);
 
     // Show the offcanvas modal
     const modal = new bootstrap.Offcanvas(document.getElementById('repairRequestModal'));
     modal.show();
   });
+  
+  let actionType; // To store if the action is 'save' or 'delete'
 
   // Delete repair request functionality
   $('#deleteRepairRequestBtn').on('click', function() {
+    actionType = 'delete';
+    $('#confirmationMessage').text('Are you sure you want to delete this repair request?');
+    $('#confirmationModal').modal('show'); // Show the confirmation modal after offcanvas is hidden
+  });
+
+  $('#saveRepairRequestBtn').on('click', function() {
+    actionType = 'save';
+    $('#confirmationMessage').text('Are you sure you want to save changes to this repair request?');
+    $('#confirmationModal').modal('show'); // Show the confirmation modal after offcanvas is hidden
+  });
+
+// Handle confirmation modal 'Confirm' button click
+$('#confirmActionBtn').on('click', function () {
+  $('#confirmationModal').modal('hide'); // Close the confirmation modal
+
+  if (actionType === 'delete') {
+    // Perform delete action
     const repairRequestId = $('#repairRequestIdLabel').text();
-    console.log('repairRequestId:', repairRequestId);
     $.ajax({
       url: 'delete_repair_request.php',
       method: 'POST',
@@ -254,9 +273,9 @@ document.addEventListener('DOMContentLoaded', function () {
         console.error('Error:', xhr.responseText);
       }
     });
-  });
 
-  $('#saveRepairRequestBtn').on('click', function() {
+  } else if (actionType === 'save') {
+    // Perform save action
     const repairRequestId = $('#repairRequestIdLabel').text();
     const urgency = $('#modalUrgency').val();
     const details = $('#modalDetails').val();
@@ -280,13 +299,13 @@ document.addEventListener('DOMContentLoaded', function () {
             details: details
         },
         success: function(response) {
-          console.log('Response:', response);
           window.location.reload();
         },
         error: function(xhr) {
             alert('Error: ' + xhr.responseJSON.message);
         }
     });
+  }
 });
 
 
