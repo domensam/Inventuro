@@ -218,9 +218,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // Populate and set urgency dropdown
     const urgencyDropdown = document.getElementById('modalUrgency');
     urgencyDropdown.innerHTML = `
-      <option value="low">Low</option>
-      <option value="medium">Medium</option>
-      <option value="high">High</option>
+      <option value="Low">Low</option>
+      <option value="Medium">Medium</option>
+      <option value="High">High</option>
     `;
     urgencyDropdown.value = urgency;
 

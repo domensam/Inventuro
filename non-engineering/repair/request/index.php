@@ -347,10 +347,8 @@ if ($user) {
                         </p>
                         <p><span id="modalStatus"></span></p>
                         <p>
-                            <select id="modalUrgency" class="form-select">
-                                <option value="low">Low</option>
-                                <option value="medium">Medium</option>
-                                <option value="high">High</option>
+                            <select id="modalUrgency" class="form-select" name="modalUrgency" required>
+                                <!-- Options can be populated dynamically using JavaScript or PHP -->
                             </select>
                         </p>
                         <p><span id="modalRequestedBy"></span></p>
@@ -360,7 +358,8 @@ if ($user) {
                     </div>
                 </div>
                 <div class="text-end">
-                    <button id="deleteRepairRequestBtn" class="btn btn-danger">Delete Repair Request</button>
+                    <button id="saveRepairRequestBtn" class="btn btn-primary"><i class="bi bi-save"></i> Save</button>
+                    <button id="deleteRepairRequestBtn" class="btn btn-danger"><i class="bi bi-trash"></i> Delete</button>
                 </div>
             </div>
         </div>
