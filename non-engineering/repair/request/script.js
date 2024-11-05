@@ -190,4 +190,37 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
+  // Open modal and populate it with repair request data when a row is clicked
+$('#historyTable tbody').on('click', 'tr', function () {
+  // Extract data attributes from the clicked row
+  const dateRequested = $(this).data('date-requested');
+  const machineId = $(this).data('machine-id');
+  const status = $(this).data('status');
+  const urgency = $(this).data('urgency');
+  const requestedBy = $(this).data('requested-by');
+  const details = $(this).data('details');
+
+  // Populate the modal fields
+  $('#modalDateRequested').text(dateRequested);
+  $('#modalMachineId').text(machineId);
+  $('#modalStatus').text(status);
+  $('#modalUrgency').text(urgency);
+  $('#modalRequestedBy').text(requestedBy);
+  $('#modalDetails').text(details);
+
+  // Show the offcanvas modal
+  const modal = new bootstrap.Offcanvas(document.getElementById('repairRequestModal'));
+  modal.show();
+});
+
+// Prevent opening the modal if multiple rows are selected
+$('.row-checkbox').on('change', function () {
+  const selectedCount = $('.row-checkbox:checked').length;
+
+  if (selectedCount > 1) {
+      const modal = bootstrap.Offcanvas.getInstance('#repairRequestModal');
+      if (modal) modal.hide();
+  } 
+});
+
 });
