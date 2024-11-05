@@ -4,6 +4,11 @@ document.addEventListener('DOMContentLoaded', function () {
   hamBurger.addEventListener("click", function () {
       document.querySelector("#sidebar").classList.toggle("expand");
   });
+  function showInfoModal(title, message) {
+    document.querySelector('#infoModal .modal-title').textContent = title;
+    document.querySelector('#infoModal .modal-body p').textContent = message;
+    $('#infoModal').modal('show');
+  }
 
   // Search functionality
   const searchBar = document.getElementById('search-bar');
@@ -98,37 +103,37 @@ document.getElementById('updateProfileForm').addEventListener('submit', function
 
   // Basic validation
   if (!firstName || !lastName) {
-      alert("First Name and Last Name are required.");
-      return;
+    showInfoModal('Error', 'First and last names are required.');
+    return;
   }
   
   if(currentPassword) {
     if(newPassword !== confirmPassword) {
-      alert("New Password and Confirm Password do not match.");
-      return;
+        showInfoModal('Error', 'New password and confirm password do not match.');
+        return;
     }
     else {
       if(newPassword.length < 8) {
-        alert("New Password must be at least 8 characters long.");
+        showInfoModal('Error', 'New password must be at least 8 characters long.');
         return;
       }
       if(!newPassword.match(/[a-z]/g)) {
-        alert("New Password must contain at least one lowercase letter.");
+        showInfoModal('Error', 'New Password must contain at least one lowercase letter.');
         return;
       }
       if(!newPassword.match(/[A-Z]/g)) {
-        alert("New Password must contain at least one uppercase letter.");
+        showInfoModal('Error', 'New Password must contain at least one uppercase letter.');
         return;
       }
       if(!newPassword.match(/[0-9]/g)) {
-        alert("New Password must contain at least one number.");
+        showInfoModal('Error', 'New Password must contain at least one number.');
         return;
       }
     }
   }
 
   if(!currentPassword && (newPassword || confirmPassword)) {
-    alert("Current Password is required.");
+    showInfoModal('Error', 'Please enter your current password.');
     return;
   }
 
@@ -165,10 +170,9 @@ function submitForm(formData) {
   .then(response => response.json())
   .then(data => {
       if (data.success) {
-          alert("Profile updated successfully.");
           window.location.reload();
       } else {
-          alert(data.message);
+        showInfoModal('Error', 'There was an error updating the your profile.');
       }
   })
   .catch(error => {

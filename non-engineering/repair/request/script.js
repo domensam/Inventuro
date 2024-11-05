@@ -5,6 +5,11 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelector("#sidebar").classList.toggle("expand");
   });
 
+  function showInfoModal(title, message) {
+    document.querySelector('#infoModal .modal-title').textContent = title;
+    document.querySelector('#infoModal .modal-body p').textContent = message;
+    $('#infoModal').modal('show');
+  }
   // Search functionality
   const searchBar = document.getElementById('search-bar');
 
@@ -143,15 +148,16 @@ document.addEventListener('DOMContentLoaded', function () {
       .then(response => response.json())
       .then(data => {
           if (data.success) {
-              alert("Repair request submitted successfully.");
-              repairForm.reset(); // Optionally reset the form after submission
+          showInfoModal('Success', 'The repair request has been successfully submitted.');
+          repairForm.reset(); // Reset the form after submission
+
           } else {
-              alert("Error: " + data.message);
+            showInfoModal('Error', 'There was an error submitting the repair request.');
           }
       })
       .catch(error => {
           console.error('Error:', error);
-          alert("There was an error submitting the repair request.");
+          showInfoModal('Error', 'There was an error submitting the repair request.');
       });
   });
 
@@ -267,10 +273,10 @@ $('#confirmActionBtn').on('click', function () {
       data: { repair_request_id: repairRequestId },
       success: function(response) {
         window.location.reload();
+        
       },
       error: function(xhr, status, error) {
-        alert('Error deleting repair request. Please try again.');
-        console.error('Error:', xhr.responseText);
+        showInfoModal('Error', 'The repair request has not been deleted.');
       }
     });
 
@@ -281,13 +287,13 @@ $('#confirmActionBtn').on('click', function () {
     const details = $('#modalDetails').val();
 
     if (!urgency) {
-        alert('Please select an urgency level.');
-        return;
+      showInfoModal('Error', 'Please select an urgency level.');
+      return;
     }
 
     if (!details) {
-        alert('Please enter details.');
-        return;
+      showInfoModal('Error', 'Please enter problem details.');
+      return;
     }
 
     $.ajax({
@@ -300,9 +306,10 @@ $('#confirmActionBtn').on('click', function () {
         },
         success: function(response) {
           window.location.reload();
+
         },
         error: function(xhr) {
-            alert('Error: ' + xhr.responseJSON.message);
+          showInfoModal('Error', 'The repair request has not been saved.');
         }
     });
   }
