@@ -61,7 +61,7 @@ if ($user) {
                     <i class="bi bi-box-seam-fill"></i>
                 </button>
                 <div class="sidebar-logo">
-                    <a href="index.php">Inventuro</a>
+                    <a href="../../index.php">Inventuro</a>
                 </div>
             </div>
             <ul class="sidebar-nav">
