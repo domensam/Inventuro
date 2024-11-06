@@ -380,8 +380,13 @@ if ($user) {
                                         $urgencyClass = isset($row['urgency']) ? ($row['urgency'] === 'High' ? 'text-danger' : ($row['urgency'] === 'Medium' ? 'text-warning' : 'text-success')) : '';
 
                                         echo "<tr 
-                                            data-repair-request-id='" . htmlspecialchars($row['r_repair_request_id']) . "' 
-                                            data-date-requested='" . htmlspecialchars($row['m_date_requested'] ?? '') . "'>
+                                            data-material-request-id='" . htmlspecialchars($row['m_material_request_id']) . "' 
+                                            data-date-requested='" . htmlspecialchars(date("d M Y g:i A", strtotime($row['m_date_requested'] ?? ''))) . "'
+                                            data-status='" . htmlspecialchars($row['m_status'] ?? '') . "'
+                                            data-machine-name='" . htmlspecialchars($row['machine_name'] ?? '') . "'
+                                            data-department='" . htmlspecialchars($row['department_name'] ?? '') . "'
+                                            data-urgency='" . htmlspecialchars($row['urgency'] ?? '') . "'
+                                            data-details='" . htmlspecialchars($row['details'] ?? '') . "'>
                                             <td class='text-center'><input type='checkbox' class='row-checkbox'></td>
                                             <td>" . htmlspecialchars(date("d M Y g:i A", strtotime($row['m_date_requested'] ?? ''))) . "</td>
                                             <td>" . htmlspecialchars($row['m_material_request_id'] ?? '') . "</td>
@@ -485,6 +490,47 @@ if ($user) {
             </div>
         </div>
     </div>
+
+    <!-- Offcanvas Modal for Material Request Details -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="materialRequestModal" aria-labelledby="materialRequestModalLabel" style="width: 40%; padding: 20px;">
+        <div class="offcanvas-header">
+            <div class="col-10">
+                <h5 id="materialRequestModalLabel" class="mb-0">Material Request Details</h5>
+                <p class="text-muted mb-0"><strong>Request No.:</strong> <span id="modalMaterialRequestId"></span></p>
+            </div>
+            <button class="btn btn-danger" id="deleteMaterialRequestBtn"><i class="bi bi-trash"></i></button>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+
+        <div class="offcanvas-body p-4">
+            <p><strong>Date Requested:</strong> <span id="materialRequestDate"></span></p>
+            <p><strong>Status:</strong> <span id="materialRequestStatus"></span></p>
+            <p><strong>Machine:</strong> <span id="materialRequestMachine"></span></p>
+            <p><strong>Department:</strong> <span id="materialRequestDepartment"></span></p>
+            <p><strong>Urgency:</strong> <span id="materialRequestUrgency"></span></p>
+
+            <div id="modalItemList" class="mt-3">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Item Name</th>
+                            <th>Quantity Needed</th>
+                            <th>Current Quantity</th>
+                        </tr>
+                    </thead>
+                    <tbody id="itemListBody">
+                        <!-- Material request items will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-start" style="padding-top: 20px">
+                <button id="saveMaterialRequestBtn" class="btn btn-primary me-2">Save</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="offcanvas">Cancel</button>
+            </div>
+        </div>
+    </div>
+
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"

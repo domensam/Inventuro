@@ -182,7 +182,166 @@ document.addEventListener('DOMContentLoaded', function () {
       search: "Search: " // Customizing the search label
     }
   });
-  
+
+  // Event listener for row clicks
+  $('#materialRequestTable tbody').on('click', 'tr', function () {
+    const materialRequestId = $(this).data('material-request-id');
+    const dateRequested = $(this).data('date-requested');
+    const status = $(this).data('status');
+    const machineName = $(this).data('machine-name');
+    const department = $(this).data('department');
+    const urgency = $(this).data('urgency');
+    const details = $(this).data('details');
+
+    // Populate modal fields
+    $('#modalMaterialRequestId').text(materialRequestId);
+    $('#materialRequestDate').text(dateRequested);
+    $('#materialRequestStatus').text(status);
+    $('#materialRequestMachine').text(machineName);
+    $('#materialRequestDepartment').text(department);
+    $('#materialRequestUrgency').text(urgency);
+    $('#materialRequestDetails').text(details);
+
+    // Fetch items associated with the material request
+    fetchMaterialRequestItems(materialRequestId);
+
+    // Conditionally display the Save and Delete button, and disable/enable inputs based on status
+    if(status === 'Not Started') {
+      $('#deleteMaterialRequestBtn').show();
+      $('#saveMaterialRequestBtn').show();
+    } else {
+      $('#deleteMaterialRequestBtn').hide();
+      $('#saveMaterialRequestBtn').hide();
+    }
+    // Show the offcanvas modal
+    const modal = new bootstrap.Offcanvas(document.getElementById('materialRequestModal'));
+    modal.show();
+  });
+
+  // Function to fetch material request items
+  function fetchMaterialRequestItems(materialRequestId) {
+    $.ajax({
+        url: 'get_material_request_items.php', // Your server-side script to get items
+        method: 'POST',
+        dataType: 'json',
+        data: {
+            material_request_id: materialRequestId // Send the ID to the server
+        },
+        success: function (response) {
+            if (response.success) {
+                // Clear existing items
+                $('#modalItemList').empty();
+                
+                // Create the table header
+                const tableHeader = `
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Item Name</th>
+                                <th>Quantity Needed</th>
+                                <th>Current Quantity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                $('#modalItemList').append(tableHeader);
+                
+                // Populate the modal with material request items
+                response.items.forEach(item => {
+                  // Determine if the input should be enabled or disabled based on the item's status
+                  const isDisabled = item.status !== 'Not Started';
+              
+                  $('#modalItemList tbody').append(`
+                      <tr>
+                          <td class="text-start" style="padding-left: 30px;">${item.item_name}</td>
+                          <td>
+                              <input type="number" 
+                                     data-item-id="${item.item_id}" 
+                                     value="${item.quantity}" 
+                                     min="1" 
+                                     class="form-control quantity-input" 
+                                     style="margin-left: 60px; width: 100px;" 
+                                     ${isDisabled ? 'disabled' : ''}>
+                          </td>
+                          <td style="padding-left: 120px;">${item.item_quantity}</td>
+                      </tr>
+                  `);
+                });
+
+                // Close the table
+                $('#modalItemList').append(`</tbody></table>`);
+            } else {
+                // Handle case where no items are found
+                $('#modalItemList').html('<p>No items found for this request.</p>');
+            }
+        },
+        error: function () {
+            $('#modalItemList').html('<p>Error fetching items. Please try again.</p>');
+        }
+    });
+  }
+
+// Event listener for save button
+$('#saveMaterialRequestBtn').click(function() {
+  const updatedItems = [];
+  let isValid = true;
+
+  // Gather the updated quantities
+  $('#modalItemList .quantity-input').each(function() {
+      const itemId = $(this).data('item-id');
+      const newQuantity = parseInt($(this).val());
+      
+      // Assuming you have a way to get the current quantity for validation
+      const currentQuantity = parseInt($(this).closest('tr').find('td:last-child').text()); // Get the quantity from the last column
+
+      // Validate quantity
+      if (newQuantity < 1) {
+          isValid = false;
+          showInfoModal('Error', 'Quantity cannot be less than 1.');
+          return false; // Break the loop
+      }
+      if (newQuantity > currentQuantity) {
+          isValid = false;
+          showInfoModal('Error', `Quantity cannot exceed the current quantity of ${currentQuantity}.`);
+          return false; // Break the loop
+      }
+
+      // If valid, push to updatedItems array
+      updatedItems.push({ item_id: itemId, quantity: newQuantity });
+  });
+
+  if (!isValid) {
+      return; // If not valid, stop execution
+  }
+
+  // Make AJAX call to update material_request_items
+  $.ajax({
+      url: 'update_material_request_items.php', // Your server-side script
+      method: 'POST',
+      dataType: 'json',
+      contentType: 'application/json',
+      data: JSON.stringify({
+          items: updatedItems
+      }),
+      success: function(response) {
+          if (response.success) {
+              showInfoModal('Success', 'Material request updated successfully!');
+          } else {
+              showInfoModal('Error', response.message);
+          }
+      },
+      error: function(xhr, status, error) {
+          showInfoModal('Error', 'An error occurred while updating material request items.');
+          console.error('Error:', error);
+      }
+  });
+});
+
+
+  $('#deleteMaterialRequestBtn').click(function() {
+    showInfoModal('Success', 'Material request deleted successfully!');
+  });
+
   // Custom Search Functionality for Table and Timeline
   const searchBar = document.getElementById('search-bar');
   searchBar.addEventListener('input', function () {
