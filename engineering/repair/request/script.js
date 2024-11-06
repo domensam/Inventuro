@@ -5,6 +5,12 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelector("#sidebar").classList.toggle("expand");
   });
 
+  function showInfoModal(title, message) {
+    document.querySelector('#infoModal .modal-title').textContent = title;
+    document.querySelector('#infoModal .modal-body p').textContent = message;
+    $('#infoModal').modal('show');
+  }
+
   const dataTable = $('#historyTable').DataTable({
     dom: '<"row"<"col-md-6"f><"col-md-6 text-end"B>>tip',
     buttons: [
@@ -43,6 +49,45 @@ document.addEventListener('DOMContentLoaded', function () {
   $('#selectAll').on('click', function() {
     var rows = $('#historyTable').DataTable().rows({ 'search': 'applied' }).nodes();
     $('input[type="checkbox"]', rows).prop('checked', this.checked);
+  });
+
+  // Event listener for row clicks
+  $('#historyTable tbody').on('click', 'tr', function () {
+      // Get data from the clicked row
+      const repairRequestId = $(this).data('repair-request-id');
+      const dateRequested = $(this).data('date-requested');
+      const machineName = $(this).data('machine-name');
+      const department = $(this).data('department');
+      const urgency = $(this).data('urgency');
+      const status = $(this).data('status');
+      const requestedBy = $(this).data('requested-by');
+      const details = $(this).data('details');
+
+      // Populate modal fields
+      $('#repairRequestIdLabel').text(repairRequestId);
+      $('#modalDateRequested').text(dateRequested);
+      $('#modalMachineName').text(machineName);
+      $('#modalDepartment').text(department);
+      $('#modalUrgency').text(urgency);
+      $('#modalStatus').text(status);
+      $('#modalRequestedBy').text(requestedBy);
+      $('#modalDetails').text(details);
+
+      // Conditionally display the Request Material button based on status
+      if (status === 'Not Started') {
+          $('#requestMaterialBtn').show();
+      } else {
+          $('#requestMaterialBtn').hide();
+      }
+
+      // Show the offcanvas modal
+      const modal = new bootstrap.Offcanvas(document.getElementById('repairRequestModal'));
+      modal.show();
+  });
+
+  $('#requestMaterialBtn').on('click', function() {
+    const repairRequestId = $('#repairRequestIdLabel').text();
+    showInfoModal('Request Material', `You have selected repair request id: ${repairRequestId}. Please proceed to request material.`);
   });
 
   // Custom Search Functionality for Table and Timeline

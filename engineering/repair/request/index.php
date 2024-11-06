@@ -265,7 +265,7 @@ if ($user) {
                                         data-machine-name='" . htmlspecialchars($row['machine_name'] ?? 'Unknown Machine') . "'
                                         data-status='" . $statusText . "'
                                         data-urgency='" . $urgencyText . "'
-                                        data-department='" . htmlspecialchars($row['machine_department'] ?? 'Unknown Department') . "'
+                                        data-department='" . htmlspecialchars($row['department_name'] ?? 'Unknown Department') . "'
                                         data-requested-by='" . htmlspecialchars(($first_name ?? 'N/A') . " " . ($last_name ?? '') . " (" . ($employee_id ?? 'Unknown') . ")") . "'
                                         data-handled-by='" . (
                                             !empty($row['first_name']) && !empty($row['last_name']) 
@@ -300,7 +300,7 @@ if ($user) {
         </div>
     </div>
     <!--Info Modal -->
-    <div class="modal" tabindex="-1" role="dialog" id="infoModal">
+    <div class="modal fade" tabindex="-1" role="dialog" id="infoModal">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
             <div class="modal-header">
@@ -318,6 +318,31 @@ if ($user) {
             </div>
         </div>
     </div>
+    <!-- Offcanvas Modal for Repair Request Details -->
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="repairRequestModal" aria-labelledby="repairRequestModalLabel" style="width: 40%; padding: 20px;">
+        <div class="offcanvas-header">
+            <h5 id="repairRequestModalLabel">Repair Request Details</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        
+        <div class="offcanvas-body">
+            <p><strong>Date Requested:</strong> <span id="modalDateRequested"></span></p>
+            <p><strong>Repair Request No.:</strong> <span id="repairRequestIdLabel"></span></p>
+            <p><strong>Machine:</strong> <span id="modalMachineName"></span></p>
+            <p><strong>Department:</strong> <span id="modalDepartment"></span></p>
+            <p><strong>Urgency:</strong> <span id="modalUrgency"></span></p>
+            <p><strong>Status:</strong> <span id="modalStatus"></span></p>
+            <p><strong>Requested By:</strong> <span id="modalRequestedBy"></span></p>
+            <p><strong>Details:</strong> <span id="modalDetails"></span></p>
+
+            <div class="d-flex justify-content-start" style="padding-top: 20px">
+                <button id="requestMaterialBtn" class="btn btn-primary me-2">Claim</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="offcanvas">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe"
         crossorigin="anonymous"></script>
