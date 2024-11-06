@@ -17,6 +17,10 @@ a.sidebar-link:hover {
     background-color: #1d3854;
     color: white;
     border-left: 3px solid #3a7abead;
+    
+    svg {
+        fill: white;
+    }
 }
 
 li {
@@ -110,6 +114,9 @@ a.sidebar-link:hover {
     background-color: #1d3854;
     color: white;
     border-left: 3px solid #3a7abead;
+    svg {
+        fill: white;
+    }
 }
 
 .sidebar-item {
