@@ -149,6 +149,40 @@ document.addEventListener('DOMContentLoaded', function () {
     modal.show();
   });
 
+  $('#materialRequestTable').DataTable({
+    dom: '<"row"<"col-md-6"f><"col-md-6 text-end"B>>tip',
+    buttons: [
+      {
+        extend: 'copy',
+        text: 'Copy'
+      },
+      {
+        extend: 'collection',
+        text: 'Download',
+        className: 'btn',
+        buttons: [
+          { extend: 'csv', text: 'CSV' },
+          { extend: 'excel', text: 'Excel' },
+          { extend: 'pdf', text: 'PDF' }
+        ]
+      },
+      {
+        extend: 'print',
+        text: 'Print'
+      }
+    ],
+    paging: true,
+    searching: true,
+    ordering: true,
+    info: true,
+    columnDefs: [
+      { orderable: false, targets: 0 } // Disable ordering on the first column (checkbox)
+    ],
+    language: {
+      search: "Search: " // Customizing the search label
+    }
+  });
+  
   // Custom Search Functionality for Table and Timeline
   const searchBar = document.getElementById('search-bar');
   searchBar.addEventListener('input', function () {

@@ -332,6 +332,76 @@ if ($user) {
                     <div class="m-4 ml-5">
                         <h1><strong>Your Material Requests</strong></h1>
                     </div>
+                    <!-- Material Requests Table -->
+                    <table id="materialRequestTable" class="table table-striped table-hover w-100">
+                        <thead>
+                            <tr>
+                                <th class="text-center" style="width: 5%;">
+                                    <input type="checkbox" id="selectAll">
+                                </th>
+                                <th class="text-start">Date Requested</th>
+                                <th class="text-start">Material Request No.</th>
+                                <th class="text-start">Status</th>
+                                <th class="text-start">Machine</th>
+                                <th class="text-start">Department</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            try {
+                                include '../../../connect.php'; // Include database connection
+                                
+                                $sql = "SELECT 
+                                        material_request.material_request_id AS m_material_request_id,
+                                        material_request.repair_request_id AS r_repair_request_id,
+                                        material_request.timestamp AS m_date_requested,
+                                        material_request.status AS m_status,
+                                        material_request.requested_by AS m_requested_by,
+                                        material_request.approved_by AS m_approved_by,
+                                        repair_request.*,
+                                        machine.*,
+                                        department.*
+                                        FROM material_request
+                                        LEFT JOIN repair_request ON material_request.repair_request_id = repair_request.repair_request_id
+                                        LEFT JOIN machine ON repair_request.machine_id = machine.machine_id
+                                        LEFT JOIN department ON machine.machine_department_id = department.department_id
+                                        WHERE material_request.requested_by = ?
+                                        ORDER BY m_date_requested DESC"; // Make sure to refer to the correct alias
+                                
+                                $stmt = $conn->prepare($sql);
+                                $stmt->execute([$employee_id]); // Bind the parameter correctly as an array
+
+                                // Check if any rows were returned
+                                if ($stmt->rowCount() > 0) {
+                                    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                                        // Define status and urgency classes
+                                        $statusClass = isset($row['m_status']) ? ($row['m_status'] === 'Not Started' ? 'text-secondary' : ($row['m_status'] === 'Started' ? 'text-warning' : 'text-success')) : '';
+                                        $urgencyClass = isset($row['urgency']) ? ($row['urgency'] === 'High' ? 'text-danger' : ($row['urgency'] === 'Medium' ? 'text-warning' : 'text-success')) : '';
+
+                                        echo "<tr 
+                                            data-repair-request-id='" . htmlspecialchars($row['r_repair_request_id']) . "' 
+                                            data-date-requested='" . htmlspecialchars($row['m_date_requested'] ?? '') . "'>
+                                            <td class='text-center'><input type='checkbox' class='row-checkbox'></td>
+                                            <td>" . htmlspecialchars(date("d M Y g:i A", strtotime($row['m_date_requested'] ?? ''))) . "</td>
+                                            <td>" . htmlspecialchars($row['m_material_request_id'] ?? '') . "</td>
+                                            <td class='$statusClass'>" . htmlspecialchars($row['m_status'] ?? '') . "</td>
+                                            <td>" . htmlspecialchars($row['machine_name'] ?? '') . "</td>
+                                            <td>" . htmlspecialchars($row['department_name'] ?? '') . "</td>
+                                            <td class='text-center'>
+                                                <button class='btn btn-sm btn-primary' onclick='viewDetails(\"" . htmlspecialchars($row['r_repair_request_id']) . "\")'>View</button>
+                                            </td>
+                                        </tr>";
+                                    }
+                                } else {
+                                    echo "<tr><td colspan='8'>No material requests found.</td></tr>";
+                                }
+                            } catch (PDOException $e) {
+                                echo "<tr><td colspan='8'>Error fetching data: " . htmlspecialchars($e->getMessage()) . "</td></tr>";
+                            }
+                            ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
