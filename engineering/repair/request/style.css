@@ -352,11 +352,11 @@ h2 {
 .dataTables_filter {
     float: left;
     margin-bottom: 10px;
-    margin-left: 5px; /* Adjust margin */
+    margin-left: 10px; /* Adjust margin */
 }
 
 .dataTables_filter input {
-    width: 500px; /* Extend the width of the search bar */
+    width: 400px; /* Extend the width of the search bar */
 }
 
 .dt-buttons {

@@ -185,110 +185,99 @@ if ($user) {
             </div>
             <div id="main-content">
                 <!-- Request Content Section -->
-                <div id="request-content" class="content-section active">
+                <div id="request-content" class="content-section active"> <!-- Ensure this is set as active -->
                     <div class="m-4 ml-5">
-                        <h1><strong>Repair Requests</strong></h1>
-                        <p>Claim a repair by requesting materials</p>
+                        <h1><strong>Request for Machine Repair</strong></h1>
+                        <p>Select a repair request to claim.</p>
                     </div>
-                    <!-- Table -->
+                    <!-- History Table -->
                     <table id="historyTable" class="table table-striped table-hover w-100">
                         <thead>
                             <tr>
-                                <th class="text-center" style="width: 5%;"><input type="checkbox" id="selectAll"></th>
-                                <th class="text-start" style="padding-left: 13px;">Date</th>
-                                <th class="text-start" style="padding-left: 13px;">Repair Request No.</th>
-                                <th class="text-start" style="padding-left: 13px;">Machine</th>
-                                <th class="text-start" style="padding-left: 13px;">Department</th>
-                                <th class="text-start" style="padding-left: 13px;">Urgency</th>
-                                <th class="text-start" style="padding-left: 13px;">Status</th>
+                                <th class="text-center" style="width: 5%;">
+                                    <input type="checkbox" id="selectAll">
+                                </th>
+                                <th class="text-start">Date Requested</th>
+                                <th class="text-start">Repair Request No.</th>
+                                <th class="text-start">Machine</th>
+                                <th class="text-start">Department</th>
+                                <th class="text-start">Urgency</th>
+                                <th class="text-start">Status</th>
+                                <th class="text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                        <?php
+                            <?php
                             try {
-                                $requested_by = $_SESSION['employee_id'];
-
-                                $sql = "SELECT * FROM repair_request 
-                                        LEFT JOIN repair ON repair_request.repair_request_id = repair.repair_request_id
-                                        LEFT JOIN employee ON repair.handled_by = employee.employee_id
-                                        LEFT JOIN machine ON repair_request.machine_id = machine.machine_id
-                                        LEFT JOIN department ON machine.machine_department_id = department.department_id
-                                        ORDER BY repair_request.date_requested ASC;";
-
-                                // Prepare the statement
+                                include '../../../connect.php'; // Include database connection
+                                $sql = "SELECT 
+                                    repair_request.*, 
+                                    repair_request.repair_request_id AS r_repair_request_id, 
+                                    repair.*,
+                                    employee.*, 
+                                    machine.*, 
+                                    department.*, 
+                                    warranty.*
+                                FROM 
+                                    repair_request 
+                                LEFT JOIN 
+                                    repair ON repair_request.repair_request_id = repair.repair_request_id
+                                LEFT JOIN 
+                                    employee ON repair.handled_by = employee.employee_id
+                                LEFT JOIN 
+                                    machine ON repair_request.machine_id = machine.machine_id
+                                LEFT JOIN 
+                                    department ON machine.machine_department_id = department.department_id
+                                LEFT JOIN 
+                                    warranty ON machine.machine_id = warranty.machine_id 
+                                ORDER BY 
+                                    repair_request.date_requested ASC";
                                 $stmt = $conn->prepare($sql);
-
-                                // Execute the query
                                 $stmt->execute();
-                                
-                                // Fetch data and display
-                                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                                    $imageData = isset($row['image']) && !empty($row['image'])
-                                        ? "data:" . (new finfo(FILEINFO_MIME_TYPE))->buffer($row['image']) . ";base64," . base64_encode($row['image'])
-                                        : "../../../images/gallery.png";
 
-                                    // Determine status color class
-                                    $statusClass = '';
-                                    $statusText = htmlspecialchars($row['status'] ?? 'Unknown Status'); // Default to 'Unknown Status' if NULL
-                                    switch ($statusText) {
-                                        case 'Not Started':
-                                            $statusClass = 'bg-light text-secondary'; // Gray
-                                            break;
-                                        case 'Started':
-                                            $statusClass = 'bg-warning text-dark'; // Yellow
-                                            break;
-                                        case 'Done':
-                                            $statusClass = 'bg-success text-white'; // Green
-                                            break;
+                                // Check if any rows were returned
+                                if ($stmt->rowCount() > 0) {
+                                    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                                        // Define status and urgency classes
+                                        $statusClass = $row['status'] === 'Not Started' ? 'text-secondary' : ($row['status'] === 'Started' ? 'text-warning' : 'text-success');
+                                        $urgencyClass = $row['urgency'] === 'High' ? 'text-danger' : ($row['urgency'] === 'Medium' ? 'text-warning' : 'text-success');
+
+                                        echo "<tr 
+                                            data-repair-request-id='" . htmlspecialchars($row['r_repair_request_id']) . "' 
+                                            data-date-requested='" . htmlspecialchars($row['date_requested']) . "'
+                                            data-machine-name='" . htmlspecialchars($row['machine_name']) . "'
+                                            data-department='" . htmlspecialchars($row['department_name']) . "'
+                                            data-urgency='" . htmlspecialchars($row['urgency']) . "'
+                                            data-status='" . htmlspecialchars($row['status']) . "'
+                                            data-requested-by='" . htmlspecialchars($row['requested_by']) . "'
+                                            data-details='" . htmlspecialchars($row['details']) . "'>
+                                            <td class='text-center'><input type='checkbox' class='row-checkbox'></td>
+                                            <td>" . htmlspecialchars(date("d M Y g:i A", strtotime($row['date_requested'] ?? ''))) . "</td>
+                                            <td>" . htmlspecialchars($row['r_repair_request_id'] ?? '') . "</td>
+                                            <td>" . htmlspecialchars($row['machine_name'] ?? '') . "</td>
+                                            <td>" . htmlspecialchars($row['department_name'] ?? '') . "</td>
+                                            <td class='$urgencyClass'>" . htmlspecialchars($row['urgency'] ?? '') . "</td>
+                                            <td class='$statusClass'>" . htmlspecialchars($row['status'] ?? '') . "</td>
+                                            <td class='text-center'>
+                                                <button class='btn btn-sm btn-primary' onclick='viewDetails(\"" . $row['r_repair_request_id'] . "\")'>View</button>
+                                            </td>
+                                        </tr>";
                                     }
-
-                                    // Determine urgency text color class
-                                    $urgencyClass = '';
-                                    $urgencyText = htmlspecialchars($row['urgency'] ?? 'Not Set'); // Default to 'Not Set' if NULL
-                                    switch ($urgencyText) {
-                                        case 'Low':
-                                            $urgencyClass = 'text-success'; // Green
-                                            break;
-                                        case 'Medium':
-                                            $urgencyClass = 'text-warning'; // Yellow
-                                            break;
-                                        case 'High':
-                                            $urgencyClass = 'text-danger'; // Red
-                                            break;
-                                    }
-
-                                    // Construct the table row
-                                    echo "<tr
-                                        data-date-requested='" . htmlspecialchars(date("d M Y g:i A", strtotime($row['date_requested'] ?? 'now'))) . "'
-                                        data-repair-request-id='" . htmlspecialchars($row['repair_request_id'] ?? 'N/A') . "'
-                                        data-machine-id='" . htmlspecialchars($row['machine_id'] ?? 'N/A') . "'
-                                        data-machine-name='" . htmlspecialchars($row['machine_name'] ?? 'Unknown Machine') . "'
-                                        data-status='" . $statusText . "'
-                                        data-urgency='" . $urgencyText . "'
-                                        data-department='" . htmlspecialchars($row['department_name'] ?? 'Unknown Department') . "'
-                                        data-requested-by='" . htmlspecialchars(($first_name ?? 'N/A') . " " . ($last_name ?? '') . " (" . ($employee_id ?? 'Unknown') . ")") . "'
-                                        data-handled-by='" . (
-                                            !empty($row['first_name']) && !empty($row['last_name']) 
-                                                ? htmlspecialchars($row['first_name'] . ' ' . $row['last_name'])
-                                                : 'Not assigned yet'
-                                            ) . "'
-                                        data-details='" . htmlspecialchars($row['details'] ?? 'No details provided') . "'
-                                        data-image='" . htmlspecialchars($imageData) . "'>
-                                        <td class='text-center align-middle'><input type='checkbox' class='row-checkbox'></td>
-                                        <td class='text-start align-middle'>" . htmlspecialchars(date("d M Y g:i A", strtotime($row['date_requested'] ?? 'now'))) . "</td>
-                                        <td class='text-start align-middle'>" . htmlspecialchars($row['repair_request_id'] ?? 'N/A') . "</td>
-                                        <td class='text-start align-middle'>" . htmlspecialchars($row['machine_name'] ?? 'Unknown Machine') . "</td>
-                                        <td class='text-start align-middle'>" . htmlspecialchars($row['department_name'] ?? 'Unknown Department') . "</td>
-                                        <td class='text-start align-middle $urgencyClass'>$urgencyText</td>
-                                        <td class='text-start align-middle $statusClass'>$statusText</td>
-                                    </tr>";
+                                } else {
+                                    echo "<tr><td colspan='8'>No repair requests found.</td></tr>";
                                 }
                             } catch (PDOException $e) {
-                                echo "<tr><td colspan='5'>Error fetching data: " . htmlspecialchars($e->getMessage()) . "</td></tr>";
+                                echo "<tr><td colspan='8'>Error fetching data: " . htmlspecialchars($e->getMessage()) . "</td></tr>";
                             }
-                        ?>
+                            ?>
                         </tbody>
                     </table>
+                </div>
+                <div id="materials-request-content" class="content-section">
+                    <div class="m-4 ml-5">
+                        <h1><strong>Materials Request</strong></h1>
+                        <p><strong>Repair Request No.: </strong><span id="modalRepairRequestId" class="text-muted"></span></p>
+                    </div>
                 </div>
                 <!-- Materials Content Section -->
                 <div id="materials-content" class="content-section">
