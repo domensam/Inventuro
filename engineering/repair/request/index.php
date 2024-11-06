@@ -250,6 +250,7 @@ if ($user) {
                                             data-urgency='" . htmlspecialchars($row['urgency']) . "'
                                             data-status='" . htmlspecialchars($row['status']) . "'
                                             data-requested-by='" . htmlspecialchars($row['requested_by']) . "'
+                                            data-warranty-status='" . htmlspecialchars($row['warranty_status'] ?? 'No warranty') . "'
                                             data-details='" . htmlspecialchars($row['details']) . "'>
                                             <td class='text-center'><input type='checkbox' class='row-checkbox'></td>
                                             <td>" . htmlspecialchars(date("d M Y g:i A", strtotime($row['date_requested'] ?? ''))) . "</td>
@@ -284,9 +285,10 @@ if ($user) {
                             <tr>
                                 <th class="text-center" style="width: 5%;"><input type="checkbox" id="selectAll"></th>
                                 <th class="text-start">Item</th>
+                                <th class="text-start">Description</th>
                                 <th class="text-start">Quantity on Hand</th>
+                                <th class="text-start">Per Unit</th>
                                 <th class="text-start">Restock Level</th>
-                                <th class="text-start">Reorder Point</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -298,20 +300,21 @@ if ($user) {
 
                                 while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
                                     $itemName = htmlspecialchars($row['item_name']);
+                                    $itemDescription = htmlspecialchars($row['description']);
                                     $itemQuantity = htmlspecialchars($row['item_quantity']);
-                                    $reorderPoint = htmlspecialchars($row['reorder_point']);
+                                    $itemPerUnit = htmlspecialchars($row['size_per_unit'] . ' ' . $row['unit']);
                                     $statusClass = $row['reorder_point'] > $row['item_quantity'] ? 'text-danger' : 'text-success';
                                     
                                     echo "<tr
                                         data-item-code='" . htmlspecialchars($row['item_code']) . "' 
                                         data-item-name='" . $itemName . "' 
-                                        data-item-quantity='" . $itemQuantity . "' 
-                                        data-item-reorder-point='" . $reorderPoint . "'>
+                                        data-item-quantity='" . $itemQuantity . "'>
                                         <td class='text-center'><input type='checkbox' class='row-checkbox'></td>
                                         <td>$itemName</td>
+                                        <td>$itemDescription</td>
                                         <td>$itemQuantity</td>
+                                        <td>$itemPerUnit</td>
                                         <td class='$statusClass'>" . ($row['reorder_point'] > $row['item_quantity'] ? 'Low' : 'Sufficient') . "</td>
-                                        <td>$reorderPoint</td>
                                     </tr>";
                                 }
                             } catch (PDOException $e) {
@@ -365,6 +368,11 @@ if ($user) {
             <p><strong>Status:</strong> <span id="modalStatus"></span></p>
             <p><strong>Requested By:</strong> <span id="modalRequestedBy"></span></p>
             <p><strong>Details:</strong> <span id="modalDetails"></span></p>
+            <p style="display: none; font-size: 15px; max-width: 43%; padding: 10px;" class="badge bg-warning text-center">
+                <i class="bi bi-info-circle"></i>
+                <strong>Warranty Status:</strong>
+                <span id="modalWarranty"></span>
+            </p>
 
             <div class="d-flex justify-content-start" style="padding-top: 20px">
                 <button id="requestMaterialBtn" class="btn btn-primary me-2">Claim</button>

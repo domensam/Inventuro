@@ -101,6 +101,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const status = $(this).data('status');
     const requestedBy = $(this).data('requested-by');
     const details = $(this).data('details');
+    const warrantyStatus = $(this).data('warranty-status');
 
     // Populate modal fields
     $('#repairRequestIdLabel').text(repairRequestId);
@@ -117,6 +118,21 @@ document.addEventListener('DOMContentLoaded', function () {
       $('#requestMaterialBtn').show();
     } else {
       $('#requestMaterialBtn').hide();
+    }
+
+    if(warrantyStatus === 'Active') {
+      const warrantyElement = document.getElementById('modalWarranty');
+
+      warrantyElement.textContent = warrantyStatus; // Set the warranty status
+
+      // Make the <p> element visible
+      const warrantyStatusElement = warrantyElement.parentElement; // Get the parent <p> element
+      warrantyStatusElement.style.display = 'block'; // Change display style to block
+      $('#requestMaterialBtn').hide();
+    } else {
+      const warrantyElement = document.getElementById('modalWarranty');
+      const warrantyStatusElement = warrantyElement.parentElement;
+      warrantyStatusElement.style.display = 'none';
     }
 
     // Show the offcanvas modal
