@@ -273,11 +273,53 @@ if ($user) {
                         </tbody>
                     </table>
                 </div>
+                <!-- Materials Request Content Section -->
                 <div id="materials-request-content" class="content-section">
                     <div class="m-4 ml-5">
-                        <h1><strong>Materials Request</strong></h1>
+                        <h1><strong>Claim a Repair Request</strong></h1>
                         <p><strong>Repair Request No.: </strong><span id="modalRepairRequestId" class="text-muted"></span></p>
                     </div>
+                    <table id="itemTable" class="table table-striped table-hover w-100">
+                        <thead>
+                            <tr>
+                                <th class="text-center" style="width: 5%;"><input type="checkbox" id="selectAll"></th>
+                                <th class="text-start">Item</th>
+                                <th class="text-start">Quantity on Hand</th>
+                                <th class="text-start">Restock Level</th>
+                                <th class="text-start">Reorder Point</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            try {
+                                $sql = "SELECT item.*, employee.first_name, employee.last_name FROM item 
+                                        JOIN employee ON item.created_by = employee.employee_id";
+                                $result = $conn->query($sql);
+
+                                while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+                                    $itemName = htmlspecialchars($row['item_name']);
+                                    $itemQuantity = htmlspecialchars($row['item_quantity']);
+                                    $reorderPoint = htmlspecialchars($row['reorder_point']);
+                                    $statusClass = $row['reorder_point'] > $row['item_quantity'] ? 'text-danger' : 'text-success';
+                                    
+                                    echo "<tr
+                                        data-item-code='" . htmlspecialchars($row['item_code']) . "' 
+                                        data-item-name='" . $itemName . "' 
+                                        data-item-quantity='" . $itemQuantity . "' 
+                                        data-item-reorder-point='" . $reorderPoint . "'>
+                                        <td class='text-center'><input type='checkbox' class='row-checkbox'></td>
+                                        <td>$itemName</td>
+                                        <td>$itemQuantity</td>
+                                        <td class='$statusClass'>" . ($row['reorder_point'] > $row['item_quantity'] ? 'Low' : 'Sufficient') . "</td>
+                                        <td>$reorderPoint</td>
+                                    </tr>";
+                                }
+                            } catch (PDOException $e) {
+                                echo "<tr><td colspan='5'>Error fetching data: " . htmlspecialchars($e->getMessage()) . "</td></tr>";
+                            }
+                            ?>
+                        </tbody>
+                    </table>
                 </div>
                 <!-- Materials Content Section -->
                 <div id="materials-content" class="content-section">

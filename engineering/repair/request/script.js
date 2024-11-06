@@ -50,6 +50,40 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
+  $('#itemTable').DataTable({
+    dom: '<"row"<"col-md-6"f><"col-md-6 text-end"B>>tip',
+    buttons: [
+      {
+        extend: 'copy',
+        text: 'Copy'
+      },
+      {
+        extend: 'collection',
+        text: 'Download',
+        className: 'btn',
+        buttons: [
+          { extend: 'csv', text: 'CSV' },
+          { extend: 'excel', text: 'Excel' },
+          { extend: 'pdf', text: 'PDF' }
+        ]
+      },
+      {
+        extend: 'print',
+        text: 'Print'
+      }
+    ],
+    paging: true,
+    searching: true,
+    ordering: true,
+    info: true,
+    columnDefs: [
+      { orderable: false, targets: 0 } // Disable ordering on the first column (checkbox)
+    ],
+    language: {
+      search: "Search: " // Customizing the search label
+    }
+  });
+
   // Handle "Select All" checkbox
   $('#selectAll').on('click', function () {
     var rows = dataTable.rows({ 'search': 'applied' }).nodes();
