@@ -163,7 +163,7 @@ $recent_requests = $stmt_requests->fetchAll(PDO::FETCH_ASSOC);
             <div id="main-content" class="p-5">
                 <!-- Dashboard Content Section -->
                 <div id="dashboard-content" class="content-section active">
-                    <h1>Recent Requests</h1>
+                    <h1>Your Dashboard</h1>
                 </div>
                 <!-- Announcement Content Section -->
                 <div id="announcement-content" class="content-section">
