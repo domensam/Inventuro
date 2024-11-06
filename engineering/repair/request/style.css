@@ -220,10 +220,12 @@ h2 {
     justify-content: left;
     align-items: center;
     margin-top: 20px;
+    text-decoration: none;
 }
 
 #main-content-links a {
     margin-left: 45px;
+    text-decoration: none;
 }
 
 .second-nav {
@@ -338,4 +340,41 @@ h2 {
 .content-text p {
     font-size: 0.9rem;
     color: #666;
+}
+
+/* Custom styling for DataTables */
+.dataTables_wrapper .row:first-child {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dataTables_filter {
+    float: left;
+    margin-bottom: 10px;
+    margin-left: 5px; /* Adjust margin */
+}
+
+.dataTables_filter input {
+    width: 500px; /* Extend the width of the search bar */
+}
+
+.dt-buttons {
+    float: right;
+    margin-bottom: 10px;
+    margin-right: 5px;
+}
+
+.dataTables_info {
+    margin-left: 20px; /* Adjust as needed */
+}
+
+.dataTables_paginate {
+    margin-right: 10px; /* Adjust as needed */
+}
+
+/* Styling for export buttons dropdown */
+.dropdown-menu button {
+    width: 100%;
+    text-align: left;
 }

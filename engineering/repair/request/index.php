@@ -56,7 +56,7 @@ if ($user) {
 
     <link rel="stylesheet" href="style.css">
 
-    <title>Profile</title>
+    <title>Repair</title>
 </head>
 <body>
     <div class="wrapper">
@@ -179,160 +179,122 @@ if ($user) {
                     </div>
                 </div>
                 <div id="main-content-links">
-                    <a id="settings-link" class="link-hover-effect text-primary active" href="#">Settings</a>
-                    <a id="activity-log-link" class="link-hover-effect text-primary" href="#">Activity Log</a>
+                    <a id="request-link" class="link-hover-effect text-primary active" href="#">Request</a>
+                    <a id="materials-link" class="link-hover-effect text-primary" href="#">Materials</a>
                 </div>
             </div>
-            <div id="main-content" class="p-4">
-                <!-- Settings Content Section -->
-                <div id="settings-content" class="content-section active">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row align-items-center">
-                                <div class="col-4 col-sm-auto mb-3">
-                                    <div class="mx-auto" style="width: 140px;">
-                                        <?php if (isset($base64Image)): ?>
-                                            <img id="profile-picture" src="data:<?=$mimeType?>;base64,<?=$base64Image?>"
-                                                alt="Profile Picture" 
-                                                class="profile-icon" style="height: 140px; width: 140px;">
-                                        <?php else: ?>
-                                            <img id="profile-picture" src="../../../images/person-circle.png"
-                                                alt="Profile Picture" 
-                                                class="profile-icon" style="height: 140px; width: 140px;">
-                                        <?php endif; ?>
-                                    </div>
-                                </div>
-                                <div class="col-8 d-flex flex-column flex-sm-row justify-content-between mb-3">
-                                    <div class="text-center text-sm-left mb-2 mb-sm-0">
-                                        <h4 class="pt-sm-2 pb-1 mb-0 text-nowrap"><?=$first_name?> <?=$last_name?> <small><span class="badge badge-secondary"><?=$role?> of <?=$department?></span></small></h4>
-                                        <p class="mb-0"><?=$employee_id?></p>
-                                        <div class="text-muted"><small><?= date("d M Y", strtotime($date_created)) ?></small></div>
-                                        <div class="mt-2">
-                                            <button class="btn btn-primary" type="button" onclick="document.getElementById('profile-picture-input').click()">
-                                                <i class="fa fa-fw fa-camera"></i>
-                                                <span>Change Photo</span>
-                                            </button>
-                                            <input type="file" id="profile-picture-input" accept="image/*" style="display: none;" onchange="previewProfilePicture(event)">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Settings Tab -->
-                            <ul class="nav nav-tabs">
-                                <li class="nav-item"><a href="" class="active nav-link">Settings</a></li>
-                            </ul>
-                            <div class="tab-content pt-3">
-                                <div class="tab-pane active">
-                                <form id="updateProfileForm" class="form" method="POST" novalidate="">
-                                    <div class="row">
-                                        <div class="col">
-                                            <div class="row">
-                                                <div class="col">
-                                                    <div class="form-group">
-                                                        <label>First Name</label>
-                                                        <input class="form-control" type="text" name="first_name" placeholder="Juan" value="<?= htmlspecialchars($first_name ?? '') ?>">
-                                                    </div>
-                                                </div>
-                                                <div class="col">
-                                                    <div class="form-group">
-                                                        <label>Middle Name</label>
-                                                        <input class="form-control" type="text" name="middle_name" placeholder="Apolinario" value="<?= htmlspecialchars($middle_name ?? '') ?>">
-                                                    </div>
-                                                </div>
-                                                <div class="col">
-                                                    <div class="form-group">
-                                                        <label>Last Name</label>
-                                                        <input class="form-control" type="text" name="last_name" placeholder="Dela Cruz" value="<?= htmlspecialchars($last_name ?? '') ?>">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <div class="col-6 mb-3">
-                                            <div class="mb-2"><b>Change Password</b></div>
-                                            <div class="form-group">
-                                                <label>Current Password</label>
-                                                <input id="current-password" class="form-control" type="password" name="current_password" placeholder="••••••">
-                                            </div>
-                                            <div class="form-group">
-                                                <label>New Password</label>
-                                                <input id="new-password" class="form-control" type="password" name="new_password" placeholder="••••••">
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Confirm Password</label>
-                                                <input id="confirm-password" class="form-control" type="password" name="confirm_password" placeholder="••••••">
-                                            </div>
-                                            <div class="form-check mt-2">
-                                                <input type="checkbox" id="toggle-password-visibility" class="form-check-input">
-                                                <label class="form-check-label" for="toggle-password-visibility">Show Password</label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <div class="col">
-                                            <div class="form-group">
-                                                <input type="file" id="profile-picture-input" accept="image/*" onchange="previewProfilePicture(event)" style="display: none;">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <div class="col d-flex justify-content-start">
-                                            <button class="btn btn-primary" type="submit">Save Changes</button>
-                                        </div>
-                                    </div>
-                                </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Activity Log Content Section -->
-                <div id="activity-log-content" class="content-section">
-                    <div class="p-3">
-                        <h1><strong>Your Activity Log</strong></h1>
+            <div id="main-content">
+                <!-- Request Content Section -->
+                <div id="request-content" class="content-section active">
+                    <div class="m-4 ml-5">
+                        <h1><strong>Repair Requests</strong></h1>
+                        <p>Claim a repair by requesting materials</p>
                     </div>
                     <!-- Table -->
-                    <table id="activityLogTable" class="table table-striped table-hover w-100">
+                    <table id="historyTable" class="table table-striped table-hover w-100">
                         <thead>
                             <tr>
+                                <th class="text-center" style="width: 5%;"><input type="checkbox" id="selectAll"></th>
                                 <th class="text-start" style="padding-left: 13px;">Date</th>
-                                <th class="text-start" style="padding-left: 13px;">Activity</th>
-                                <th class="text-start" style="padding-left: 13px;">IP Address</th>
+                                <th class="text-start" style="padding-left: 13px;">Repair Request No.</th>
+                                <th class="text-start" style="padding-left: 13px;">Machine</th>
+                                <th class="text-start" style="padding-left: 13px;">Department</th>
+                                <th class="text-start" style="padding-left: 13px;">Urgency</th>
+                                <th class="text-start" style="padding-left: 13px;">Status</th>
                             </tr>
                         </thead>
                         <tbody>
                         <?php
                             try {
-                                // Get the user ID from the session
-                                $user_id = $_SESSION['user_id'];
+                                $requested_by = $_SESSION['employee_id'];
 
-                                // SQL query to fetch activity logs for the logged-in user
-                                $sql = "SELECT * FROM activity_log WHERE user_id = ? ORDER BY timestamp DESC";
-                                
+                                $sql = "SELECT * FROM repair_request 
+                                        LEFT JOIN repair ON repair_request.repair_request_id = repair.repair_request_id
+                                        LEFT JOIN employee ON repair.handled_by = employee.employee_id
+                                        LEFT JOIN machine ON repair_request.machine_id = machine.machine_id
+                                        LEFT JOIN department ON machine.machine_department_id = department.department_id
+                                        ORDER BY repair_request.date_requested ASC;";
+
                                 // Prepare the statement
                                 $stmt = $conn->prepare($sql);
-
-                                // Bind the user_id parameter
-                                $stmt->bindParam(1, $user_id, PDO::PARAM_INT);
 
                                 // Execute the query
                                 $stmt->execute();
                                 
-                                // Fetch and display each activity log
+                                // Fetch data and display
                                 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                                    echo "<tr>
-                                        <td class='text-start align-middle'>" . htmlspecialchars(date("d M Y g:i A", strtotime($row['timestamp']))) . "</td>
-                                        <td class='text-start align-middle'>" . htmlspecialchars($row['activity']) . "</td>
-                                        <td class='text-start align-middle'>" . htmlspecialchars($row['ip_address'] ?? '') . "</td>
+                                    $imageData = isset($row['image']) && !empty($row['image'])
+                                        ? "data:" . (new finfo(FILEINFO_MIME_TYPE))->buffer($row['image']) . ";base64," . base64_encode($row['image'])
+                                        : "../../../images/gallery.png";
+
+                                    // Determine status color class
+                                    $statusClass = '';
+                                    $statusText = htmlspecialchars($row['status'] ?? 'Unknown Status'); // Default to 'Unknown Status' if NULL
+                                    switch ($statusText) {
+                                        case 'Not Started':
+                                            $statusClass = 'bg-light text-secondary'; // Gray
+                                            break;
+                                        case 'Started':
+                                            $statusClass = 'bg-warning text-dark'; // Yellow
+                                            break;
+                                        case 'Done':
+                                            $statusClass = 'bg-success text-white'; // Green
+                                            break;
+                                    }
+
+                                    // Determine urgency text color class
+                                    $urgencyClass = '';
+                                    $urgencyText = htmlspecialchars($row['urgency'] ?? 'Not Set'); // Default to 'Not Set' if NULL
+                                    switch ($urgencyText) {
+                                        case 'Low':
+                                            $urgencyClass = 'text-success'; // Green
+                                            break;
+                                        case 'Medium':
+                                            $urgencyClass = 'text-warning'; // Yellow
+                                            break;
+                                        case 'High':
+                                            $urgencyClass = 'text-danger'; // Red
+                                            break;
+                                    }
+
+                                    // Construct the table row
+                                    echo "<tr
+                                        data-date-requested='" . htmlspecialchars(date("d M Y g:i A", strtotime($row['date_requested'] ?? 'now'))) . "'
+                                        data-repair-request-id='" . htmlspecialchars($row['repair_request_id'] ?? 'N/A') . "'
+                                        data-machine-id='" . htmlspecialchars($row['machine_id'] ?? 'N/A') . "'
+                                        data-machine-name='" . htmlspecialchars($row['machine_name'] ?? 'Unknown Machine') . "'
+                                        data-status='" . $statusText . "'
+                                        data-urgency='" . $urgencyText . "'
+                                        data-department='" . htmlspecialchars($row['machine_department'] ?? 'Unknown Department') . "'
+                                        data-requested-by='" . htmlspecialchars(($first_name ?? 'N/A') . " " . ($last_name ?? '') . " (" . ($employee_id ?? 'Unknown') . ")") . "'
+                                        data-handled-by='" . (
+                                            !empty($row['first_name']) && !empty($row['last_name']) 
+                                                ? htmlspecialchars($row['first_name'] . ' ' . $row['last_name'])
+                                                : 'Not assigned yet'
+                                            ) . "'
+                                        data-details='" . htmlspecialchars($row['details'] ?? 'No details provided') . "'
+                                        data-image='" . htmlspecialchars($imageData) . "'>
+                                        <td class='text-center align-middle'><input type='checkbox' class='row-checkbox'></td>
+                                        <td class='text-start align-middle'>" . htmlspecialchars(date("d M Y g:i A", strtotime($row['date_requested'] ?? 'now'))) . "</td>
+                                        <td class='text-start align-middle'>" . htmlspecialchars($row['repair_request_id'] ?? 'N/A') . "</td>
+                                        <td class='text-start align-middle'>" . htmlspecialchars($row['machine_name'] ?? 'Unknown Machine') . "</td>
+                                        <td class='text-start align-middle'>" . htmlspecialchars($row['department_name'] ?? 'Unknown Department') . "</td>
+                                        <td class='text-start align-middle $urgencyClass'>$urgencyText</td>
+                                        <td class='text-start align-middle $statusClass'>$statusText</td>
                                     </tr>";
                                 }
                             } catch (PDOException $e) {
-                                echo "<tr><td colspan='3'>Error fetching data: " . htmlspecialchars($e->getMessage()) . "</td></tr>";
+                                echo "<tr><td colspan='5'>Error fetching data: " . htmlspecialchars($e->getMessage()) . "</td></tr>";
                             }
                         ?>
                         </tbody>
                     </table>
+                </div>
+                <!-- Materials Content Section -->
+                <div id="materials-content" class="content-section">
+                    <div class="m-4 ml-5">
+                        <h1><strong>Your Material Requests</strong></h1>
+                    </div>
                 </div>
             </div>
         </div>

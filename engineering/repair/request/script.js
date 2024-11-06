@@ -5,35 +5,78 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelector("#sidebar").classList.toggle("expand");
   });
 
-  // Search functionality
-  const searchBar = document.getElementById('search-bar');
-
-  searchBar.addEventListener('input', function () {
-    const searchTerm = searchBar.value.toLowerCase();
-
-    // Search through announcements (if this is needed)
-    const announcements = document.querySelectorAll('.timeline-item');
-    announcements.forEach(announcement => {
-        const date = announcement.querySelector('.timeline-date span').textContent.toLowerCase();
-        const title = announcement.querySelector('h3').textContent.toLowerCase();
-        const content = announcement.querySelector('p').textContent.toLowerCase();
-  
-        if (title.includes(searchTerm) || content.includes(searchTerm) || date.includes(searchTerm)) {
-            announcement.style.display = ''; // Show matching items
-        } else {
-            announcement.style.display = 'none'; // Hide non-matching items
+  const dataTable = $('#historyTable').DataTable({
+    dom: '<"row"<"col-md-6"f><"col-md-6 text-end"B>>tip',
+    buttons: [
+        {
+            extend: 'copy',
+            text: 'Copy'
+        },
+        {
+            extend: 'collection',
+            text: 'Download',
+            className: 'btn',
+            buttons: [
+                { extend: 'csv', text: 'CSV' },
+                { extend: 'excel', text: 'Excel' },
+                { extend: 'pdf', text: 'PDF' }
+            ]
+        },
+        {
+            extend: 'print',
+            text: 'Print'
         }
-    });
+    ],
+    paging: true,
+    searching: true,
+    ordering: true,
+    info: true,
+    columnDefs: [
+        { orderable: false, targets: 0 } // Disable ordering on the first column (checkbox)
+    ],
+    language: {
+        search: "Search: " // Customizing the search label
+    }
+  });
+
+  // Handle "Select All" checkbox
+  $('#selectAll').on('click', function() {
+    var rows = $('#historyTable').DataTable().rows({ 'search': 'applied' }).nodes();
+    $('input[type="checkbox"]', rows).prop('checked', this.checked);
+  });
+
+  // Custom Search Functionality for Table and Timeline
+  const searchBar = document.getElementById('search-bar');
+  searchBar.addEventListener('input', function () {
+      const searchTerm = searchBar.value.toLowerCase();
+
+      // Filter DataTable
+      dataTable.search(searchTerm).draw();
+
+      // Filter Timeline Items
+      const announcements = document.querySelectorAll('.timeline-item');
+      announcements.forEach(announcement => {
+          const date = announcement.querySelector('.timeline-date span').textContent.toLowerCase();
+          const title = announcement.querySelector('h3').textContent.toLowerCase();
+          const content = announcement.querySelector('p').textContent.toLowerCase();
+
+          // Check if any part matches the search term
+          if (title.includes(searchTerm) || content.includes(searchTerm) || date.includes(searchTerm)) {
+              announcement.style.display = ''; // Show matching items
+          } else {
+              announcement.style.display = 'none'; // Hide non-matching items
+          }
+      });
   });
 
   const mainContentLinks = {
-    dashboard: document.getElementById("dashboard-link"),
-    announcement: document.getElementById("announcements-link")
+    request: document.getElementById("request-link"),
+    materials: document.getElementById("materials-link")
   };
 
   const contentSections = {
-    dashboard: document.getElementById("dashboard-content"),
-    announcement: document.getElementById("announcement-content")
+    request: document.getElementById("request-content"),
+    materials: document.getElementById("materials-content")
   };
 
   function setActiveLink(linkId) {
@@ -46,71 +89,20 @@ document.addEventListener('DOMContentLoaded', function () {
     contentSections[sectionId].classList.add("active");
   }
 
-  mainContentLinks.dashboard.addEventListener("click", function (e) {
+  mainContentLinks.request.addEventListener("click", function (e) {
     e.preventDefault();
-    setActiveLink("dashboard");
-    showContent("dashboard");
+    setActiveLink("request");
+    showContent("request");
   });
 
-  mainContentLinks.announcement.addEventListener("click", function (e) {
+  mainContentLinks.materials.addEventListener("click", function (e) {
     e.preventDefault();
-    setActiveLink("announcement");
-    showContent("announcement");
+    setActiveLink("materials");
+    showContent("materials");
   });
 
-  // Load dashboard by default
-  setActiveLink("dashboard");
-  showContent("dashboard");
+  // Load request by default
+  setActiveLink("request");
+  showContent("request");
 
-  // Fetch announcements from fetch_announcements.php
-  fetch('fetch_announcements.php')
-    .then(response => {
-      if (!response.ok) {
-          throw new Error('Network response was not ok');
-      }
-      return response.json(); // Parse JSON
-    })
-    .then(data => {
-      // Check if the data is an array before attempting forEach
-      if (Array.isArray(data)) {
-        const timelineContainer = document.querySelector('.timeline');
-        data.forEach(announcement => {
-          const item = document.createElement('div');
-          item.classList.add('timeline-item');
-
-          // Format the date as "02 Aug 2024"
-          const date = new Date(announcement.created_at);
-          const formattedDate = date.toLocaleDateString('en-GB', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric'
-          });
-
-          const formattedContent = announcement.content.replace(/\r\n|\n|\r/g, '<br>');
-
-          item.innerHTML = `
-              <div class="row">
-                <div class="col-1">
-                  <div class="timeline-date"><span>${formattedDate}</span></div>
-                </div>
-                <div class="col-11">
-                  <div class="timeline-content">
-                    <div class="icon"><img src="../images/megaphone.png" alt="Announcement Icon" class="icon-img"></div>
-                    <div class="content-text">
-                      <h3>${announcement.title}</h3>
-                      <p>${formattedContent}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-          `;
-          timelineContainer.appendChild(item);
-        });
-      } else {
-        console.error("Unexpected response format:", data);
-      }
-    })
-    .catch(error => {
-      console.error('Error fetching announcements:', error);
-    });
 });
