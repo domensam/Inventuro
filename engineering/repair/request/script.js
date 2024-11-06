@@ -86,6 +86,10 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   $('#requestMaterialBtn').on('click', function() {
+    // Close modal
+    const offcanvasModal = bootstrap.Offcanvas.getInstance(document.getElementById('repairRequestModal'));
+    offcanvasModal.hide();
+    
     const repairRequestId = $('#repairRequestIdLabel').text();
     showInfoModal('Request Material', `You have selected repair request id: ${repairRequestId}. Please proceed to request material.`);
   });
