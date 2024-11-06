@@ -1,6 +1,6 @@
 <?php
 session_start();
-if (isset($_SESSION['user_id']) && isset($_SESSION['employee_id']) && $_SESSION['user_type'] === "non-engineering") {
+if (isset($_SESSION['user_id']) && isset($_SESSION['employee_id']) && $_SESSION['user_type'] === "engineering") {
 
 // Include the database connection file
 include '../../connect.php';
