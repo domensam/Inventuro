@@ -338,9 +338,36 @@ $('#saveMaterialRequestBtn').click(function() {
 });
 
 
-  $('#deleteMaterialRequestBtn').click(function() {
-    showInfoModal('Success', 'Material request deleted successfully!');
-  });
+$('#deleteMaterialRequestBtn').click(function() {
+  const materialRequestId = $('#modalMaterialRequestId').text(); // Get the Material Request ID from the modal
+
+  // Confirm deletion
+  if (confirm('Are you sure you want to delete this material request? This action cannot be undone.')) {
+      // Send AJAX request to delete the material request
+      $.ajax({
+          url: 'delete_material_request.php', // Your server-side script
+          method: 'POST',
+          dataType: 'json',
+          contentType: 'application/json',
+          data: JSON.stringify({
+              material_request_id: materialRequestId
+          }),
+          success: function(response) {
+              if (response.success) {
+                  showInfoModal('Success', 'Material request deleted successfully!');
+                  // Optionally, refresh the table or close the modal
+              } else {
+                  showInfoModal('Error', response.message);
+              }
+          },
+          error: function(xhr, status, error) {
+              showInfoModal('Error', 'An error occurred while deleting the material request.');
+              console.error('Error:', error);
+          }
+      });
+  }
+});
+
 
   // Custom Search Functionality for Table and Timeline
   const searchBar = document.getElementById('search-bar');
@@ -548,6 +575,17 @@ document.getElementById('completeOrderBtn').addEventListener('click', function()
       return;
   }
 
+  // Validate quantities
+  for (const item of orderItems) {
+    if (item.quantity < 1) {
+        showInfoModal('Error', `The quantity for item "${item.name}" cannot be less than 1.`);
+        return;
+    }
+    if (item.quantity > item.available) {
+        showInfoModal('Error', `The quantity for item "${item.name}" exceeds available stock.`);
+        return;
+    }
+  }
   // Send the order data to your server
   $.ajax({
       url: 'process_order.php', // Adjust this to your server-side processing script
