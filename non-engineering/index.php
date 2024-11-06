@@ -5,6 +5,8 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['employee_id']) && $_SESSION[
 // Include the database connection file
 include '../connect.php';
 
+date_default_timezone_set('Asia/Manila');
+
 // SQL query to get the most recent BLOB from the image column
 $stmt = $conn->prepare("
     SELECT *
@@ -36,6 +38,20 @@ if ($user) {
     $employee_id = $user['employee_id'];
     $department = $user['department'];
 }
+
+$stmt_requests = $conn->prepare("SET time_zone = '+08:00'");
+$stmt_requests->execute();
+
+// Fetch top 5 most recent requests for the user
+$stmt_requests = $conn->prepare("
+SELECT * FROM repair_request
+WHERE requested_by = ?
+ORDER BY date_requested DESC
+LIMIT 5
+");
+
+$stmt_requests->execute([$employee_id]); // Assuming 'requested_by' is employee_id
+$recent_requests = $stmt_requests->fetchAll(PDO::FETCH_ASSOC);
 
 ?>
 <!DOCTYPE html>
@@ -147,8 +163,57 @@ if ($user) {
             <div id="main-content" class="p-5">
                 <!-- Dashboard Content Section -->
                 <div id="dashboard-content" class="content-section active">
-                    <h2>Dashboard</h2>
-                    <p>This is the dashboard section.</p>
+                    <h1>Recent Requests</h1>
+                    <ul class="list-group">
+                        <?php foreach ($recent_requests as $request): 
+                            // Determine status color class
+                            $statusClass = '';
+                            $statusText = htmlspecialchars($request['status']);
+                            switch ($statusText) {
+                                case 'Not Started':
+                                    $statusClass = 'bg-light text-secondary p-1 rounded-pill'; // Gray
+                                    break;
+                                case 'Started':
+                                    $statusClass = 'bg-warning text-dark p-1 rounded-pill'; // Yellow
+                                    break;
+                                case 'Done':
+                                    $statusClass = 'bg-success text-white p-1 rounded-pill'; // Green
+                                    break;
+                            }
+
+                            // Determine urgency color class
+                            $urgencyClass = '';
+                            $urgencyText = htmlspecialchars($request['urgency']);
+                            switch ($urgencyText) {
+                                case 'Low':
+                                    $urgencyClass = 'text-success'; // Green
+                                    break;
+                                case 'Medium':
+                                    $urgencyClass = 'text-warning'; // Yellow
+                                    break;
+                                case 'High':
+                                    $urgencyClass = 'text-danger'; // Red
+                                    break;
+                            }
+                        ?>
+                            <li class="list-group-item d-flex justify-content-between align-items-start" 
+                                data-request-id="<?= htmlspecialchars($request['repair_request_id']) ?>" 
+                                data-machine="<?= htmlspecialchars($request['machine_id']) ?>"
+                                data-status="<?= $statusText ?>"
+                                data-urgency="<?= $urgencyText ?>"
+                                data-date="<?= date("d M Y", strtotime($request['date_requested'])) ?>">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold">Request ID: <?= htmlspecialchars($request['repair_request_id']) ?></div>
+                                    Machine: <?= htmlspecialchars($request['machine_id']) ?> | 
+                                    <span class="<?= $statusClass ?>">Status: <?= $statusText ?></span> | 
+                                    <span class="<?= $urgencyClass ?>">Urgency: <?= $urgencyText ?></span>
+                                </div>
+                                <span class="badge bg-primary rounded-pill">
+                                    <?= date("d M Y", strtotime($request['date_requested'])) ?>
+                                </span>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
                 </div>
                 <!-- Announcement Content Section -->
                 <div id="announcement-content" class="content-section">

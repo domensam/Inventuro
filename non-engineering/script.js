@@ -10,22 +10,38 @@ document.addEventListener('DOMContentLoaded', function () {
 
   searchBar.addEventListener('input', function () {
     const searchTerm = searchBar.value.toLowerCase();
-    const announcements = document.querySelectorAll('.timeline-item');
+  
+    // Search through recent requests
+    const requests = document.querySelectorAll('#dashboard-content .list-group-item');
+    requests.forEach(request => {
+        const requestId = request.getAttribute('data-request-id').toLowerCase();
+        const machine = request.getAttribute('data-machine').toLowerCase();
+        const status = request.getAttribute('data-status').toLowerCase();
+        const urgency = request.getAttribute('data-urgency').toLowerCase();
+        const date = request.getAttribute('data-date').toLowerCase();
 
+        // Check if any of the fields contain the search term
+        if (requestId.includes(searchTerm) || machine.includes(searchTerm) || status.includes(searchTerm) || urgency.includes(searchTerm) || date.includes(searchTerm)) {
+            request.style.display = ''; // Show matching requests
+        } else {
+            request.style.display = 'none'; // Hide non-matching requests
+        }
+    });
+
+    // Search through announcements (if this is needed)
+    const announcements = document.querySelectorAll('.timeline-item');
     announcements.forEach(announcement => {
-      const date = announcement.querySelector('.timeline-date span').textContent.toLowerCase();
-      const title = announcement.querySelector('h3').textContent.toLowerCase();
-      const content = announcement.querySelector('p').textContent.toLowerCase();
-      
-      // Check if either the title or content includes the search term
-      if (title.includes(searchTerm) || content.includes(searchTerm) || date.includes(searchTerm)) {
-        announcement.style.display = ''; // Show matching items
-      } else {
-        announcement.style.display = 'none'; // Hide non-matching items
-      }
+        const date = announcement.querySelector('.timeline-date span').textContent.toLowerCase();
+        const title = announcement.querySelector('h3').textContent.toLowerCase();
+        const content = announcement.querySelector('p').textContent.toLowerCase();
+  
+        if (title.includes(searchTerm) || content.includes(searchTerm) || date.includes(searchTerm)) {
+            announcement.style.display = ''; // Show matching items
+        } else {
+            announcement.style.display = 'none'; // Hide non-matching items
+        }
     });
   });
-
 
   const mainContentLinks = {
     dashboard: document.getElementById("dashboard-link"),

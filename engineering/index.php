@@ -2,6 +2,57 @@
 session_start();
 if (isset($_SESSION['user_id']) && isset($_SESSION['employee_id']) && $_SESSION['user_type'] === "engineering") {
 
+// Include the database connection file
+include '../connect.php';
+
+date_default_timezone_set('Asia/Manila');
+
+// SQL query to get the most recent BLOB from the image column
+$stmt = $conn->prepare("
+    SELECT *
+    FROM users 
+    JOIN employee
+    ON users.employee_id = employee.employee_id
+    WHERE users.user_id = ?
+    LIMIT 1
+");
+
+$stmt->execute([$_SESSION['user_id']]);
+
+// Fetch the result
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// Check if a result was found and store the image data
+if ($user) {
+    $profileImage = $user['image'];
+
+    // Detect MIME type of the image
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $mimeType = $finfo->buffer($profileImage);
+
+    // Convert BLOB to base64
+    $base64Image = base64_encode($profileImage);
+
+    $first_name = $user['first_name'];
+    $last_name = $user['last_name'];
+    $employee_id = $user['employee_id'];
+    $department = $user['department'];
+}
+
+$stmt_requests = $conn->prepare("SET time_zone = '+08:00'");
+$stmt_requests->execute();
+
+// Fetch top 5 most recent requests for the user
+$stmt_requests = $conn->prepare("
+SELECT * FROM repair_request
+WHERE requested_by = ?
+ORDER BY date_requested DESC
+LIMIT 5
+");
+
+$stmt_requests->execute([$employee_id]); // Assuming 'requested_by' is employee_id
+$recent_requests = $stmt_requests->fetchAll(PDO::FETCH_ASSOC);
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -16,98 +67,31 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['employee_id']) && $_SESSION[
 </head>
 <body>
     <div class="wrapper">
-        <aside id="sidebar">
+        <aside id="sidebar" class="expand">
             <div class="d-flex">
                 <button class="toggle-btn" type="button">
                     <i class="bi bi-box-seam-fill"></i>
                 </button>
                 <div class="sidebar-logo">
-                    <a href="#">Inventuro</a>
+                    <a href="index.php">Inventuro</a>
                 </div>
             </div>
             <ul class="sidebar-nav">
                 <li class="sidebar-item">
-                    <a href="#" class="sidebar-link">
+                    <a href="index.php" class="sidebar-link active">
                     <i class="bi bi-house-door"></i>
                         <span>Home</span>
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a href="#" class="sidebar-link collapsed has-dropdown" data-bs-toggle="collapse"
-                        data-bs-target="#requests" aria-expanded="false" aria-controls="requests">
-                        <i class="bi bi-basket3"></i>
+                    <a href="repair/request/index.php" class="sidebar-link">
+                        <i class="bi bi-tools"></i>
                         <span>Repair</span>
                     </a>
-                    <ul id="requests" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
-                        <li class="sidebar-item">
-                            <a href="#" class="sidebar-link">Requests</a>
-                        </li>
-                        <li class="sidebar-item">
-                            <a href="#" class="sidebar-link">Requested Materials</a>
-                        </li>
-                    </ul>
                 </li>
                 <li class="sidebar-item">
-                    <a href="#" class="sidebar-link collapsed has-dropdown" data-bs-toggle="collapse"
-                        data-bs-target="#maintenance" aria-expanded="false" aria-controls="maintenance">
-                        <i class="bi bi-basket3"></i>
-                        <span>Maintenance</span>
-                    </a>
-                    <ul id="maintenance" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
-                        <li class="sidebar-item">
-                            <a href="#" class="sidebar-link">Schedule</a>
-                        </li>
-                        <li class="sidebar-item">
-                            <a href="#" class="sidebar-link">Requested Materials</a>
-                        </li>
-                    </ul>
-                </li>
-                <!--
-                <li class="sidebar-item">
-                    <a href="#" class="sidebar-link collapsed has-dropdown" data-bs-toggle="collapse"
-                        data-bs-target="#multi" aria-expanded="false" aria-controls="multi">
-                        <i class="lni lni-layout"></i>
-                        <span>Multi Level</span>
-                    </a>
-                    <ul id="multi" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
-                        <li class="sidebar-item">
-                            <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse"
-                                data-bs-target="#multi-two" aria-expanded="false" aria-controls="multi-two">
-                                Two Links
-                            </a>
-                            <ul id="multi-two" class="sidebar-dropdown list-unstyled collapse">
-                                <li class="sidebar-item">
-                                    <a href="#" class="sidebar-link">Link 1</a>
-                                </li>
-                                <li class="sidebar-item">
-                                    <a href="#" class="sidebar-link">Link 2</a>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </li>
-                -->
-                <li class="sidebar-item">
-                    <a href="#" class="sidebar-link collapsed has-dropdown" data-bs-toggle="collapse"
-                        data-bs-target="#history" aria-expanded="false" aria-controls="history">
-                        <i class="bi bi-tools"></i>
-                        <span>History</span>
-                    </a>
-                    <ul id="history" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
-                        <li class="sidebar-item">
-                            <a href="#" class="sidebar-link">Repair Requests</a>
-                        </li>
-                        <li class="sidebar-item">
-                            <a href="#" class="sidebar-link">Material Requests</a>
-                        </li>
-                        <li class="sidebar-item">
-                            <a href="#" class="sidebar-link">Return Materials</a>
-                        </li>
-                    </ul>
-                </li>
-                <li class="sidebar-item">
-                    <a href="#" class="sidebar-link">
-                    <i class="bi bi-file-earmark-text"></i>
+                    <a href="profile/index.php" class="sidebar-link">
+                    <i class="bi bi-person"></i>
                         <span>Profile</span>
                     </a>
                 </li>
@@ -119,14 +103,14 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['employee_id']) && $_SESSION[
                 </a>
             </div>
         </aside>
-        <div class="main p-3">
+        <div class="main">
             <nav class="navbar navbar-expand-lg navbar-custom px-4">
-                <div class="d-flex flex-grow-1 align-items-center">
-                    <form class="d-flex mx-4 flex-grow-1" role="search">
-                        <input class="form-control me-2" type="search" placeholder="Search..." aria-label="Search" style="width: 600px">
-                        <button class="icon-btn" title="Notifications">
-                            <i class="bi bi-search"></i>
-                        </button>
+                <div class="d-flex flex-grow-1 align-items-center p-2">
+                    <form class="d-flex flex-grow-1" role="search">
+                    <input id="search-bar" class="form-control me-2" type="search" placeholder="Search..." aria-label="Search" style="width: 600px; height: 30px; font-size: 16px;">
+                    <button type="button" class="icon-btn" title="Search">
+                        <i class="bi bi-search"></i>
+                    </button>
                     </form>
                     <ul class="navbar-nav">
                         <li class="nav-item">
@@ -139,16 +123,53 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['employee_id']) && $_SESSION[
                                 <i class="bi bi-gear"></i>
                             </button>
                         </li>
-                        <li class="nav-item">
-                            <button class="icon-btn" title="Profile">
-                                <i class="bi bi-person-circle"></i>
-                            </button>
-                        </li>
+                        <button class="icon-btn" title="Profile" style="border: none; background: none; padding: 0;">
+                            <?php if (isset($base64Image)): ?>
+                                <img src="data:<?=$mimeType?>;base64,<?=$base64Image?>"
+                                    alt="Profile Picture" 
+                                    class="profile-icon" style="height: 1.7rem; width: 1.7rem">
+                            <?php else: ?>
+                                <img src="../../../images/person-circle.png"
+                                    alt="Profile Picture" 
+                                    class="profile-icon">
+                            <?php endif; ?>
+                        </button>
                     </ul>
                 </div>
             </nav>
-            <div class="container">
-                <h1>Hello, <?=$_SESSION['user_first_name']?> <?=$_SESSION['user_last_name']?></h1>
+            <div class="second-nav">
+                <div class="container p-2">
+                    <div class="box left-box">
+                        <img src="../images/ksk-logo.png" alt="KSK Logo" style="max-width: 100%; height: auto;">
+                    </div>
+                    <div class="box right-box">
+                        <div class="row">
+                            <div class="col-8">
+                                <h1 class="name-display">Hello, <?=$first_name?> <?=$last_name?></h1>
+                                <h5>KSK Food Products</h5>
+                            </div>
+                            <div class="col-4">
+                                <p><strong>Employee ID: </strong><?=$employee_id?></p>
+                                <p><strong>Department: </strong><?=$department?></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="main-content-links">
+                    <a id="dashboard-link" class="link-hover-effect text-primary" href="#">Dashboard</a>
+                    <a id="announcements-link" class="link-hover-effect text-primary" href="#">Announcement</a>
+                </div>
+            </div>
+            <div id="main-content" class="p-5">
+                <!-- Dashboard Content Section -->
+                <div id="dashboard-content" class="content-section active">
+                    <h1>Recent Requests</h1>
+                </div>
+                <!-- Announcement Content Section -->
+                <div id="announcement-content" class="content-section">
+                    <!-- Timeline Container for dynamically loaded announcements -->
+                    <div class="timeline"></div>
+                </div>
             </div>
         </div>
     </div>
