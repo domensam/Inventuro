@@ -378,3 +378,7 @@ h2 {
     width: 100%;
     text-align: left;
 }
+
+#infoModal {
+    z-index: 1051 !important
+}

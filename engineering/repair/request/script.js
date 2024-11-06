@@ -8,7 +8,10 @@ document.addEventListener('DOMContentLoaded', function () {
   function showInfoModal(title, message) {
     document.querySelector('#infoModal .modal-title').textContent = title;
     document.querySelector('#infoModal .modal-body p').textContent = message;
-    $('#infoModal').modal('show');
+    
+    // Show the modal
+    const infoModal = new bootstrap.Modal(document.getElementById('infoModal'));
+    infoModal.show(); // Show the modal
 
     if (title === 'Request Details') {
       const requestDetails = document.getElementById('request-details');
@@ -50,6 +53,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
+  // Handle "Select All" checkbox
+  $('#selectAll').on('click', function () {
+    var rows = dataTable.rows({ 'search': 'applied' }).nodes();
+    $('input[type="checkbox"]', rows).prop('checked', this.checked);
+  });
+
   $('#itemTable').DataTable({
     dom: '<"row"<"col-md-6"f><"col-md-6 text-end"B>>tip',
     buttons: [
@@ -85,7 +94,7 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   // Handle "Select All" checkbox
-  $('#selectAll').on('click', function () {
+  $('#selectAllCart').on('click', function () {
     var rows = dataTable.rows({ 'search': 'applied' }).nodes();
     $('input[type="checkbox"]', rows).prop('checked', this.checked);
   });
@@ -223,4 +232,156 @@ document.addEventListener('DOMContentLoaded', function () {
 
     showContent("requestMaterials");
   });
+
+  // Cart functionality
+  let cart = []; // Initialize the cart array
+
+  document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+      button.addEventListener('click', function() {
+          const row = this.closest('tr'); // Get the closest table row
+          const itemId = row.dataset.itemCode; // Retrieve item ID from data attribute
+          const itemName = row.dataset.itemName; // Retrieve item name from data attribute
+          const itemQuantity = parseInt(row.dataset.itemQuantity); // Retrieve item quantity from data attribute
+  
+          // Toggle the 'selected' class on the row
+          const isSelected = row.classList.toggle('selected');
+  
+          // Get the checkbox within the current row
+          const checkbox = row.querySelector('.row-checkbox');
+  
+          // Check or uncheck the checkbox based on the row's selection state
+          checkbox.checked = isSelected;
+  
+          if (isSelected) {
+              // If the row was not previously selected, add the item to the cart
+              const existingItem = cart.find(item => item.id === itemId);
+              if (existingItem) {
+                  // If the item already exists in the cart, increment the quantity
+                  existingItem.quantity += 1; // Change this if you want to control the quantity further
+              } else {
+                  // Add the item to the cart if it's not already there
+                  cart.push({
+                      id: itemId,
+                      name: itemName,
+                      quantity: 1, // Default quantity
+                      available: itemQuantity
+                  });
+              }
+          } else {
+              // If the row is unselected, remove the item from the cart
+              cart = cart.filter(item => item.id !== itemId); // Remove the item from the cart
+          }
+  
+          console.log(cart); // Log the cart for debugging purposes
+      });
+  });  
+
+  function openCartModal() {
+    const cartModalBody = document.getElementById('cartModalBody');
+    cartModalBody.innerHTML = ''; // Clear previous cart items
+
+    cart.forEach(item => {
+        const row = document.createElement('tr');
+
+        // Create cells for item code, item name, available quantity, requested quantity, and note
+        const itemCodeCell = document.createElement('td');
+        itemCodeCell.textContent = item.id; // Item code
+        row.appendChild(itemCodeCell);
+
+        const itemNameCell = document.createElement('td');
+        itemNameCell.textContent = item.name; // Item name
+        row.appendChild(itemNameCell);
+
+        const availableQtyCell = document.createElement('td');
+        availableQtyCell.textContent = item.available; // Available quantity from cart
+        row.appendChild(availableQtyCell);
+
+        const requestedQtyCell = document.createElement('td');
+        const qtyInput = document.createElement('input');
+        qtyInput.type = 'number';
+        qtyInput.value = item.quantity || 1; // Default to 1 if quantity is not set
+        qtyInput.min = 1; // Minimum quantity
+        qtyInput.max = item.available; // Max quantity based on availability
+        qtyInput.classList.add('form-control');
+        qtyInput.setAttribute('data-item-id', item.id); // Set data-item-id attribute
+        requestedQtyCell.appendChild(qtyInput);
+        row.appendChild(requestedQtyCell);
+
+        // Create a note cell for out of stock items
+        const noteCell = document.createElement('td');
+        if (item.available === 0) {
+            noteCell.innerHTML = '<span class="text-danger">Not guaranteed, and ordering may take a while</span>';
+        } else {
+            noteCell.textContent = ''; // No note for items in stock
+        }
+        row.appendChild(noteCell);
+
+        // Append the row to the cart modal body
+        cartModalBody.appendChild(row);
+    });
+
+    // Show the modal
+    const cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
+    cartModal.show();
+  }
+
+// Attach the function to the complete button
+document.getElementById('completeRequestBtn').addEventListener('click', openCartModal);
+
+document.getElementById('completeOrderBtn').addEventListener('click', function() {
+  // Get the repair request ID from the modal
+  const repairRequestId = document.getElementById('modalRepairRequestId').textContent;
+  const requestedById = document.getElementById('employee-id-text').textContent;
+
+  // Prepare the order data
+  const orderItems = cart.map(item => {
+      const qtyInput = document.querySelector(`input[data-item-id="${item.id}"]`); // Use data-item-id
+      if (qtyInput) {
+          return {
+              id: item.id,
+              name: item.name,
+              quantity: parseInt(qtyInput.value), // Get the quantity input
+              available: item.available
+          };
+      } else {
+          console.error(`Quantity input not found for item: ${item.id}`);
+          return null; // Return null if input is not found
+      }
+  }).filter(item => item !== null); // Filter out any null values
+
+  // Check if orderItems is empty
+  if (orderItems.length === 0) {
+      showInfoModal('Error', 'Please select at least one item in the cart before completing the order.');
+      return;
+  }
+
+  // Send the order data to your server
+  $.ajax({
+      url: 'process_order.php', // Adjust this to your server-side processing script
+      method: 'POST',
+      dataType: 'json',
+      contentType: 'application/json', // Specify content type
+      data: JSON.stringify({
+          items: orderItems,
+          repair_request_id: repairRequestId, // Include the repair request ID
+          requested_by: requestedById
+      }),
+      success: function(response) {
+        if (response.success) {
+            showInfoModal('Success', response.message); // Show success message
+            cart = []; // Clear the cart
+            $('#cartModal').modal('hide'); // Hide the modal
+        } else {
+            // Handle errors returned from the server
+            showInfoModal('Error', response.message); // Show the error message
+            console.error('Error:', response.message);
+        }
+      },
+      error: function(xhr, status, error) {
+        console.error('AJAX Error:', xhr.responseText); // Log full response
+        showInfoModal('Error', 'An error occurred while processing your order. Please try again.');
+      }    
+  });
+});
+
 });

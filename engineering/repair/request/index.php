@@ -283,12 +283,13 @@ if ($user) {
                     <table id="itemTable" class="table table-striped table-hover w-100">
                         <thead>
                             <tr>
-                                <th class="text-center" style="width: 5%;"><input type="checkbox" id="selectAll"></th>
+                                <th class="text-center" style="width: 5%;"><input type="checkbox" id="selectAllCart"></th>
                                 <th class="text-start">Item</th>
                                 <th class="text-start">Description</th>
                                 <th class="text-start">Quantity on Hand</th>
                                 <th class="text-start">Per Unit</th>
                                 <th class="text-start">Restock Level</th>
+                                <th class="text-start">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -315,6 +316,7 @@ if ($user) {
                                         <td>$itemQuantity</td>
                                         <td>$itemPerUnit</td>
                                         <td class='$statusClass'>" . ($row['reorder_point'] > $row['item_quantity'] ? 'Low' : 'Sufficient') . "</td>
+                                        <td><button class='btn btn-primary btn-success add-to-cart-btn' style='font-size: 12px'><i class='fas fa-shopping-cart'></i> Add to Cart</button></td>
                                     </tr>";
                                 }
                             } catch (PDOException $e) {
@@ -323,6 +325,7 @@ if ($user) {
                             ?>
                         </tbody>
                     </table>
+                    <button id="completeRequestBtn" class="btn btn-primary">Complete</button>
                 </div>
                 <!-- Materials Content Section -->
                 <div id="materials-content" class="content-section">
@@ -377,6 +380,38 @@ if ($user) {
             <div class="d-flex justify-content-start" style="padding-top: 20px">
                 <button id="requestMaterialBtn" class="btn btn-primary me-2">Claim</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="offcanvas">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Modal -->
+    <div class="modal fade" id="cartModal" tabindex="-1" aria-labelledby="cartModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cartModalLabel">Shopping Cart</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-striped table-hover" id="cartTable">
+                        <thead>
+                            <tr>
+                                <th>Item Code</th>
+                                <th>Item Name</th>
+                                <th>Available Quantity</th>
+                                <th>Requested Quantity</th>
+                                <th>Note</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cartModalBody">
+                            <!-- Cart items will be injected here by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" id="completeOrderBtn" class="btn btn-primary">Complete Order</button>
+                </div>
             </div>
         </div>
     </div>
