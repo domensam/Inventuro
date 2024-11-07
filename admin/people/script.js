@@ -22,6 +22,15 @@ document.addEventListener('DOMContentLoaded', function () {
         columnDefs: [{ orderable: false, targets: [0] }]
     });
 
+    function showInfoModal(title, message) {
+        document.querySelector('#infoModal .modal-title').textContent = title;
+        document.querySelector('#infoModal .modal-body p').textContent = message;
+    
+        // Use Bootstrap's JavaScript API to show the modal
+        const infoModal = new bootstrap.Modal(document.getElementById('infoModal'));
+        infoModal.show();
+    }
+
     // Disable image edit/remove buttons initially
     editImageBtn.disabled = true;
     removeImageBtn.disabled = true;
@@ -108,7 +117,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.error('AJAX error:', textStatus, errorThrown); // Detailed logging
                 console.error('Response text:', jqXHR.responseText); // Log response text
 
-                alert(`Failed to update user. Please try again. Error: ${textStatus}`);
+                showInfoModal('Error', `Failed to update user. Please try again. Error: ${textStatus}`);
             }
         });
     }
@@ -146,12 +155,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 const fileSize = selectedFile.size;
 
                 if (!allowedFileTypes.includes(fileType)) {
-                    alert('Only JPEG, PNG, and JPG images are allowed');
+                    showInfoModal('Error', 'Only JPEG, PNG, and JPG images are allowed');
                     return;
                 }
 
                 if (fileSize > maxFileSize) {
-                    alert('Maximum file size is 20 MB');
+                    showInfoModal('Error', 'Maximum file size is 20 MB');
                     return;
                 }
 
@@ -312,8 +321,7 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             success: function(response) {
                 const parsedResponse = JSON.parse(response); // Parse the JSON response
-                alert('User added successfully! The password is: ' + parsedResponse.password);
-
+                showInfoModal('Success', 'User added successfully! The password is: ' + parsedResponse.password);
                 const addUserModal = new bootstrap.Offcanvas(document.getElementById('addUserModal'));
                 addUserModal.hide();
             },
@@ -321,7 +329,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Log the error response in the console
                 const response = JSON.parse(xhr.responseText);
                 console.error('Error:', response.errors || response.message);
-                alert('Error adding user. Check console for details.');
+                showInfoModal('Error', 'Please try again.');
             }
         });
     }
@@ -334,12 +342,12 @@ document.addEventListener('DOMContentLoaded', function () {
             const maxFileSize = 5 * 1024 * 1024; // 5 MB limit
 
             if (!allowedFileTypes.includes(file.type)) {
-                alert('Invalid file type. Only JPEG and PNG are allowed.');
+                showInfoModal('Error', 'Invalid file type. Only JPEG and PNG are allowed.');
                 return;
             }
 
             if (file.size > maxFileSize) {
-                alert('File size exceeds the limit of 5 MB.');
+                showInfoModal('Error', 'File size exceeds the limit of 5 MB.');
                 return;
             }
 
@@ -390,7 +398,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             window.location.reload();
                         },
                         error: function(xhr, status, error) {
-                            alert('Error deleting user. Please try again.');
+                            showInfoModal('Error', 'Error deleting user. Please try again.');
                             console.error('Error:', xhr.responseText);
                         }
                     });
