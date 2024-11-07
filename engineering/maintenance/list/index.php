@@ -56,7 +56,7 @@ if ($user) {
 
     <link rel="stylesheet" href="style.css">
 
-    <title>Repair</title>
+    <title>Maintenance</title>
 </head>
 <body>
     <div class="wrapper">
@@ -77,32 +77,32 @@ if ($user) {
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a href="index.php" class="sidebar-link collapsed has-dropdown active" data-bs-toggle="collapse"
+                    <a href="index.php" class="sidebar-link collapsed has-dropdown" data-bs-toggle="collapse"
                         data-bs-target="#repair" aria-expanded="false" aria-controls="repair">
                         <i class="bi bi-tools"></i>
                         <span>Repair</span>
                     </a>
                     <ul id="repair" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
                         <li class="sidebar-item">
-                            <a href="index.php" class="sidebar-link">Request</a>
+                            <a href="../../repair/request/index.php" class="sidebar-link">Request</a>
                         </li>
                         <li class="sidebar-item">
-                            <a href="index.php" class="sidebar-link">Request Material</a>
+                            <a href="../../repair/request/index.php" class="sidebar-link">Request Material</a>
                         </li>
                     </ul>
                 </li>
                 <li class="sidebar-item">
-                    <a href="../../maintenance/list/index.php" class="sidebar-link collapsed has-dropdown" data-bs-toggle="collapse"
+                    <a href="../../maintenance/list/index.php" class="sidebar-link collapsed has-dropdown active" data-bs-toggle="collapse"
                         data-bs-target="#maintenance" aria-expanded="false" aria-controls="maintenance">
                         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#224d7a"><path d="M159-120v-120h124L181-574q-27-15-44.5-44T119-680q0-50 35-85t85-35q39 0 69.5 22.5T351-720h128v-40q0-17 11.5-28.5T519-800q9 0 17.5 4t14.5 12l68-64q9-9 21.5-11.5T665-856l156 72q12 6 16.5 17.5T837-744q-6 12-17.5 15.5T797-730l-144-66-94 88v56l94 86 144-66q11-5 23-1t17 15q6 12 1 23t-17 17l-156 74q-12 6-24.5 3.5T619-512l-68-64q-6 6-14.5 11t-17.5 5q-17 0-28.5-11.5T479-600v-40H351q-3 8-6.5 15t-9.5 15l200 370h144v120H159Zm80-520q17 0 28.5-11.5T279-680q0-17-11.5-28.5T239-720q-17 0-28.5 11.5T199-680q0 17 11.5 28.5T239-640Zm126 400h78L271-560h-4l98 320Zm78 0Z"/></svg>
                         <span>Maintenance</span>
                     </a>
                     <ul id="maintenance" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
                         <li class="sidebar-item">
-                            <a href="../../maintenance/list/index.php" class="sidebar-link">List</a>
+                            <a href="index.php" class="sidebar-link">List</a>
                         </li>
                         <li class="sidebar-item">
-                            <a href="../../maintenance/request_material/index.php" class="sidebar-link">Request Material</a>
+                            <a href="index.php" class="sidebar-link">Request Material</a>
                         </li>
                     </ul>
                 </li>
@@ -179,7 +179,7 @@ if ($user) {
                     </div>
                 </div>
                 <div id="main-content-links">
-                    <a id="request-link" class="link-hover-effect text-primary active" href="#">Request</a>
+                    <a id="request-link" class="link-hover-effect text-primary active" href="#">List</a>
                     <a id="materials-link" class="link-hover-effect text-primary" href="#">Materials</a>
                 </div>
             </div>
@@ -187,8 +187,8 @@ if ($user) {
                 <!-- Request Content Section -->
                 <div id="request-content" class="content-section active"> <!-- Ensure this is set as active -->
                     <div class="m-4 ml-5">
-                        <h1><strong>Request for Machine Repair</strong></h1>
-                        <p>Select a repair request to claim.</p>
+                        <h1><strong>Machine Maintenance List</strong></h1>
+                        <p>Select a machine maintenance to claim.</p>
                     </div>
                     <!-- History Table -->
                     <table id="historyTable" class="table table-striped table-hover w-100">
@@ -197,13 +197,12 @@ if ($user) {
                                 <th class="text-center" style="width: 5%;">
                                     <input type="checkbox" id="selectAll">
                                 </th>
-                                <th class="text-start">Date Requested</th>
-                                <th class="text-start">Repair Request No.</th>
+                                <th class="text-start">Date</th>
+                                <th class="text-start">Maintenance No.</th>
                                 <th class="text-start">Machine</th>
                                 <th class="text-start">Department</th>
-                                <th class="text-start">Urgency</th>
                                 <th class="text-start">Status</th>
-                                <th class="text-center">Actions</th>
+                                <th class="text-center">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -211,27 +210,23 @@ if ($user) {
                             try {
                                 include '../../../connect.php'; // Include database connection
                                 $sql = "SELECT 
-                                    repair_request.*, 
-                                    repair_request.repair_request_id AS r_repair_request_id, 
-                                    repair.*,
-                                    employee.*, 
-                                    machine.*, 
-                                    department.*, 
-                                    warranty.*
-                                FROM 
-                                    repair_request 
-                                LEFT JOIN 
-                                    repair ON repair_request.repair_request_id = repair.repair_request_id
-                                LEFT JOIN 
-                                    employee ON repair.handled_by = employee.employee_id
-                                LEFT JOIN 
-                                    machine ON repair_request.machine_id = machine.machine_id
-                                LEFT JOIN 
-                                    department ON machine.machine_department_id = department.department_id
-                                LEFT JOIN 
-                                    warranty ON machine.machine_id = warranty.machine_id 
-                                ORDER BY 
-                                    repair_request.date_requested ASC";
+                                        maintenance.maintenance_id, 
+                                        maintenance.machine_id, 
+                                        maintenance.maintenance_scheduled_date, 
+                                        maintenance.maintenance_status, 
+                                        machine.machine_id,
+                                        machine.machine_name,
+                                        machine.machine_department_id,
+                                        department.department_name,
+                                        warranty.warranty_status
+                                    FROM 
+                                        maintenance
+                                    LEFT JOIN 
+                                        machine ON machine.machine_id = maintenance.machine_id
+                                    LEFT JOIN
+                                        department ON department.department_id = machine.machine_department_id
+                                    LEFT JOIN
+                                        warranty ON warranty.machine_id = machine.machine_id";
                                 $stmt = $conn->prepare($sql);
                                 $stmt->execute();
 
@@ -239,33 +234,29 @@ if ($user) {
                                 if ($stmt->rowCount() > 0) {
                                     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                                         // Define status and urgency classes
-                                        $statusClass = $row['status'] === 'Not Started' ? 'text-secondary' : ($row['status'] === 'Started' ? 'text-warning' : 'text-success');
-                                        $urgencyClass = $row['urgency'] === 'High' ? 'text-danger' : ($row['urgency'] === 'Medium' ? 'text-warning' : 'text-success');
+                                        $statusClass = $row['maintenance_status'] === 'Scheduled' ? 'text-secondary' : ($row['maintenance_status'] === 'Done' ? 'text-success' : 'text-warning');
 
                                         echo "<tr 
-                                            data-repair-request-id='" . htmlspecialchars($row['r_repair_request_id']) . "' 
-                                            data-date-requested='" . htmlspecialchars($row['date_requested']) . "'
+                                            data-maintenance-id='" . htmlspecialchars($row['maintenance_id']) . "' 
+                                            data-date-requested='" . htmlspecialchars($row['maintenance_scheduled_date']) . "'
                                             data-machine-name='" . htmlspecialchars($row['machine_name']) . "'
                                             data-department='" . htmlspecialchars($row['department_name']) . "'
-                                            data-urgency='" . htmlspecialchars($row['urgency']) . "'
-                                            data-status='" . htmlspecialchars($row['status']) . "'
-                                            data-requested-by='" . htmlspecialchars($row['requested_by']) . "'
-                                            data-warranty-status='" . htmlspecialchars($row['warranty_status'] ?? 'No warranty') . "'
-                                            data-details='" . htmlspecialchars($row['details']) . "'>
+                                            data-status='" . htmlspecialchars($row['maintenance_status']) . "'
+                                            data-warranty-status='" . htmlspecialchars($row['warranty_status'] ?? 'No warranty') . "'>
+
                                             <td class='text-center'><input type='checkbox' class='row-checkbox'></td>
-                                            <td>" . htmlspecialchars(date("d M Y g:i A", strtotime($row['date_requested'] ?? ''))) . "</td>
-                                            <td>" . htmlspecialchars($row['r_repair_request_id'] ?? '') . "</td>
+                                            <td>" . htmlspecialchars(date("d M Y g:i A", strtotime($row['maintenance_scheduled_date'] ?? ''))) . "</td>
+                                            <td>" . htmlspecialchars($row['maintenance_id'] ?? '') . "</td>
                                             <td>" . htmlspecialchars($row['machine_name'] ?? '') . "</td>
                                             <td>" . htmlspecialchars($row['department_name'] ?? '') . "</td>
-                                            <td class='$urgencyClass'>" . htmlspecialchars($row['urgency'] ?? '') . "</td>
-                                            <td class='$statusClass'>" . htmlspecialchars($row['status'] ?? '') . "</td>
+                                            <td class='$statusClass'>" . htmlspecialchars($row['maintenance_status'] ?? '') . "</td>
                                             <td class='text-center'>
-                                                <button class='btn btn-sm btn-primary' onclick='viewDetails(\"" . $row['r_repair_request_id'] . "\")'>View</button>
+                                                <button class='btn btn-sm btn-primary' onclick='viewDetails(\"" . $row['maintenance_id'] . "\")'>View</button>
                                             </td>
                                         </tr>";
                                     }
                                 } else {
-                                    echo "<tr><td colspan='8'>No repair requests found.</td></tr>";
+                                    echo "<tr><td colspan='8'>No maintenance found.</td></tr>";
                                 }
                             } catch (PDOException $e) {
                                 echo "<tr><td colspan='8'>Error fetching data: " . htmlspecialchars($e->getMessage()) . "</td></tr>";
@@ -349,63 +340,59 @@ if ($user) {
                             </tr>
                         </thead>
                         <tbody>
-                            <?php
-                            try {
-                                include '../../../connect.php'; // Include database connection
-                                
-                                $sql = "SELECT 
-                                        material_request.material_request_id AS m_material_request_id,
-                                        material_request.repair_request_id AS r_repair_request_id,
-                                        material_request.timestamp AS m_date_requested,
-                                        material_request.status AS m_status,
-                                        material_request.requested_by AS m_requested_by,
-                                        material_request.approved_by AS m_approved_by,
-                                        repair_request.*,
-                                        machine.*,
-                                        department.*
-                                        FROM material_request
-                                        LEFT JOIN repair_request ON material_request.repair_request_id = repair_request.repair_request_id
-                                        LEFT JOIN machine ON repair_request.machine_id = machine.machine_id
-                                        LEFT JOIN department ON machine.machine_department_id = department.department_id
-                                        WHERE material_request.requested_by = ? AND material_request.repair_request_id IS NOT NULL
-                                        ORDER BY m_date_requested DESC"; // Make sure to refer to the correct alias
-                                
-                                $stmt = $conn->prepare($sql);
-                                $stmt->execute([$employee_id]); // Bind the parameter correctly as an array
+                        <?php
+                        try {
+                            include '../../../connect.php'; // Include database connection
+                            
+                            $sql = "SELECT 
+                                    material_request.material_request_id AS m_material_request_id,
+                                    material_request.maintenance_id AS m_maintenance_id,
+                                    material_request.timestamp AS m_date_requested,
+                                    material_request.status AS m_status,
+                                    material_request.requested_by AS m_requested_by,
+                                    material_request.approved_by AS m_approved_by,
+                                    machine.*,
+                                    department.*
+                                    FROM material_request
+                                    LEFT JOIN maintenance ON maintenance.maintenance_id = material_request.maintenance_id
+                                    LEFT JOIN machine ON maintenance.machine_id = machine.machine_id
+                                    LEFT JOIN department ON machine.machine_department_id = department.department_id
+                                    WHERE material_request.requested_by = ? AND material_request.maintenance_id IS NOT NULL
+                                    ORDER BY m_date_requested DESC"; // Make sure to refer to the correct alias
+                            
+                            $stmt = $conn->prepare($sql);
+                            $stmt->execute([$employee_id]); // Bind the parameter correctly as an array
 
-                                // Check if any rows were returned
-                                if ($stmt->rowCount() > 0) {
-                                    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                                        // Define status and urgency classes
-                                        $statusClass = isset($row['m_status']) ? ($row['m_status'] === 'Not Started' ? 'text-secondary' : ($row['m_status'] === 'Started' ? 'text-warning' : 'text-success')) : '';
-                                        $urgencyClass = isset($row['urgency']) ? ($row['urgency'] === 'High' ? 'text-danger' : ($row['urgency'] === 'Medium' ? 'text-warning' : 'text-success')) : '';
+                            // Check if any rows were returned
+                            if ($stmt->rowCount() > 0) {
+                                while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                                    // Define status and urgency classes
+                                    $statusClass = isset($row['m_status']) ? ($row['m_status'] === 'Not Started' ? 'text-secondary' : ($row['m_status'] === 'Started' ? 'text-warning' : 'text-success')) : '';
 
-                                        echo "<tr 
-                                            data-material-request-id='" . htmlspecialchars($row['m_material_request_id']) . "' 
-                                            data-date-requested='" . htmlspecialchars(date("d M Y g:i A", strtotime($row['m_date_requested'] ?? ''))) . "'
-                                            data-status='" . htmlspecialchars($row['m_status'] ?? '') . "'
-                                            data-machine-name='" . htmlspecialchars($row['machine_name'] ?? '') . "'
-                                            data-department='" . htmlspecialchars($row['department_name'] ?? '') . "'
-                                            data-urgency='" . htmlspecialchars($row['urgency'] ?? '') . "'
-                                            data-details='" . htmlspecialchars($row['details'] ?? '') . "'>
-                                            <td class='text-center'><input type='checkbox' class='row-checkbox'></td>
-                                            <td>" . htmlspecialchars(date("d M Y g:i A", strtotime($row['m_date_requested'] ?? ''))) . "</td>
-                                            <td>" . htmlspecialchars($row['m_material_request_id'] ?? '') . "</td>
-                                            <td class='$statusClass'>" . htmlspecialchars($row['m_status'] ?? '') . "</td>
-                                            <td>" . htmlspecialchars($row['machine_name'] ?? '') . "</td>
-                                            <td>" . htmlspecialchars($row['department_name'] ?? '') . "</td>
-                                            <td class='text-center'>
-                                                <button class='btn btn-sm btn-primary' onclick='viewDetails(\"" . htmlspecialchars($row['r_repair_request_id']) . "\")'>View</button>
-                                            </td>
-                                        </tr>";
-                                    }
-                                } else {
-                                    echo "<tr><td colspan='8'>No material requests found.</td></tr>";
+                                    echo "<tr 
+                                        data-material-request-id='" . htmlspecialchars($row['m_material_request_id']) . "' 
+                                        data-date-requested='" . htmlspecialchars(date("d M Y g:i A", strtotime($row['m_date_requested'] ?? ''))) . "'
+                                        data-status='" . htmlspecialchars($row['m_status'] ?? '') . "'
+                                        data-machine-name='" . htmlspecialchars($row['machine_name'] ?? '') . "'
+                                        data-department='" . htmlspecialchars($row['department_name'] ?? '') . "'>
+                                        <td class='text-center'><input type='checkbox' class='row-checkbox'></td>
+                                        <td>" . htmlspecialchars(date("d M Y g:i A", strtotime($row['m_date_requested'] ?? ''))) . "</td>
+                                        <td>" . htmlspecialchars($row['m_material_request_id'] ?? '') . "</td>
+                                        <td class='$statusClass'>" . htmlspecialchars($row['m_status'] ?? '') . "</td>
+                                        <td>" . htmlspecialchars($row['machine_name'] ?? '') . "</td>
+                                        <td>" . htmlspecialchars($row['department_name'] ?? '') . "</td>
+                                        <td class='text-center'>
+                                            <button class='btn btn-sm btn-primary' onclick='viewDetails(\"" . htmlspecialchars($row['m_maintenance_id']) . "\")'>View</button>
+                                        </td>
+                                    </tr>";
                                 }
-                            } catch (PDOException $e) {
-                                echo "<tr><td colspan='8'>Error fetching data: " . htmlspecialchars($e->getMessage()) . "</td></tr>";
+                            } else {
+                                echo "<tr><td colspan='8'>No material requests found.</td></tr>";
                             }
-                            ?>
+                        } catch (PDOException $e) {
+                            echo "<tr><td colspan='7'>Error fetching data: " . htmlspecialchars($e->getMessage()) . "</td></tr>";
+                        }
+                        ?>
                         </tbody>
                     </table>
                 </div>
@@ -434,19 +421,16 @@ if ($user) {
     <!-- Offcanvas Modal for Repair Request Details -->
     <div class="offcanvas offcanvas-end" tabindex="-1" id="repairRequestModal" aria-labelledby="repairRequestModalLabel" style="width: 40%; padding: 20px;">
         <div class="offcanvas-header">
-            <h5 id="repairRequestModalLabel">Repair Request Details</h5>
+            <h5 id="repairRequestModalLabel">Maintenance Schedule Details</h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         
         <div class="offcanvas-body">
             <p><strong>Date Requested:</strong> <span id="modalDateRequested"></span></p>
-            <p><strong>Repair Request No.:</strong> <span id="repairRequestIdLabel"></span></p>
+            <p><strong>Maintenance No.:</strong> <span id="repairRequestIdLabel"></span></p>
             <p><strong>Machine:</strong> <span id="modalMachineName"></span></p>
             <p><strong>Department:</strong> <span id="modalDepartment"></span></p>
-            <p><strong>Urgency:</strong> <span id="modalUrgency"></span></p>
             <p><strong>Status:</strong> <span id="modalStatus"></span></p>
-            <p><strong>Requested By:</strong> <span id="modalRequestedBy"></span></p>
-            <p><strong>Details:</strong> <span id="modalDetails"></span></p>
             <p style="display: none; font-size: 15px; max-width: 43%; padding: 10px;" class="badge bg-warning text-center">
                 <i class="bi bi-info-circle"></i>
                 <strong>Warranty Status:</strong>
@@ -508,7 +492,6 @@ if ($user) {
             <p><strong>Status:</strong> <span id="materialRequestStatus"></span></p>
             <p><strong>Machine:</strong> <span id="materialRequestMachine"></span></p>
             <p><strong>Department:</strong> <span id="materialRequestDepartment"></span></p>
-            <p><strong>Urgency:</strong> <span id="materialRequestUrgency"></span></p>
 
             <div id="modalItemList" class="mt-3">
                 <table class="table table-striped">

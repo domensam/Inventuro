@@ -96,7 +96,7 @@ $recent_requests = $stmt_requests->fetchAll(PDO::FETCH_ASSOC);
                             <a href="repair/request/index.php" class="sidebar-link">Request</a>
                         </li>
                         <li class="sidebar-item">
-                            <a href="repair/request_material/index.php" class="sidebar-link">Request Material</a>
+                            <a href="repair/request/index.php" class="sidebar-link">Request Material</a>
                         </li>
                     </ul>
                 </li>
