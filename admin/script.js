@@ -1,9 +1,19 @@
 document.addEventListener('DOMContentLoaded', function () {
     const hamBurger = document.querySelector(".toggle-btn");
+    const addAnnouncementModal = new bootstrap.Modal(document.getElementById('addAnnouncementModal'));
 
     hamBurger.addEventListener("click", function () {
         document.querySelector("#sidebar").classList.toggle("expand");
     });
+    
+    function showInfoModal(title, message) {
+        document.querySelector('#infoModal .modal-title').textContent = title;
+        document.querySelector('#infoModal .modal-body p').textContent = message;
+    
+        // Use Bootstrap's JavaScript API to show the modal
+        const infoModal = new bootstrap.Modal(document.getElementById('infoModal'));
+        infoModal.show();
+    }    
     
     const mainContentLinks = {
         dashboard: document.getElementById("dashboard-link"),
@@ -155,4 +165,37 @@ document.addEventListener('DOMContentLoaded', function () {
     // Load dashboard by default
     setActiveLink("dashboard");
     showContent("dashboard");
+
+    // Open modal when "Add announcement" button is clicked
+    document.getElementById('addAnnouncementBtn').addEventListener('click', function () {
+        addAnnouncementModal.show();
+    });
+
+    // Handle form submission
+    document.getElementById('saveAnnouncementBtn').addEventListener('click', function () {
+        const form = document.getElementById('announcementForm');
+        const formData = new FormData(form);
+
+        fetch('add_announcement.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                addAnnouncementModal.hide();
+                showInfoModal('Success', 'Announcement added successfully.');
+                // Reload the page after 3 seconds (3000 milliseconds)
+                setTimeout(() => {
+                    location.reload();
+                }, 3000);
+            } else {
+                showInfoModal('Error', 'Failed to add announcement');
+            }
+        })
+        .catch(error => {
+            showInfoModal('Error', 'An error occurred while adding the announcement');
+        });
+    });
+    
 })
