@@ -151,7 +151,7 @@ if ($user) {
                                     alt="Profile Picture" 
                                     class="profile-icon" style="height: 1.7rem; width: 1.7rem">
                             <?php else: ?>
-                                <img src="../../../images/person-circle.png"
+                                <img src="../../images/person-circle.png"
                                     alt="Profile Picture" 
                                     class="profile-icon">
                             <?php endif; ?>
@@ -234,13 +234,13 @@ if ($user) {
                             </div>
                         </div>
                         <div class="col-4">
-                            <div class="card col align-items-center card-hover">
+                            <div class="card col align-items-center card-hover p-100">
                                 <h2>Analytics Insights</h2>
                                 <div class="radial-progress-container">
                                     <svg class="radial-progress" width="120" height="120" viewBox="0 0 120 120">
                                         <circle class="progress-bg" cx="60" cy="60" r="54" />
                                         <circle class="progress" cx="60" cy="60" r="54" transform="rotate(-90, 60, 60)" />
-                                        <text x="60" y="65" class="progress-text">0%</text>
+                                        <text x="60" y="65" class="progress-text">45%</text>
                                     </svg>
                                 </div>
                             </div>

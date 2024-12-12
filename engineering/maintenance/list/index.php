@@ -38,6 +38,20 @@ if ($user) {
     $department = $user['department'];
     $role = $user['role'];
     $date_created = $user['date_created'];
+
+    $departmentStmt = $conn->prepare("
+    SELECT department_name
+    FROM department
+    WHERE department_id=?
+    LIMIT 1
+    ");
+
+    $departmentStmt->execute([$department]);
+
+    // Fetch the result
+    $departmentName = $departmentStmt->fetch(PDO::FETCH_ASSOC);
+
+    $department = $departmentName['department_name'];
 }
 
 ?>
@@ -77,17 +91,17 @@ if ($user) {
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a href="index.php" class="sidebar-link collapsed has-dropdown" data-bs-toggle="collapse"
+                    <a href="../../repair/request_new/index.php" class="sidebar-link collapsed has-dropdown" data-bs-toggle="collapse"
                         data-bs-target="#repair" aria-expanded="false" aria-controls="repair">
                         <i class="bi bi-tools"></i>
                         <span>Repair</span>
                     </a>
                     <ul id="repair" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
                         <li class="sidebar-item">
-                            <a href="../../repair/request/index.php" class="sidebar-link">Request</a>
+                            <a href="../../repair/request_new/index.php" class="sidebar-link">Claim a Repair</a>
                         </li>
                         <li class="sidebar-item">
-                            <a href="../../repair/request/index.php" class="sidebar-link">Request Material</a>
+                            <a href="../../repair/claimed/index.php" class="sidebar-link">Your Claimed Repairs</a>
                         </li>
                     </ul>
                 </li>
@@ -106,12 +120,12 @@ if ($user) {
                         </li>
                     </ul>
                 </li>
-                <li class="sidebar-item">
+                <!-- <li class="sidebar-item">
                     <a href="../../history/index.php" class="sidebar-link">
                         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#224d7a"><path d="M13 3a9 9 0 0 0-9 9H2l3.89 3.89.07.14L10 12H7a7 7 0 1 1 7 7 7.07 7.07 0 0 1-6-3H6.26a8.99 8.99 0 0 0 7.74 5 9 9 0 1 0 0-18Zm-1 5v6h6v-2h-4V8Z"/></svg>
                         <span>History</span>
                     </a>
-                </li>
+                </li> -->
                 <li class="sidebar-item">
                     <a href="../../profile/index.php" class="sidebar-link">
                     <i class="bi bi-person"></i>
@@ -211,7 +225,7 @@ if ($user) {
                                 include '../../../connect.php'; // Include database connection
                                 $sql = "SELECT 
                                         maintenance.maintenance_id, 
-                                        maintenance.machine_id, 
+                                        maintenance.machine_parts_id, 
                                         maintenance.maintenance_scheduled_date, 
                                         maintenance.maintenance_status, 
                                         machine.machine_id,
@@ -221,8 +235,10 @@ if ($user) {
                                         warranty.warranty_status
                                     FROM 
                                         maintenance
+                                    LEFT JOIN
+                                        machine_parts ON maintenance.machine_parts_id = machine_parts.machine_parts_id
                                     LEFT JOIN 
-                                        machine ON machine.machine_id = maintenance.machine_id
+                                        machine ON machine.machine_id = machine_parts.machine_id
                                     LEFT JOIN
                                         department ON department.department_id = machine.machine_department_id
                                     LEFT JOIN
@@ -237,23 +253,30 @@ if ($user) {
                                         $statusClass = $row['maintenance_status'] === 'Scheduled' ? 'text-secondary' : ($row['maintenance_status'] === 'Done' ? 'text-success' : 'text-warning');
 
                                         echo "<tr 
-                                            data-maintenance-id='" . htmlspecialchars($row['maintenance_id']) . "' 
-                                            data-date-requested='" . htmlspecialchars($row['maintenance_scheduled_date']) . "'
-                                            data-machine-name='" . htmlspecialchars($row['machine_name']) . "'
-                                            data-department='" . htmlspecialchars($row['department_name']) . "'
-                                            data-status='" . htmlspecialchars($row['maintenance_status']) . "'
-                                            data-warranty-status='" . htmlspecialchars($row['warranty_status'] ?? 'No warranty') . "'>
+                                        data-maintenance-id='" . htmlspecialchars($row['maintenance_id']) . "' 
+                                        data-date-requested='" . htmlspecialchars($row['maintenance_scheduled_date']) . "'
+                                        data-machine-name='" . htmlspecialchars($row['machine_name']) . "'
+                                        data-department='" . htmlspecialchars($row['department_name']) . "'
+                                        data-status='" . htmlspecialchars($row['maintenance_status']) . "'
+                                        data-warranty-status='" . htmlspecialchars($row['warranty_status'] ?? 'No warranty') . "'>
+                                        
+                                        <td class='text-center'><input type='checkbox' class='row-checkbox'></td>
+                                        <td>" . htmlspecialchars(date("d M Y g:i A", strtotime($row['maintenance_scheduled_date'] ?? ''))) . "</td>
+                                        <td>" . htmlspecialchars($row['maintenance_id'] ?? '') . "</td>
+                                        <td>" . htmlspecialchars($row['machine_name'] ?? '') . "</td>
+                                        <td>" . htmlspecialchars($row['department_name'] ?? '') . "</td>
+                                        <td class='$statusClass'>" . htmlspecialchars($row['maintenance_status'] ?? '') . "</td>
+                                        <td class='text-center'>";
+                                        
+                                    // Always show "View" button
+                                    echo "<button class='btn btn-sm btn-primary' id='view-details-btn' data-maintenance-id='" . htmlspecialchars($row['maintenance_id']) . "'>View</button> ";
 
-                                            <td class='text-center'><input type='checkbox' class='row-checkbox'></td>
-                                            <td>" . htmlspecialchars(date("d M Y g:i A", strtotime($row['maintenance_scheduled_date'] ?? ''))) . "</td>
-                                            <td>" . htmlspecialchars($row['maintenance_id'] ?? '') . "</td>
-                                            <td>" . htmlspecialchars($row['machine_name'] ?? '') . "</td>
-                                            <td>" . htmlspecialchars($row['department_name'] ?? '') . "</td>
-                                            <td class='$statusClass'>" . htmlspecialchars($row['maintenance_status'] ?? '') . "</td>
-                                            <td class='text-center'>
-                                                <button class='btn btn-sm btn-primary' onclick='viewDetails(\"" . $row['maintenance_id'] . "\")'>View</button>
-                                            </td>
-                                        </tr>";
+                                    // Show "Done" button only if status is "Assigned"
+                                    if ($row['maintenance_status'] == 'Assigned') {
+                                        echo "<button class='btn btn-sm btn-success' id='done-btn' data-maintenance-id='" . htmlspecialchars($row['maintenance_id']) . "'>Done</button>";
+                                    }
+
+                                    echo "</td></tr>";
                                     }
                                 } else {
                                     echo "<tr><td colspan='8'>No maintenance found.</td></tr>";
@@ -265,64 +288,11 @@ if ($user) {
                         </tbody>
                     </table>
                 </div>
-                <!-- Materials Request Content Section -->
-                <div id="materials-request-content" class="content-section">
-                    <div class="m-4 ml-5">
-                        <h1><strong>Claim a Repair Request</strong></h1>
-                        <p><strong>Repair Request No.: </strong><span id="modalRepairRequestId" class="text-muted"></span></p>
-                    </div>
-                    <table id="itemTable" class="table table-striped table-hover w-100">
-                        <thead>
-                            <tr>
-                                <th class="text-center" style="width: 5%;"><input type="checkbox" id="selectAllCart"></th>
-                                <th class="text-start">Item</th>
-                                <th class="text-start">Description</th>
-                                <th class="text-start">Quantity on Hand</th>
-                                <th class="text-start">Per Unit</th>
-                                <th class="text-start">Restock Level</th>
-                                <th class="text-start">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php
-                            try {
-                                $sql = "SELECT item.*, employee.first_name, employee.last_name FROM item 
-                                        JOIN employee ON item.created_by = employee.employee_id";
-                                $result = $conn->query($sql);
-
-                                while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-                                    $itemName = htmlspecialchars($row['item_name']);
-                                    $itemDescription = htmlspecialchars($row['description']);
-                                    $itemQuantity = htmlspecialchars($row['item_quantity']);
-                                    $itemPerUnit = htmlspecialchars($row['size_per_unit'] . ' ' . $row['unit']);
-                                    $statusClass = $row['reorder_point'] > $row['item_quantity'] ? 'text-danger' : 'text-success';
-                                    
-                                    echo "<tr
-                                        data-item-code='" . htmlspecialchars($row['item_code']) . "' 
-                                        data-item-name='" . $itemName . "' 
-                                        data-item-quantity='" . $itemQuantity . "'>
-                                        <td class='text-center'><input type='checkbox' class='row-checkbox'></td>
-                                        <td>$itemName</td>
-                                        <td>$itemDescription</td>
-                                        <td>$itemQuantity</td>
-                                        <td>$itemPerUnit</td>
-                                        <td class='$statusClass'>" . ($row['reorder_point'] > $row['item_quantity'] ? 'Low' : 'Sufficient') . "</td>
-                                        <td><button class='btn btn-primary btn-success add-to-cart-btn' style='font-size: 12px'><i class='fas fa-shopping-cart'></i> Add to Cart</button></td>
-                                    </tr>";
-                                }
-                            } catch (PDOException $e) {
-                                echo "<tr><td colspan='5'>Error fetching data: " . htmlspecialchars($e->getMessage()) . "</td></tr>";
-                            }
-                            ?>
-                        </tbody>
-                    </table>
-                    <button id="completeRequestBtn" class="btn btn-primary">Complete</button>
-                </div>
                 <!-- Materials Content Section -->
                 <div id="materials-content" class="content-section">
                     <div class="m-4 ml-5">
                         <h1><strong>Your Material Requests</strong></h1>
-                        <p>Click a material request to view, edit, or delete.</p>
+                        <p>Click a material request to see info.</p>
                     </div>
                     <!-- Material Requests Table -->
                     <table id="materialRequestTable" class="table table-striped table-hover w-100">
@@ -354,8 +324,10 @@ if ($user) {
                                     machine.*,
                                     department.*
                                     FROM material_request
+                                    LEFT JOIN material_request_items ON material_request.material_request_id = material_request_items.material_request_id
+                                    LEFT JOIN machine_parts ON material_request_items.item_id = machine_parts.machine_parts_id
                                     LEFT JOIN maintenance ON maintenance.maintenance_id = material_request.maintenance_id
-                                    LEFT JOIN machine ON maintenance.machine_id = machine.machine_id
+                                    LEFT JOIN machine ON machine_parts.machine_id = machine.machine_id
                                     LEFT JOIN department ON machine.machine_department_id = department.department_id
                                     WHERE material_request.requested_by = ? AND material_request.maintenance_id IS NOT NULL
                                     ORDER BY m_date_requested DESC"; // Make sure to refer to the correct alias
@@ -374,6 +346,7 @@ if ($user) {
                                         data-date-requested='" . htmlspecialchars(date("d M Y g:i A", strtotime($row['m_date_requested'] ?? ''))) . "'
                                         data-status='" . htmlspecialchars($row['m_status'] ?? '') . "'
                                         data-machine-name='" . htmlspecialchars($row['machine_name'] ?? '') . "'
+                                        data-item-code='" . htmlspecialchars($row['item_code'] ?? '') . "'
                                         data-department='" . htmlspecialchars($row['department_name'] ?? '') . "'>
                                         <td class='text-center'><input type='checkbox' class='row-checkbox'></td>
                                         <td>" . htmlspecialchars(date("d M Y g:i A", strtotime($row['m_date_requested'] ?? ''))) . "</td>
@@ -426,7 +399,7 @@ if ($user) {
         </div>
         
         <div class="offcanvas-body">
-            <p><strong>Date Requested:</strong> <span id="modalDateRequested"></span></p>
+            <p><strong>Maintenance Date:</strong> <span id="modalDateRequested"></span></p>
             <p><strong>Maintenance No.:</strong> <span id="repairRequestIdLabel"></span></p>
             <p><strong>Machine:</strong> <span id="modalMachineName"></span></p>
             <p><strong>Department:</strong> <span id="modalDepartment"></span></p>
@@ -499,7 +472,6 @@ if ($user) {
                         <tr>
                             <th>Item Name</th>
                             <th>Quantity Needed</th>
-                            <th>Current Quantity</th>
                         </tr>
                     </thead>
                     <tbody id="itemListBody">

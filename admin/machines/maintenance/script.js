@@ -15,15 +15,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let isEditing = false; // Track if the modal is in edit mode
 
-    const itemTable = $('#itemTable').DataTable({
-        autoWidth: false,
-        pageLength: 10,
-        lengthMenu: [10, 25, 50, 100],
-        processing: true,
-        searching: true,
-        order: [],
-        columnDefs: [{ orderable: false, targets: [0] }]
-    });
+    // const itemTable = $('#itemTable').DataTable({
+    //     autoWidth: false,
+    //     pageLength: 10,
+    //     lengthMenu: [10, 25, 50, 100],
+    //     processing: true,
+    //     searching: true,
+    //     order: [],
+    //     columnDefs: [{ orderable: false, targets: [0] }]
+    // });
 
     const calendarEl = document.getElementById('calendar');
 
@@ -46,39 +46,67 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log("Machine IDs:", info.event.extendedProps.machine_ids);
             openEditModal(info.event);
         },
-        events: [] // Initially set to an empty array
-    });    
+        events: function(fetchInfo, successCallback, failureCallback) {
+            $.ajax({
+                url: 'fetch_maintenance_data.php', // PHP file that fetches events from the DB
+                method: 'GET',
+                success: function(data) {
+                    const events = JSON.parse(data);
+                    
+                    // Log events to verify the structure
+                    console.log("Parsed events:", events);
 
-    // Fetch events from the database and render them on the calendar
-    fetch('fetch_events.php')
-    .then(response => {
-        return response.text(); // Read the response as text
-    })
-    .then(data => {
-        console.log('Raw response:', data); // Log the raw response
-        // Try to parse the response as JSON
-        const events = JSON.parse(data);
-        
-        // Map the fetched events to the format expected by FullCalendar
-        const formattedEvents = events.map(event => ({
-            id: event.machine_id, // Unique ID for the event
-            title: event.machine_description, // Title/description of the event
-            start: event.maintenance_scheduled_date, // Start date of the event
-            allDay: true, // Set to true if it's an all-day event
-            extendedProps: {
-                machine_ids: event.machine_ids // Add machine IDs to extendedProps
-            }
-        }));
+                    // Format events into the format FullCalendar expects
+                    const formattedEvents = events.map(event => {
+                        return {
+                            title: event.title, // Make sure the title is correct
+                            start: event.start, // Ensure the date format matches FullCalendar requirements
+                            extendedProps: {
+                                machine_parts_id: event.machine_parts_id
+                            }
+                        };
+                    });
 
-        // Add formatted events to the calendar
-        calendar.addEventSource(formattedEvents);
-    })
-    .catch(error => {
-        console.error('Error fetching events:', error);
+                    // Pass the formatted events to FullCalendar
+                    successCallback(formattedEvents);
+                },
+                error: function(error) {
+                    console.log('Error fetching events:', error);
+                    failureCallback(error);
+                }
+            });
+        }
     });
 
     // Render the calendar
     calendar.render();
+
+    // // Fetch events from the database and render them on the calendar
+    // fetch('fetch_events.php')
+    // .then(response => {
+    //     return response.text(); // Read the response as text
+    // })
+    // .then(data => {
+    //     console.log('Raw response:', data); // Log the raw response
+    //     // Try to parse the response as JSON
+    //     const events = JSON.parse(data);
+        
+    //     // Map the fetched events to the format expected by FullCalendar
+    //     const formattedEvents = events.map(event => ({
+    //         id: event.machine_id, // Unique ID for the event
+    //         title: event.machine_description, // Title/description of the event
+    //         start: event.maintenance_scheduled_date, // Start date of the event
+    //         extendedProps: {
+    //             machine_ids: event.machine_ids // Add machine IDs to extendedProps
+    //         }
+    //     }));
+
+    //     // Add formatted events to the calendar
+    //     calendar.addEventSource(formattedEvents);
+    // })
+    // .catch(error => {
+    //     console.error('Error fetching events:', error);
+    // });
 
     // Function to open the maintenance modal for adding an event
     function openMaintenanceModal(dateStr) {

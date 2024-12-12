@@ -25,10 +25,9 @@ $ipAddress = $_SERVER['REMOTE_ADDR'];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $repairRequestId = $_POST['repair_request_id'];
-    $urgency = $_POST['urgency'];
     $details = $_POST['details'];
 
-    if (empty($repairRequestId) || empty($urgency) || empty($details)) {
+    if (empty($repairRequestId) || empty($details)) {
         http_response_code(400);
         echo json_encode(['message' => 'All fields are required.']);
         exit();
@@ -39,10 +38,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $stmtUpdate = $conn->prepare("
             UPDATE repair_request
-            SET urgency = :urgency, details = :details
+            SET details = :details
             WHERE repair_request_id = :repair_request_id
         ");
-        $stmtUpdate->bindParam(':urgency', $urgency);
         $stmtUpdate->bindParam(':details', $details);
         $stmtUpdate->bindParam(':repair_request_id', $repairRequestId);
 

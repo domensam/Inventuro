@@ -37,6 +37,20 @@ if ($user) {
     $last_name = $user['last_name'];
     $employee_id = $user['employee_id'];
     $department = $user['department'];
+
+    $departmentStmt = $conn->prepare("
+    SELECT department_name
+    FROM department
+    WHERE department_id=?
+    LIMIT 1
+    ");
+
+    $departmentStmt->execute([$department]);
+
+    // Fetch the result
+    $departmentName = $departmentStmt->fetch(PDO::FETCH_ASSOC);
+
+    $department = $departmentName['department_name'];
 }
 
 $stmt_requests = $conn->prepare("SET time_zone = '+08:00'");
@@ -44,10 +58,13 @@ $stmt_requests->execute();
 
 // Fetch top 5 most recent requests for the user
 $stmt_requests = $conn->prepare("
-SELECT * FROM repair_request
-WHERE requested_by = ?
-ORDER BY date_requested DESC
-LIMIT 5
+SELECT * FROM repair
+LEFT JOIN repair_request ON repair.repair_request_id = repair_request.repair_request_id
+LEFT JOIN machine ON machine.machine_id = repair.machine_id
+LEFT JOIN urgency ON machine.machine_urgency = urgency.id
+WHERE repair.handled_by = ?
+ORDER BY repair_request.date_requested DESC
+LIMIT 10
 ");
 
 $stmt_requests->execute([$employee_id]); // Assuming 'requested_by' is employee_id
@@ -86,17 +103,17 @@ $recent_requests = $stmt_requests->fetchAll(PDO::FETCH_ASSOC);
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a href="repair/request/index.php" class="sidebar-link collapsed has-dropdown" data-bs-toggle="collapse"
+                    <a href="repair/request_new/index.php" class="sidebar-link collapsed has-dropdown" data-bs-toggle="collapse"
                         data-bs-target="#repair" aria-expanded="false" aria-controls="repair">
                         <i class="bi bi-tools"></i>
                         <span>Repair</span>
                     </a>
                     <ul id="repair" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
                         <li class="sidebar-item">
-                            <a href="repair/request/index.php" class="sidebar-link">Request</a>
+                            <a href="repair/request_new/index.php" class="sidebar-link">Claim a Repair</a>
                         </li>
                         <li class="sidebar-item">
-                            <a href="repair/request/index.php" class="sidebar-link">Request Material</a>
+                            <a href="repair/claimed/index.php" class="sidebar-link">Your Claimed Repairs</a>
                         </li>
                     </ul>
                 </li>
@@ -115,12 +132,12 @@ $recent_requests = $stmt_requests->fetchAll(PDO::FETCH_ASSOC);
                         </li>
                     </ul>
                 </li>
-                <li class="sidebar-item">
+                <!-- <li class="sidebar-item">
                     <a href="history/index.php" class="sidebar-link">
                         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#224d7a"><path d="M13 3a9 9 0 0 0-9 9H2l3.89 3.89.07.14L10 12H7a7 7 0 1 1 7 7 7.07 7.07 0 0 1-6-3H6.26a8.99 8.99 0 0 0 7.74 5 9 9 0 1 0 0-18Zm-1 5v6h6v-2h-4V8Z"/></svg>
                         <span>History</span>
                     </a>
-                </li>
+                </li> -->
                 <li class="sidebar-item">
                     <a href="profile/index.php" class="sidebar-link">
                     <i class="bi bi-person"></i>
@@ -195,7 +212,57 @@ $recent_requests = $stmt_requests->fetchAll(PDO::FETCH_ASSOC);
             <div id="main-content" class="p-5">
                 <!-- Dashboard Content Section -->
                 <div id="dashboard-content" class="content-section active">
-                    <h1>Your Dashboard</h1>
+                    <h1>Recent Repairs</h1>
+                    <ul class="list-group">
+                        <?php foreach ($recent_requests as $request): 
+                            // Determine status color class
+                            $statusClass = '';
+                            $statusText = htmlspecialchars($request['status']);
+                            switch ($statusText) {
+                                case 'Not Started':
+                                    $statusClass = 'bg-light text-secondary p-1 rounded-pill'; // Gray
+                                    break;
+                                case 'Started':
+                                    $statusClass = 'bg-warning text-dark p-1 rounded-pill'; // Yellow
+                                    break;
+                                case 'Done':
+                                    $statusClass = 'bg-success text-white p-1 rounded-pill'; // Green
+                                    break;
+                            }
+
+                            // Determine urgency color class
+                            $urgencyClass = '';
+                            $urgencyText = htmlspecialchars($request['name']);
+                            switch ($urgencyText) {
+                                case 'Low':
+                                    $urgencyClass = 'text-success'; // Green
+                                    break;
+                                case 'Medium':
+                                    $urgencyClass = 'text-warning'; // Yellow
+                                    break;
+                                case 'High':
+                                    $urgencyClass = 'text-danger'; // Red
+                                    break;
+                            }
+                        ?>
+                            <li class="list-group-item d-flex justify-content-between align-items-start" 
+                                data-request-id="<?= htmlspecialchars($request['repair_request_id']) ?>" 
+                                data-machine="<?= htmlspecialchars($request['machine_name']) ?>"
+                                data-status="<?= $statusText ?>"
+                                data-urgency="<?= $urgencyText ?>"
+                                data-date="<?= date("d M Y", strtotime($request['date_requested'])) ?>">
+                                <div class="ms-2 me-auto">
+                                    <div class="fw-bold">Request ID: <?= htmlspecialchars($request['repair_request_id']) ?></div>
+                                    Machine: <?= htmlspecialchars($request['machine_name']) ?> - <?= htmlspecialchars($request['machine_serial_number']) ?> | 
+                                    <span class="<?= $statusClass ?>">Status: <?= $statusText ?></span> | 
+                                    <span class="<?= $urgencyClass ?>">Urgency: <?= $urgencyText ?></span>
+                                </div>
+                                <span class="badge bg-primary rounded-pill">
+                                    <?= date("d M Y", strtotime($request['date_requested'])) ?>
+                                </span>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
                 </div>
                 <!-- Announcement Content Section -->
                 <div id="announcement-content" class="content-section">

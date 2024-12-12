@@ -18,18 +18,26 @@ header('Content-Type: application/json');
 
 // Check if the request is a GET request
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $item_id = isset($_GET['item_id']) ? $_GET['item_id'] : '';
-    
+    $item_id = isset($_GET['item_code']) ? $_GET['item_code'] : '';
+
+    // Validate if the item_id is a valid integer and greater than or equal to 1
+    if (!filter_var($item_id, FILTER_VALIDATE_INT) || $item_id < 1) {
+        http_response_code(400);
+        echo json_encode(['message' => 'Invalid item_id. It must be an integer greater than or equal to 1.']);
+        exit();
+    }
+
     try {
         // Prepare the SQL statement to retrieve the sum of quantity for the item
-        $stmt = $conn->prepare('
+        $stmt = $conn->prepare("
             SELECT SUM(quantity) AS total_quantity
-            FROM material_request_items
-            WHERE item_id = :item_id
-        ');
+            FROM material_request_items 
+            JOIN material_request
+            WHERE item_id = :item_id AND status != 'Done';
+        ");
 
         // Bind the parameter correctly to the prepared statement
-        $stmt->bindParam(':item_id', $item_id, PDO::PARAM_STR);
+        $stmt->bindParam(':item_id', $item_id, PDO::PARAM_INT);
 
         // Execute the query
         $stmt->execute();

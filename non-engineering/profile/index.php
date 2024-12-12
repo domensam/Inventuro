@@ -38,6 +38,20 @@ if ($user) {
     $department = $user['department'];
     $role = $user['role'];
     $date_created = $user['date_created'];
+
+    $departmentStmt = $conn->prepare("
+    SELECT department_name
+    FROM department
+    WHERE department_id=?
+    LIMIT 1
+    ");
+
+    $departmentStmt->execute([$department]);
+
+    // Fetch the result
+    $departmentName = $departmentStmt->fetch(PDO::FETCH_ASSOC);
+
+    $department = $departmentName['department_name'];
 }
 
 ?>
@@ -76,10 +90,19 @@ if ($user) {
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a href="../repair/request/index.php" class="sidebar-link">
+                    <a href="#" class="sidebar-link collapsed has-dropdown" data-bs-toggle="collapse"
+                        data-bs-target="#machines" aria-expanded="false" aria-controls="machines">
                         <i class="bi bi-tools"></i>
                         <span>Repair</span>
                     </a>
+                    <ul id="machines" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
+                        <li class="sidebar-item">
+                            <a href="../repair/list/index.php" class="sidebar-link">View Machines List</a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="../repair/request/index.php" class="sidebar-link">Create a Request</a>
+                        </li>
+                    </ul>
                 </li>
                 <li class="sidebar-item">
                     <a href="index.php" class="sidebar-link active">

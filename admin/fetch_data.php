@@ -25,8 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         // Set MySQL timezone (optional)
         $stmt = $conn->prepare("SET time_zone = '+08:00'");
         $stmt->execute();
-
-        // Queries as before...
+        
         // Query to sum item_quantity from the item table
         $stmt = $conn->prepare('SELECT SUM(item_quantity) AS total_quantity FROM item');
         $stmt->execute();

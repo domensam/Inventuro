@@ -75,10 +75,9 @@ document.addEventListener('DOMContentLoaded', function () {
   showContent("dashboard");
   
     const department = document.getElementById('department').value;
-    const machineDropdown = document.getElementById('machine');
 
     // Function to fetch and populate machines based on department
-    function fetchMachines(department, dropdownId, selectedMachineId = null) {
+    function fetchMachines(department, dropdownId) {
       fetch(`fetch_machines.php?department=${encodeURIComponent(department)}`)
         .then(response => {
           if (!response.ok) {
@@ -93,7 +92,33 @@ document.addEventListener('DOMContentLoaded', function () {
           machines.forEach(machine => {
             const option = document.createElement('option');
             option.value = machine.machine_id;
-            option.textContent = `${machine.machine_name} - ID #${machine.machine_id}`;
+            option.textContent = `${machine.machine_name} - Serial No. ${machine.machine_serial_number}`;
+            machineDropdown.appendChild(option);
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching machines:', error);
+        });
+    }
+
+    fetchMachines(department, "machine");
+
+    function fetchAllMachines(department, dropdownId, selectedMachineId = null) {
+      fetch(`fetch_all_machines.php?department=${encodeURIComponent(department)}`)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          return response.json();
+        })
+        .then(machines => {
+          const machineDropdown = document.getElementById(dropdownId);
+          machineDropdown.innerHTML = '<option value="" selected disabled>Select a machine</option>';
+
+          machines.forEach(machine => {
+            const option = document.createElement('option');
+            option.value = machine.machine_id;
+            option.textContent = `${machine.machine_name} - Serial No. ${machine.machine_serial_number}`;
             machineDropdown.appendChild(option);
           });
 
@@ -107,11 +132,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Fetch machines for the initial department value
-    if (department) {
-        fetchMachines(department, 'machine');
-    }
-
     const repairForm = document.getElementById('repairRequestForm');
 
     repairForm.addEventListener('submit', function (event) {
@@ -123,20 +143,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // Capture form data
       const machineId = document.getElementById('machine').value;
-      const urgency = document.getElementById('urgency').value;
       const remarks = document.getElementById('remarks').value;
       const requestedBy = document.getElementById('employee-id-text').textContent; // Get the employee ID from PHP session
 
       // Send the data to a PHP script for processing
       formData.append('machine_id', machineId);
-      formData.append('urgency', urgency);
       formData.append('details', remarks);
       formData.append('requested_by', requestedBy);
 
       // Log form data to the console
       console.log("Form data to be sent:");
       console.log("Machine ID:", document.getElementById('machine').value);
-      console.log("Urgency:", document.getElementById('urgency').value);
       console.log("Remarks:", document.getElementById('remarks').value);
       console.log("Requested By:", document.getElementById('employee-id-text').textContent); // logged from PHP session
 
@@ -215,27 +232,17 @@ document.addEventListener('DOMContentLoaded', function () {
     $('#repairRequestIdLabel').text(repairRequestId);
     $('#modalDateRequested').text(dateRequested);
     $('#modalStatus').text(status);
+    $('#modalUrgency').text(urgency);
     $('#modalRequestedBy').text(requestedBy);
     $('#modalDetails').val(details);
 
     // Populate the machine dropdown in the modal and set the selected machine
     if (department) {
-      fetchMachines(department, 'machineName', machineId);
+      fetchAllMachines(department, 'machineName', machineId);
     }
-
-    // Populate and set urgency dropdown
-    const urgencyDropdown = document.getElementById('modalUrgency');
-    urgencyDropdown.innerHTML = `
-      <option value="Low">Low</option>
-      <option value="Medium">Medium</option>
-      <option value="High">High</option>
-    `;
-    urgencyDropdown.value = urgency;
 
     // Enable or disable fields based on the status
     const isEditable = status === 'Not Started';
-    $('#modalMachineName').prop('disabled', !isEditable);
-    $('#modalUrgency').prop('disabled', !isEditable);
     $('#modalDetails').prop('disabled', !isEditable);
     $('#saveRepairRequestBtn').toggle(isEditable);
     $('#deleteRepairRequestBtn').toggle(isEditable);
@@ -283,13 +290,7 @@ $('#confirmActionBtn').on('click', function () {
   } else if (actionType === 'save') {
     // Perform save action
     const repairRequestId = $('#repairRequestIdLabel').text();
-    const urgency = $('#modalUrgency').val();
     const details = $('#modalDetails').val();
-
-    if (!urgency) {
-      showInfoModal('Error', 'Please select an urgency level.');
-      return;
-    }
 
     if (!details) {
       showInfoModal('Error', 'Please enter problem details.');
@@ -301,7 +302,6 @@ $('#confirmActionBtn').on('click', function () {
         type: 'POST',
         data: {
             repair_request_id: repairRequestId,
-            urgency: urgency,
             details: details
         },
         success: function(response) {

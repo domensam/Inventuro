@@ -217,7 +217,6 @@ document.addEventListener('DOMContentLoaded', function () {
             const code = $(this).data('machine-id');
             const name = $(this).data('machine-name');
             const departmentId = $(this).data('department-id');
-            const intervalDays = $(this).data('machine-maintenance-interval-days');
             const description = $(this).data('machine-description');
             const createdBy = $(this).data('machine-created-by');
             const createdAt = $(this).data('machine-created-at');
@@ -235,7 +234,6 @@ document.addEventListener('DOMContentLoaded', function () {
             modalDepartmentName.value = departmentId;
             modalDescription.value = description;
 
-            $('#modalMaintenanceScheduleText').text(intervalDays);
             $('#modalCreatedByNameText').text(createdBy);
             $('#modalCreatedAtText').text(createdAt);
 
@@ -256,6 +254,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 underWarrantySection.classList.toggle('d-none', true);
             }
 
+            fetchMachineParts(code);
+
             // Open the offcanvas modal
             const modal = new bootstrap.Offcanvas('#machineInfoModal');
             modal.show();
@@ -270,9 +270,47 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // Function to fetch machine parts based on machine ID
+    function fetchMachineParts(machineId) {
+        $.ajax({
+            url: 'fetch_parts.php', // Path to your PHP script
+            method: 'GET',
+            data: {
+                machine_id: machineId // Pass the machine_id as a parameter
+            },
+            dataType: 'json',
+            success: function(response) {
+                if (response.message) {
+                    // Handle any error messages from the server
+                    alert(response.message);
+                } else {
+                    // If parts are found, update the HTML
+                    let partDetails = '';
+                    response.forEach(function(part) {
+                        partDate = `<p>${part.replacement_date} : ${part.replacement_hours} of maintenance hours</p>`;
+                        partDetails += `<p>${part.machine_parts_name} : Remaining ${part.current_operating_hours} hours</p>`;
+                    });
+
+                    // Inject the part details into the modal
+                    $('#modalMaintenanceDateText').html(partDate);
+                    $('#modalMaintenancePartText').html(partDetails);
+                }
+            },
+            error: function(xhr, status, error) {
+                // Handle any AJAX errors
+                alert('Error: ' + error);
+            }
+        });
+    }
+
     document.getElementById('underWarrantySection').addEventListener('click', function () {
         $('#warrantyModal').modal('show');
     })
+
+    document.getElementById('addWarrantyBtn').addEventListener('click', function() {
+        // $('#addWarrantyModal').modal('show');
+        alert('Button Clicked');
+    });
 
     // Prevent opening the modal if multiple rows are selected
     $('.row-checkbox').on('change', function () {
@@ -286,8 +324,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Open the Add User offcanvas modal
     document.getElementById('addItemBtn').addEventListener('click', function() {
-        const addMachineModal = new bootstrap.Offcanvas(document.getElementById('addMachineModal'));
-        addMachineModal.show();
+        // const addMachineModal = new bootstrap.Offcanvas(document.getElementById('addMachineModal'));
+        // addMachineModal.show();
+        const defaultView = document.querySelector('.default-view');
+        const addMachineView = document.querySelector('.add-machine-view');
+
+        // Toggle visibility
+        defaultView.style.display = 'none';
+        addMachineView.style.display = 'block';
+
     });
     
     document.getElementById('saveItemBtn').addEventListener('click', function() {
@@ -438,43 +483,42 @@ document.addEventListener('DOMContentLoaded', function () {
         window.location.href = '../adjustments/index.php?openModal=true';
     });
 
-    $('#updateMachineMaintenanceIntervalBtn').on('click', function(event) {
-        event.preventDefault();  // Prevent the default form submission behavior
-
-        var maintenanceInterval =$('#machineMaintenanceIntervalInput').val();  // Get reorder point as a number
-        var machineCode = $('#modalMachineCodeText').text();  // Get the item ID
-        
-        if (maintenanceInterval >= 1 && maintenanceInterval <= 30) {
-            // Proceed with AJAX request if validation passes
-            $.ajax({
-                url: 'update_machine_interval.php',  // The PHP file that handles updating the reorder point
-                method: 'POST',
-                data: { 
-                    machine_id: machineCode, 
-                    machine_maintenance_interval_days: maintenanceInterval
-                },
-                success: function(response) {
-                    // Reload the page to reflect changes
-                    window.location.reload();
-                },
-                error: function(xhr, status, error) {
-                    alert('Error updating reorder point. Please try again.');
-                    console.error('Error:', xhr.responseText);
-                }
-            });
-
-            // Hide the modal only after the AJAX call is triggered
-            $('#machineIntervalModal').modal('hide');
-        }
-        else {
-            alert('Please enter a valid machine maintenance interval');
-            return;  // Stop further execution if validation fails
-        }
-    });
-
-
     const hamBurger = document.querySelector(".toggle-btn");
         hamBurger.addEventListener("click", function () {
         document.querySelector("#sidebar").classList.toggle("expand");
     });
+
+    function nextStep(step) {
+        // Hide all step contents
+        document.querySelectorAll('.step').forEach(stepDiv => stepDiv.classList.add('d-none'));
+        // Show the selected step content
+        document.getElementById(`step${step}`).classList.remove('d-none');
+    
+        // Reset all buttons to secondary
+        document.querySelectorAll('.steps button').forEach(btn => {
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-secondary');
+        });
+    
+        // Highlight the current step's button
+        document.getElementById(`step${step}-button`).classList.add('btn-primary');
+        document.getElementById(`step${step}-button`).classList.remove('btn-secondary');
+    }
+    
+    function prevStep(step) {
+        // Same as nextStep, for navigating backward
+        document.querySelectorAll('.step').forEach(stepDiv => stepDiv.classList.add('d-none'));
+        document.getElementById(`step${step}`).classList.remove('d-none');
+    
+        document.querySelectorAll('.steps button').forEach(btn => {
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-secondary');
+        });
+    
+        document.getElementById(`step${step}-button`).classList.add('btn-primary');
+        document.getElementById(`step${step}-button`).classList.remove('btn-secondary');
+    }    
+
+    window.nextStep = nextStep;
+    window.prevStep = prevStep;
 });

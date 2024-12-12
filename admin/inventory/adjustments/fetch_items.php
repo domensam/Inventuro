@@ -39,15 +39,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
         // Encode image data to base64 if needed (optional)
         foreach ($result as &$item) {
-            if (isset($item['image'])) {
+            if (isset($item['image']) && !empty($item['image'])) {
                 // Detect the MIME type of image using finfo
                 $finfo = new finfo(FILEINFO_MIME_TYPE);
                 $mimeType = $finfo->buffer($item['image']);
-
-                // Convert BLOB to base64
-                $item['image'] = 'data:' . $mimeType . ';base64,' . base64_encode($item['image']);
+        
+                // Ensure MIME type detection succeeded
+                if ($mimeType !== false) {
+                    // Convert BLOB to base64
+                    $item['image'] = 'data:' . $mimeType . ';base64,' . base64_encode($item['image']);
+                } else {
+                    // Fallback if MIME type detection fails
+                    $item['image'] = "../../../images/gallery.png";
+                }
+            } else {
+                // Default image if image data is not set or empty
+                $item['image'] = "../../../images/gallery.png";
             }
-        }
+        }        
 
         // Return the result as JSON
         http_response_code(200);

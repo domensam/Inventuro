@@ -9,14 +9,6 @@ document.addEventListener('DOMContentLoaded', function () {
         columnDefs: [{ orderable: false, targets: [0] }]
     });
 
-    $(document).ready(function() {
-        // Check for the query parameter
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.get('openModal') === 'true') {
-            $('#addAdjustmentBtn').click(); // Simulate a click on the button to open the modal
-        }
-    });
-
     flatpickr("#addDate", {
         dateFormat: "d M Y", // Format to display
         defaultDate: "today",// Sets today's date as default
@@ -94,8 +86,13 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Open modal and populate it with adjustment data when a row is clicked
-    $('#adjustmentTable tbody').on('click', 'tr', function (event) {
-        const checkbox = $(this).find('.row-checkbox');
+    $('#adjustmentTable tbody').on('click', '#viewMaterialRequest', function (event) {
+        // Prevent the event from propagating to the row click event
+        event.stopPropagation();
+
+        // Extract data from the clicked row's data attributes
+        const row = $(this).closest('tr');
+        const checkbox = row.find('.row-checkbox');
 
         // Toggle checkbox state and row selection
         checkbox.prop('checked', !checkbox.prop('checked'));
@@ -112,12 +109,13 @@ document.addEventListener('DOMContentLoaded', function () {
             viewCheck.dispatchEvent(new Event('change'));
 
             // Extract data from the selected row
-            const adjustment_id = $(this).data('adjustment-id');
-            const entry_date = $(this).data('entry-date');
-            const reason = $(this).data('reason');
-            const created_by = $(this).data('created-by-name');
-            const description = $(this).data('description');
-            const reference_number = $(this).data('reference-number');
+            const adjustment_id = row.data('material-request-id');
+            const entry_date = row.data('entry-date');
+            const reason = row.data('reason');
+            const created_by = row.data('created-by-name');
+            const description = row.data('description');
+            const reference_number = row.data('reference-number');
+            const status = row.data('status');
 
             const options = {
                 day: '2-digit',
@@ -147,9 +145,150 @@ document.addEventListener('DOMContentLoaded', function () {
             const pdfUrl = `generate_pdf.php?adjustment_id=${adjustmentId}&employee_id=${encodeURIComponent(employeeId)}&employee_name=${encodeURIComponent(employeeName)}`;
             document.getElementById('pdfView').innerHTML = `<iframe src="${pdfUrl}" width="100%" height="600px" style="border: none;"></iframe>`;
             
+            if(status === "Done") {
+                deleteAdjustmentBtn.style.display = 'none';
+            }
             // Open the offcanvas modal
             const modal = new bootstrap.Offcanvas('#adjustmentInfoModal');
             modal.show();
+        }
+    });
+
+    // Delete the material request
+    $('#adjustmentTable tbody').on('click', '#deleteMaterialRequest', function (event) {
+        // Prevent the event from propagating to the row click event
+        event.stopPropagation();
+
+        // Extract data from the clicked row's data attributes
+        const row = $(this).closest('tr');
+        const checkbox = row.find('.row-checkbox');
+
+        // Toggle checkbox state and row selection
+        checkbox.prop('checked', !checkbox.prop('checked'));
+        $(this).toggleClass('selected', checkbox.prop('checked'));
+        
+        // Check how many rows are selected
+        const selectedCount = $('.row-checkbox:checked').length;
+
+        // Enable edit button if only one row is selected
+        if (selectedCount === 1) {
+
+            const viewCheck = document.getElementById('viewCheck');
+            viewCheck.checked = true;
+            viewCheck.dispatchEvent(new Event('change'));
+
+            // Extract data from the selected row
+            const adjustment_id = row.data('material-request-id');
+            const entry_date = row.data('entry-date');
+            const reason = row.data('reason');
+            const created_by = row.data('created-by-name');
+            const description = row.data('description');
+            const reference_number = row.data('reference-number');
+
+            const options = {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true,
+            };
+
+            const formattedDate = new Date(entry_date).toLocaleDateString('en-US', options).replace(',', '');
+            
+            $('#modalAdjustmentIDText').text(adjustment_id); // Display the adjustment ID
+            $('#modalEntryDateText').text(formattedDate); // Display the entry date
+            $('#modalReasonText').text(reason); // Display the reason
+            $('#modalCreatedByText').text(created_by); // Display the created by
+            $('#modalDescriptionText').text(description); // Display the description
+            $('#modalReferenceNumberText').text(reference_number); // Display the reference number
+            
+            fetchItemsForAdjustment(adjustment_id);
+
+            const adjustmentId = document.getElementById('modalAdjustmentIDText').textContent;
+            const employeeId = document.getElementById('loggedInEmployeeId').value;
+            const employeeName = document.getElementById('loggedInName').value;
+
+            // Embed the PDF in an iframe within #pdfView
+            const pdfUrl = `generate_pdf.php?adjustment_id=${adjustmentId}&employee_id=${encodeURIComponent(employeeId)}&employee_name=${encodeURIComponent(employeeName)}`;
+            document.getElementById('pdfView').innerHTML = `<iframe src="${pdfUrl}" width="100%" height="600px" style="border: none;"></iframe>`;
+            
+            // Show the confirmation modal
+            $('#confirmDeleteModal').modal('show');
+            
+            document.getElementById('confirmDeleteBtn').onclick = function() {
+                $.ajax({
+                    url: 'delete_adjustment.php', // The PHP file that handles deletion
+                    method: 'POST',
+                    data: { adjustment_id: adjustment_id }, // Send employee ID for deletion
+                    success: function(response) {
+                        // Reload the page to reflect changes
+                        window.location.reload();
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Error deleting material request. Please try again.');
+                        console.error('Error:', xhr.responseText);
+                    }
+                });
+                $('#confirmDeleteModal').modal('hide'); // Hide modal after confirming
+            };
+
+            }
+    });
+
+    // Open modal and populate it with adjustment data when a row is clicked
+    $('#adjustmentTable tbody').on('click', '#completeMaterialRequest', function (event) {
+        // Prevent the event from propagating to the row click event
+        event.stopPropagation();
+
+        // Extract data from the clicked row's data attributes
+        const row = $(this).closest('tr');
+        const checkbox = row.find('.row-checkbox');
+
+        // Toggle checkbox state and row selection
+        checkbox.prop('checked', !checkbox.prop('checked'));
+        $(this).toggleClass('selected', checkbox.prop('checked'));
+        
+        // Check how many rows are selected
+        const selectedCount = $('.row-checkbox:checked').length;
+
+        // Enable edit button if only one row is selected
+        if (selectedCount === 1) {
+            const viewCheck = document.getElementById('viewCheck');
+            viewCheck.checked = true;
+            viewCheck.dispatchEvent(new Event('change'));
+
+            // Extract data from the selected row
+            const adjustment_id = row.data('material-request-id');
+            const entry_date = row.data('entry-date');
+            const reason = row.data('reason');
+            const created_by = row.data('created-by-name');
+            const description = row.data('description');
+            const reference_number = row.data('reference-number');
+
+            const options = {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true,
+            };
+
+            const formattedDate = new Date(entry_date).toLocaleDateString('en-US', options).replace(',', '');
+            
+            $('#modalEntryDate').text(formattedDate); // Display the entry date
+            $('#modalReason').text(reason); // Display the reason
+            $('#modalCreatedBy').text(created_by); // Display the created by
+            $('#modalDescription').text(description); // Display the description
+            $('#modalReferenceNumber').text(reference_number); // Display the reference number
+            
+            fetchSmallItemsForAdjustment(adjustment_id);
+
+            $('#modalAdjustmentID').text(adjustment_id); // Display the adjustment ID
+            
+            // Open the offcanvas modal
+            $('#confirmCompleteModal').modal('show');
         }
     });
 
@@ -199,12 +338,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
-
-    // Open the Add Adjustment offcanvas modal
-    document.getElementById('addAdjustmentBtn').addEventListener('click', function() {
-        const addAdjustmentModal = new bootstrap.Offcanvas(document.getElementById('addAdjustmentModal'));
-        addAdjustmentModal.show();
-    });
 
     // Save Adjustment functionality
     document.getElementById('saveItemBtn').addEventListener('click', function() {
@@ -266,36 +399,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     });
 
-    // Function to save adjustment to the database
-    function saveAdjustmentToDatabase(reasonId, referenceNumber, timestamp, description, createdBy, items) {
-        $.ajax({
-            url: 'add_adjustment.php', // Adjust this to your endpoint
-            method: 'POST',
-            dataType: 'json',
-            data: {
-                reason_id: reasonId,
-                reference_number: referenceNumber,
-                entry_date: timestamp,
-                description: description,
-                created_by: createdBy,
-                items: items // Send the items array as part of the AJAX request
-            },
-            success: function(response) {
-                console.log(response);
-
-                const addAdjustmentModal = new bootstrap.Offcanvas(document.getElementById('addAdjustmentModal'));
-                addAdjustmentModal.hide();
-
-                // Refresh the page or update the UI as needed
-                window.location.reload();
-            },
-            error: function(xhr, status, error) {
-                alert('Error adding the adjustment. Please try again.');
-                console.error('Error:', error);
-            }
-        });
-    }
-
     // Open confirmation modal for deletion
     document.getElementById('deleteAdjustmentBtn').addEventListener('click', function() {
         // Get item information
@@ -314,11 +417,39 @@ document.addEventListener('DOMContentLoaded', function () {
                     window.location.reload();
                 },
                 error: function(xhr, status, error) {
-                    alert('Error deleting adjustment. Please try again.');
+                    alert('Error deleting material request. Please try again.');
                     console.error('Error:', xhr.responseText);
                 }
             });
             $('#confirmDeleteModal').modal('hide'); // Hide modal after confirming
+        };
+
+    });
+
+    // Open confirmation modal for deletion
+    document.getElementById('confirmCompleteBtn').addEventListener('click', function() {
+
+        // Get item information
+        const adjustment_id = $('#modalAdjustmentID').text();
+
+        // Show the confirmation modal
+        $('#confirmCompleteModal').modal('show');
+        
+        document.getElementById('confirmCompleteBtn').onclick = function() {
+            $.ajax({
+                url: 'complete_adjustment.php', // The PHP file that handles deletion
+                method: 'POST',
+                data: { adjustment_id: adjustment_id}, // Send employee ID for deletion
+                success: function(response) {
+                    showInfoModal('Success', 'Material request completed successfully.');
+                },
+                error: function(xhr, status, error) {
+                    alert('Error updating material request. Please try again.');
+                    console.error('Error:', xhr.responseText);
+                }
+            });
+
+            $('#confirmCompleteModal').modal('hide'); // Hide modal after confirming
         };
 
     });
@@ -358,9 +489,53 @@ document.addEventListener('DOMContentLoaded', function () {
                                 <img class="text-start align-middle" src="data:image/jpeg;base64,${item.image}" alt="Item Image" style="width: 40px; height: 40px; object-fit: cover; margin-right: 10px;">
                                 <span class="align-middle">${item.item_name}</span>
                             </td>
+                            <td class="text-center align-middle">${item.quantity}</td>
                             <td class="text-center align-middle">${item.item_quantity}</td>
-                            <td class="text-center align-middle">${item.quantity_adjusted}</td>
-                            <td class="text-center align-middle">${item.previous_quantity}</td>
+                        </tr>
+                    `;
+                    tableBody.insertAdjacentHTML('beforeend', row);
+                });
+            },
+            error: function (xhr, status, error) {
+                console.error('AJAX request failed:', error);
+                console.log('Status:', status);
+                console.log('Response:', xhr.responseText);
+                alert('An error occurred while fetching data.');
+            }
+        });
+    }
+
+    function fetchSmallItemsForAdjustment(adjustment_id) {
+        if (!adjustment_id || adjustment_id === "[Adjustment ID]") {
+            console.error("Invalid adjustment ID:", adjustment_id);
+            return;
+        }
+    
+        $.ajax({
+            url: 'fetch_item_adjustments.php', 
+            type: 'GET',
+            dataType: 'json',  
+            data: { adjustment_id: adjustment_id },
+            success: function (data) {
+                if (!data || (Array.isArray(data) && data.length === 0)) {
+                    alert('No items found for this adjustment.');
+                    return;
+                }
+
+                // Clear existing table rows
+                const tableBody = document.querySelector('#itemAdjustmentTableSmall tbody');
+                tableBody.innerHTML = '';
+
+                // Populate table rows
+                data.forEach(item => {
+                    const row = `
+                        <tr>
+                            <td>
+                                <img class="text-start align-middle" src="data:image/jpeg;base64,${item.image}" alt="Item Image" style="width: 40px; height: 40px; object-fit: cover; margin-right: 10px;">
+                                <span class="align-middle">${item.item_name}</span>
+                            </td>
+                            <td class="text-center align-middle">${item.quantity}</td>
+                            <td class="text-center align-middle">${item.item_quantity}</td>
                         </tr>
                     `;
                     tableBody.insertAdjacentHTML('beforeend', row);

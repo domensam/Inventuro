@@ -84,10 +84,10 @@ if ($user) {
                     </a>
                     <ul id="repair" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
                         <li class="sidebar-item">
-                            <a href="index.php" class="sidebar-link">Request</a>
+                            <a href="index.php" class="sidebar-link">Claim a Repair</a>
                         </li>
                         <li class="sidebar-item">
-                            <a href="index.php" class="sidebar-link">Request Material</a>
+                            <a href="../claimed/index.php" class="sidebar-link">Your Claimed Repairs</a>
                         </li>
                     </ul>
                 </li>
@@ -214,7 +214,8 @@ if ($user) {
                                     repair_request.*, 
                                     repair_request.repair_request_id AS r_repair_request_id, 
                                     repair.*,
-                                    employee.*, 
+                                    employee.*,
+                                    urgency.*,
                                     machine.*, 
                                     department.*, 
                                     warranty.*
@@ -226,6 +227,8 @@ if ($user) {
                                     employee ON repair.handled_by = employee.employee_id
                                 LEFT JOIN 
                                     machine ON repair_request.machine_id = machine.machine_id
+                                LEFT JOIN
+                                	urgency ON machine.machine_urgency = urgency.id
                                 LEFT JOIN 
                                     department ON machine.machine_department_id = department.department_id
                                 LEFT JOIN 
@@ -240,14 +243,14 @@ if ($user) {
                                     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                                         // Define status and urgency classes
                                         $statusClass = $row['status'] === 'Not Started' ? 'text-secondary' : ($row['status'] === 'Started' ? 'text-warning' : 'text-success');
-                                        $urgencyClass = $row['urgency'] === 'High' ? 'text-danger' : ($row['urgency'] === 'Medium' ? 'text-warning' : 'text-success');
+                                        $urgencyClass = $row['name'] === 'High' ? 'text-danger' : ($row['name'] === 'Medium' ? 'text-warning' : 'text-success');
 
                                         echo "<tr 
                                             data-repair-request-id='" . htmlspecialchars($row['r_repair_request_id']) . "' 
                                             data-date-requested='" . htmlspecialchars($row['date_requested']) . "'
                                             data-machine-name='" . htmlspecialchars($row['machine_name']) . "'
                                             data-department='" . htmlspecialchars($row['department_name']) . "'
-                                            data-urgency='" . htmlspecialchars($row['urgency']) . "'
+                                            data-urgency='" . htmlspecialchars($row['name']) . "'
                                             data-status='" . htmlspecialchars($row['status']) . "'
                                             data-requested-by='" . htmlspecialchars($row['requested_by']) . "'
                                             data-warranty-status='" . htmlspecialchars($row['warranty_status'] ?? 'No warranty') . "'
@@ -257,15 +260,15 @@ if ($user) {
                                             <td>" . htmlspecialchars($row['r_repair_request_id'] ?? '') . "</td>
                                             <td>" . htmlspecialchars($row['machine_name'] ?? '') . "</td>
                                             <td>" . htmlspecialchars($row['department_name'] ?? '') . "</td>
-                                            <td class='$urgencyClass'>" . htmlspecialchars($row['urgency'] ?? '') . "</td>
+                                            <td class='$urgencyClass'>" . htmlspecialchars($row['name'] ?? '') . "</td>
                                             <td class='$statusClass'>" . htmlspecialchars($row['status'] ?? '') . "</td>
                                             <td class='text-center'>
-                                                <button class='btn btn-sm btn-primary' onclick='viewDetails(\"" . $row['r_repair_request_id'] . "\")'>View</button>
+                                                <button class='btn btn-sm btn-primary')'>View</button>
                                             </td>
                                         </tr>";
                                     }
                                 } else {
-                                    echo "<tr><td colspan='8'>No repair requests found.</td></tr>";
+                                    echo "<tr class='empty-row'><td colspan='8' class='text-center'>No repair requests found.</td></tr>";
                                 }
                             } catch (PDOException $e) {
                                 echo "<tr><td colspan='8'>Error fetching data: " . htmlspecialchars($e->getMessage()) . "</td></tr>";
@@ -378,7 +381,7 @@ if ($user) {
                                     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                                         // Define status and urgency classes
                                         $statusClass = isset($row['m_status']) ? ($row['m_status'] === 'Not Started' ? 'text-secondary' : ($row['m_status'] === 'Started' ? 'text-warning' : 'text-success')) : '';
-                                        $urgencyClass = isset($row['urgency']) ? ($row['urgency'] === 'High' ? 'text-danger' : ($row['urgency'] === 'Medium' ? 'text-warning' : 'text-success')) : '';
+                                        $urgencyClass = isset($row['name']) ? ($row['name'] === 'High' ? 'text-danger' : ($row['name'] === 'Medium' ? 'text-warning' : 'text-success')) : '';
 
                                         echo "<tr 
                                             data-material-request-id='" . htmlspecialchars($row['m_material_request_id']) . "' 
@@ -386,7 +389,7 @@ if ($user) {
                                             data-status='" . htmlspecialchars($row['m_status'] ?? '') . "'
                                             data-machine-name='" . htmlspecialchars($row['machine_name'] ?? '') . "'
                                             data-department='" . htmlspecialchars($row['department_name'] ?? '') . "'
-                                            data-urgency='" . htmlspecialchars($row['urgency'] ?? '') . "'
+                                            data-urgency='" . htmlspecialchars($row['name'] ?? '') . "'
                                             data-details='" . htmlspecialchars($row['details'] ?? '') . "'>
                                             <td class='text-center'><input type='checkbox' class='row-checkbox'></td>
                                             <td>" . htmlspecialchars(date("d M Y g:i A", strtotime($row['m_date_requested'] ?? ''))) . "</td>
@@ -400,7 +403,7 @@ if ($user) {
                                         </tr>";
                                     }
                                 } else {
-                                    echo "<tr><td colspan='8'>No material requests found.</td></tr>";
+                                    echo "<tr class='empty-row'><td colspan='8' class='text-center'>No material requests found.</td></tr>";
                                 }
                             } catch (PDOException $e) {
                                 echo "<tr><td colspan='8'>Error fetching data: " . htmlspecialchars($e->getMessage()) . "</td></tr>";

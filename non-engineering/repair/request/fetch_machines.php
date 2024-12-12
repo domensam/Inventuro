@@ -30,12 +30,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['department'])) {
 
         // Fetch machines associated with the given department
         $stmt = $conn->prepare('
-            SELECT machine_id, machine_name
-            FROM machine
-            JOIN department
-            ON machine.machine_department_id = department.department_id
-            WHERE department.department_name = :department
-            ORDER BY machine_name ASC
+        SELECT 
+            machine.*, 
+            department.department_name, 
+            repair_request.repair_request_id,
+            repair_request.date_requested,
+            repair_request.status
+        FROM 
+            machine
+        JOIN 
+            department ON machine.machine_department_id = department.department_id
+        LEFT JOIN 
+            repair_request ON machine.machine_id = repair_request.machine_id
+            AND repair_request.date_requested = (
+                SELECT MAX(repair_request.date_requested)
+                FROM repair_request
+                WHERE repair_request.machine_id = machine.machine_id
+            )
+        WHERE 
+            department.department_name = :department
+            AND repair_request.status = "Done"
+        ORDER BY 
+            machine.machine_name ASC
         ');
         $stmt->bindParam(':department', $department, PDO::PARAM_STR);
         $stmt->execute();

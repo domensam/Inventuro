@@ -273,3 +273,57 @@ h2 {
 .dataTables_paginate {
     padding-right: 20px;
 }
+
+.default-view {
+    display: block;
+}
+
+.add-machine-view {
+    display: none;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.steps {
+    position: relative;
+    padding: 0 20px;
+    display: flex; /* Ensure the buttons are evenly distributed */
+    justify-content: space-between; /* Spread buttons across the entire width */
+    width: 100%; /* Make sure it spans the full width of the container */
+}
+
+.steps::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #dee2e6;
+    z-index: 0;
+    width: 100%; /* Ensure the line spans the full width */
+}
+
+.steps button {
+    position: relative;
+    z-index: 1;
+    background-color: #fff;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid #dee2e6;
+    margin: 0 30px;
+}
+
+.steps button.btn-primary {
+    border-color: #0d6efd;
+    background-color: #0d6efd;
+    color: #fff;
+}

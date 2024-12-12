@@ -35,6 +35,21 @@ if ($user) {
     $last_name = $user['last_name'];
     $employee_id = $user['employee_id'];
     $department = $user['department'];
+    $date_created = $user['date_created'];
+
+    $departmentStmt = $conn->prepare("
+    SELECT department_name
+    FROM department
+    WHERE department_id=?
+    LIMIT 1
+    ");
+
+    $departmentStmt->execute([$department]);
+
+    // Fetch the result
+    $departmentName = $departmentStmt->fetch(PDO::FETCH_ASSOC);
+
+    $department_name = $departmentName['department_name'];
 }
 
 ?>
@@ -72,10 +87,19 @@ if ($user) {
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a href="index.php" class="sidebar-link active">
+                    <a href="#" class="sidebar-link collapsed has-dropdown active" data-bs-toggle="collapse"
+                        data-bs-target="#machines" aria-expanded="false" aria-controls="machines">
                         <i class="bi bi-tools"></i>
                         <span>Repair</span>
                     </a>
+                    <ul id="machines" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
+                        <li class="sidebar-item">
+                            <a href="../list/index.php" class="sidebar-link">View Machines List</a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="index.php" class="sidebar-link">Create a Request</a>
+                        </li>
+                    </ul>
                 </li>
                 <li class="sidebar-item">
                     <a href="../../profile/index.php" class="sidebar-link">
@@ -138,7 +162,7 @@ if ($user) {
                             </div>
                             <div class="col-4">
                                 <p><strong>Employee ID:</strong> <span id="employee-id-text"><?= $employee_id ?></span></p>
-                                <p><strong>Department: </strong><?=$department?></p>
+                                <p><strong>Department: </strong><?=$department_name?></p>
                             </div>
                         </div>
                         
@@ -162,23 +186,13 @@ if ($user) {
                                     <!-- Department (Disabled) -->
                                     <div class="mb-3">
                                         <label for="department" class="form-label">Department</label>
-                                        <input type="text" class="form-control" id="department" name="department" value="<?=$department?>" disabled>
+                                        <input type="text" class="form-control" id="department" name="department" value="<?=$department_name?>" placeholder="<?$department_name?>" disabled>
                                     </div>
 
                                     <!-- Machine Dropdown -->
                                     <div class="mb-3">
                                         <label for="machine" class="form-label text-danger">Machine*</label>
                                         <select class="form-select" id="machine" name="machine" required>
-                                        </select>
-                                    </div>
-
-                                    <!-- Urgency Dropdown -->
-                                    <div class="mb-3">
-                                        <label for="urgency" class="form-label text-danger">Urgency*</label>
-                                        <select class="form-select" id="urgency" name="urgency" required>
-                                            <option value="low">Low</option>
-                                            <option value="medium">Medium</option>
-                                            <option value="high">High</option>
                                         </select>
                                     </div>
                                 </div>
@@ -238,6 +252,7 @@ if ($user) {
                                     LEFT JOIN repair ON repair_request.repair_request_id = repair.repair_request_id
                                     LEFT JOIN employee ON repair.handled_by = employee.employee_id
                                     LEFT JOIN machine ON repair_request.machine_id = machine.machine_id
+                                    LEFT JOIN urgency ON machine.machine_urgency = urgency.id
                                     WHERE repair_request.requested_by = ?
                                     ORDER BY repair_request.date_requested ASC";
 
@@ -273,8 +288,8 @@ if ($user) {
 
                                 // Determine urgency text color class
                                 $urgencyClass = '';
-                                $urgencyText = htmlspecialchars($row['urgency']);
-                                switch ($row['urgency']) {
+                                $urgencyText = htmlspecialchars($row['name']);
+                                switch ($row['name']) {
                                     case 'Low':
                                         $urgencyClass = 'text-success'; // Green
                                         break;
@@ -292,7 +307,7 @@ if ($user) {
                                         data-machine-id='" . htmlspecialchars($row['machine_id']) . "'
                                         data-machine-name='" . htmlspecialchars($row['machine_name']) . "'
                                         data-status ='" . htmlspecialchars($row['status']) . "'
-                                        data-urgency='" . htmlspecialchars($row['urgency']) . "'
+                                        data-urgency='" . htmlspecialchars($row['name']) . "'
                                         data-department='" . htmlspecialchars($department) . "'
                                         data-requested-by='" . htmlspecialchars($first_name . " " . $last_name . " (" . $employee_id . ")") . "'
                                         data-handled-by='" . (
@@ -351,7 +366,7 @@ if ($user) {
                     </div>
                     <div class="col-8">
                         <p>
-                            <select id="machineName" class="form-select" name="machineName" required>
+                            <select id="machineName" class="form-select" name="machineName" disabled>
                                 <!-- Options can be populated dynamically using JavaScript or PHP -->
                             </select>
                         </p>
@@ -371,9 +386,7 @@ if ($user) {
                     </div>
                     <div class="col-8">
                         <p>
-                            <select id="modalUrgency" class="form-select" name="modalUrgency" required>
-                                <!-- Options can be populated dynamically using JavaScript or PHP -->
-                            </select>
+                            <span id="modalUrgency"></span>
                         </p>
                     </div>
                 </div>

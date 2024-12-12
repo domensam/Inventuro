@@ -99,15 +99,46 @@ document.addEventListener('DOMContentLoaded', function () {
     $('input[type="checkbox"]', rows).prop('checked', this.checked);
   });
 
+  $('#requestMaterialBtn').on('click', function () {
+    const maintenanceId = $('#repairRequestIdLabel').text().trim(); // Get maintenance_id from button data attribute
+    console.log(maintenanceId);
+    
+    fetch('claim_repair_request.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            maintenance_id: maintenanceId // Send the maintenance_id to the server
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data); // Handle the response
+        if (data.message === 'Success') {
+            showInfoModal('Successful', 'Maintenance task claimed successfully!');
+        } else {
+          showInfoModal('Successful', data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+  });
+
   // Event listener for row clicks
-  $('#historyTable tbody').on('click', 'tr', function () {
+  $('#historyTable tbody').on('click', '#view-details-btn', function () {
+
+    // Get the parent row of the clicked button
+    const row = $(this).closest('tr');
+
     // Get data from the clicked row
-    const maintenanceId = $(this).data('maintenance-id');
-    const dateRequested = $(this).data('date-requested');
-    const machineName = $(this).data('machine-name');
-    const department = $(this).data('department');
-    const status = $(this).data('status');
-    const warrantyStatus = $(this).data('warranty-status');
+    const maintenanceId = row.data('maintenance-id');
+    const dateRequested = row.data('date-requested');
+    const machineName = row.data('machine-name');
+    const department = row.data('department');
+    const status = row.data('status');
+    const warrantyStatus = row.data('warranty-status');
 
     // Populate modal fields
     $('#repairRequestIdLabel').text(maintenanceId);
@@ -229,7 +260,6 @@ document.addEventListener('DOMContentLoaded', function () {
                             <tr>
                                 <th>Item Name</th>
                                 <th>Quantity Needed</th>
-                                <th>Current Quantity</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -253,7 +283,6 @@ document.addEventListener('DOMContentLoaded', function () {
                                      style="margin-left: 60px; width: 100px;" 
                                      ${isDisabled ? 'disabled' : ''}>
                           </td>
-                          <td style="padding-left: 120px;">${item.item_quantity}</td>
                       </tr>
                   `);
                 });
@@ -270,6 +299,38 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
   }
+
+  $('#historyTable tbody').on('click', '#done-btn', function () {
+    const maintenanceId = $('#repairRequestIdLabel').text().trim() ?? ''; // Get maintenance_id from button data attribute
+    const handledBy = "202830-ENG";
+
+    console.log(maintenanceId);
+
+    // Send maintenance_id and handled_by to server
+    fetch('complete_repair_request.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            maintenance_id: maintenanceId,  // Send the maintenance_id to the server
+            handled_by: handledBy,          // Send the handled_by value to the server
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data); // Handle the response
+        if (data.message === 'Success') {
+            showInfoModal('Successful', 'Maintenance task completed successfully!');
+        } else {
+            showInfoModal('Error', data.message);
+        }
+    })
+    .catch(error => {
+        console.log('Error:', error);
+        showInfoModal('Error', 'An error occurred while completing the task.');
+    });
+});
 
 // Event listener for save button
 $('#saveMaterialRequestBtn').click(function() {
@@ -357,8 +418,6 @@ $('#deleteMaterialRequestBtn').click(function() {
       });
   }
 });
-
-
   // Custom Search Functionality for Table and Timeline
   const searchBar = document.getElementById('search-bar');
   searchBar.addEventListener('input', function () {
@@ -430,179 +489,5 @@ $('#deleteMaterialRequestBtn').click(function() {
   // Load request by default
   setActiveLink("request");
   showContent("request");
-
-  // Offcanvas modal button event for "Request Material"
-  $('#requestMaterialBtn').on('click', function () {
-    const offcanvasModal = bootstrap.Offcanvas.getInstance(document.getElementById('repairRequestModal'));
-    if (offcanvasModal) offcanvasModal.hide();
-
-    const repairRequestId = $('#repairRequestIdLabel').text();
-    showInfoModal('Request Material', `You have selected maintenance id: ${repairRequestId}. Please proceed to request material.`);
-    $('#modalRepairRequestId').text(repairRequestId);
-
-    showContent("requestMaterials");
-  });
-
-  // Cart functionality
-  let cart = []; // Initialize the cart array
-
-  document.querySelectorAll('.add-to-cart-btn').forEach(button => {
-      button.addEventListener('click', function() {
-          const row = this.closest('tr'); // Get the closest table row
-          const itemId = row.dataset.itemCode; // Retrieve item ID from data attribute
-          const itemName = row.dataset.itemName; // Retrieve item name from data attribute
-          const itemQuantity = parseInt(row.dataset.itemQuantity); // Retrieve item quantity from data attribute
-  
-          // Toggle the 'selected' class on the row
-          const isSelected = row.classList.toggle('selected');
-  
-          // Get the checkbox within the current row
-          const checkbox = row.querySelector('.row-checkbox');
-  
-          // Check or uncheck the checkbox based on the row's selection state
-          checkbox.checked = isSelected;
-  
-          if (isSelected) {
-              // If the row was not previously selected, add the item to the cart
-              const existingItem = cart.find(item => item.id === itemId);
-              if (existingItem) {
-                  // If the item already exists in the cart, increment the quantity
-                  existingItem.quantity += 1; // Change this if you want to control the quantity further
-              } else {
-                  // Add the item to the cart if it's not already there
-                  cart.push({
-                      id: itemId,
-                      name: itemName,
-                      quantity: 1, // Default quantity
-                      available: itemQuantity
-                  });
-              }
-          } else {
-              // If the row is unselected, remove the item from the cart
-              cart = cart.filter(item => item.id !== itemId); // Remove the item from the cart
-          }
-  
-          console.log(cart); // Log the cart for debugging purposes
-      });
-  });  
-
-  function openCartModal() {
-    const cartModalBody = document.getElementById('cartModalBody');
-    cartModalBody.innerHTML = ''; // Clear previous cart items
-
-    cart.forEach(item => {
-        const row = document.createElement('tr');
-
-        // Create cells for item code, item name, available quantity, requested quantity, and note
-        const itemCodeCell = document.createElement('td');
-        itemCodeCell.textContent = item.id; // Item code
-        row.appendChild(itemCodeCell);
-
-        const itemNameCell = document.createElement('td');
-        itemNameCell.textContent = item.name; // Item name
-        row.appendChild(itemNameCell);
-
-        const availableQtyCell = document.createElement('td');
-        availableQtyCell.textContent = item.available; // Available quantity from cart
-        row.appendChild(availableQtyCell);
-
-        const requestedQtyCell = document.createElement('td');
-        const qtyInput = document.createElement('input');
-        qtyInput.type = 'number';
-        qtyInput.value = item.quantity || 1; // Default to 1 if quantity is not set
-        qtyInput.min = 1; // Minimum quantity
-        qtyInput.max = item.available; // Max quantity based on availability
-        qtyInput.classList.add('form-control');
-        qtyInput.setAttribute('data-item-id', item.id); // Set data-item-id attribute
-        requestedQtyCell.appendChild(qtyInput);
-        row.appendChild(requestedQtyCell);
-
-        // Create a note cell for out of stock items
-        const noteCell = document.createElement('td');
-        if (item.available === 0) {
-            noteCell.innerHTML = '<span class="text-danger">Not guaranteed, and ordering may take a while</span>';
-        } else {
-            noteCell.textContent = ''; // No note for items in stock
-        }
-        row.appendChild(noteCell);
-
-        // Append the row to the cart modal body
-        cartModalBody.appendChild(row);
-    });
-
-    // Show the modal
-    const cartModal = new bootstrap.Modal(document.getElementById('cartModal'));
-    cartModal.show();
-  }
-
-// Attach the function to the complete button
-document.getElementById('completeRequestBtn').addEventListener('click', openCartModal);
-
-document.getElementById('completeOrderBtn').addEventListener('click', function() {
-  // Get the repair request ID from the modal
-  const repairRequestId = document.getElementById('modalRepairRequestId').textContent;
-  const requestedById = document.getElementById('employee-id-text').textContent;
-
-  // Prepare the order data
-  const orderItems = cart.map(item => {
-      const qtyInput = document.querySelector(`input[data-item-id="${item.id}"]`); // Use data-item-id
-      if (qtyInput) {
-          return {
-              id: item.id,
-              name: item.name,
-              quantity: parseInt(qtyInput.value), // Get the quantity input
-              available: item.available
-          };
-      } else {
-          console.error(`Quantity input not found for item: ${item.id}`);
-          return null; // Return null if input is not found
-      }
-  }).filter(item => item !== null); // Filter out any null values
-
-  // Check if orderItems is empty
-  if (orderItems.length === 0) {
-      showInfoModal('Error', 'Please select at least one item in the cart before completing the order.');
-      return;
-  }
-
-  // Validate quantities
-  for (const item of orderItems) {
-    if (item.quantity < 1) {
-        showInfoModal('Error', `The quantity for item "${item.name}" cannot be less than 1.`);
-        return;
-    }
-    if (item.quantity > item.available) {
-        showInfoModal('Error', `The quantity for item "${item.name}" exceeds available stock.`);
-        return;
-    }
-  }
-  // Send the order data to your server
-  $.ajax({
-      url: 'process_order.php', // Adjust this to your server-side processing script
-      method: 'POST',
-      dataType: 'json',
-      contentType: 'application/json', // Specify content type
-      data: JSON.stringify({
-          items: orderItems,
-          repair_request_id: repairRequestId, // Include the repair request ID
-          requested_by: requestedById
-      }),
-      success: function(response) {
-        if (response.success) {
-            showInfoModal('Success', response.message); // Show success message
-            cart = []; // Clear the cart
-            $('#cartModal').modal('hide'); // Hide the modal
-        } else {
-            // Handle errors returned from the server
-            showInfoModal('Error', response.message); // Show the error message
-            console.error('Error:', response.message);
-        }
-      },
-      error: function(xhr, status, error) {
-        console.error('AJAX Error:', xhr.responseText); // Log full response
-        showInfoModal('Error', 'An error occurred while processing your order. Please try again.');
-      }    
-  });
-});
 
 });

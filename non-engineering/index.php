@@ -37,6 +37,20 @@ if ($user) {
     $last_name = $user['last_name'];
     $employee_id = $user['employee_id'];
     $department = $user['department'];
+
+    $departmentStmt = $conn->prepare("
+    SELECT department_name
+    FROM department
+    WHERE department_id=?
+    LIMIT 1
+    ");
+
+    $departmentStmt->execute([$department]);
+
+    // Fetch the result
+    $departmentName = $departmentStmt->fetch(PDO::FETCH_ASSOC);
+
+    $department_name = $departmentName['department_name'];
 }
 
 $stmt_requests = $conn->prepare("SET time_zone = '+08:00'");
@@ -44,10 +58,13 @@ $stmt_requests->execute();
 
 // Fetch top 5 most recent requests for the user
 $stmt_requests = $conn->prepare("
-SELECT * FROM repair_request
-WHERE requested_by = ?
-ORDER BY date_requested DESC
-LIMIT 5
+SELECT * 
+FROM repair_request
+JOIN machine ON repair_request.machine_id = machine.machine_id
+JOIN urgency ON machine.machine_urgency = urgency.id
+WHERE repair_request.requested_by = ?
+ORDER BY repair_request.date_requested DESC
+LIMIT 5;
 ");
 
 $stmt_requests->execute([$employee_id]); // Assuming 'requested_by' is employee_id
@@ -84,10 +101,19 @@ $recent_requests = $stmt_requests->fetchAll(PDO::FETCH_ASSOC);
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a href="repair/request/index.php" class="sidebar-link">
+                    <a href="#" class="sidebar-link collapsed has-dropdown" data-bs-toggle="collapse"
+                        data-bs-target="#machines" aria-expanded="false" aria-controls="machines">
                         <i class="bi bi-tools"></i>
                         <span>Repair</span>
                     </a>
+                    <ul id="machines" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
+                        <li class="sidebar-item">
+                            <a href="repair/list/index.php" class="sidebar-link">View Machines List</a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="repair/request/index.php" class="sidebar-link">Create a Request</a>
+                        </li>
+                    </ul>
                 </li>
                 <li class="sidebar-item">
                     <a href="profile/index.php" class="sidebar-link">
@@ -150,7 +176,7 @@ $recent_requests = $stmt_requests->fetchAll(PDO::FETCH_ASSOC);
                             </div>
                             <div class="col-4">
                                 <p><strong>Employee ID: </strong><?=$employee_id?></p>
-                                <p><strong>Department: </strong><?=$department?></p>
+                                <p><strong>Department: </strong><?=$department_name?></p>
                             </div>
                         </div>
                     </div>
@@ -183,7 +209,7 @@ $recent_requests = $stmt_requests->fetchAll(PDO::FETCH_ASSOC);
 
                             // Determine urgency color class
                             $urgencyClass = '';
-                            $urgencyText = htmlspecialchars($request['urgency']);
+                            $urgencyText = htmlspecialchars($request['name']);
                             switch ($urgencyText) {
                                 case 'Low':
                                     $urgencyClass = 'text-success'; // Green
@@ -198,13 +224,13 @@ $recent_requests = $stmt_requests->fetchAll(PDO::FETCH_ASSOC);
                         ?>
                             <li class="list-group-item d-flex justify-content-between align-items-start" 
                                 data-request-id="<?= htmlspecialchars($request['repair_request_id']) ?>" 
-                                data-machine="<?= htmlspecialchars($request['machine_id']) ?>"
+                                data-machine="<?= htmlspecialchars($request['machine_name']) ?>"
                                 data-status="<?= $statusText ?>"
                                 data-urgency="<?= $urgencyText ?>"
                                 data-date="<?= date("d M Y", strtotime($request['date_requested'])) ?>">
                                 <div class="ms-2 me-auto">
                                     <div class="fw-bold">Request ID: <?= htmlspecialchars($request['repair_request_id']) ?></div>
-                                    Machine: <?= htmlspecialchars($request['machine_id']) ?> | 
+                                    Machine: <?= htmlspecialchars($request['machine_name']) ?> - <?= htmlspecialchars($request['machine_serial_number']) ?> | 
                                     <span class="<?= $statusClass ?>">Status: <?= $statusText ?></span> | 
                                     <span class="<?= $urgencyClass ?>">Urgency: <?= $urgencyText ?></span>
                                 </div>

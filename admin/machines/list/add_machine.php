@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $stmtMachine->bindValue(':image', null, PDO::PARAM_NULL);
         }
-
+        
         // Execute the insert query
         $stmtMachine->execute();
 

@@ -8,9 +8,8 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['employee_id']) && $_SESSION[
     include '../../../connect.php';
 
     // Check if all required POST data is set
-    if (isset($_POST['machine_id'], $_POST['urgency'], $_POST['details'], $_POST['requested_by'])) {
+    if (isset($_POST['machine_id'], $_POST['details'], $_POST['requested_by'])) {
         $machine_id = $_POST['machine_id'];
-        $urgency = $_POST['urgency'];
         $details = $_POST['details'];
         $requested_by = $_POST['requested_by'];
         $status = 'Not Started'; // Default status for new requests
@@ -21,15 +20,14 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['employee_id']) && $_SESSION[
 
             // Insert into repair_request
             $stmt = $conn->prepare("
-                INSERT INTO repair_request (machine_id, date_requested, status, requested_by, urgency, details)
-                VALUES (:machine_id, NOW(), :status, :requested_by, :urgency, :details)
+                INSERT INTO repair_request (machine_id, date_requested, status, requested_by, details)
+                VALUES (:machine_id, NOW(), :status, :requested_by, :details)
             ");
 
             // Bind parameters
             $stmt->bindParam(':machine_id', $machine_id, PDO::PARAM_INT);
             $stmt->bindParam(':status', $status, PDO::PARAM_STR);
             $stmt->bindParam(':requested_by', $requested_by, PDO::PARAM_STR);
-            $stmt->bindParam(':urgency', $urgency, PDO::PARAM_STR);
             $stmt->bindParam(':details', $details, PDO::PARAM_STR);
 
             // Execute the repair_request insertion

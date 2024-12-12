@@ -61,14 +61,45 @@ class PDFWithWatermark extends TCPDF {
 try {
     // Prepare and execute SQL statement
     $stmtAdjustmentList = $conn->prepare('
-        SELECT * FROM item_adjustment_list
-        JOIN item ON item_adjustment_list.item_id = item.item_code
-        JOIN item_adjustment ON item_adjustment_list.adjustment_id = item_adjustment.adjustment_id
-        JOIN item_adjustment_reason ON item_adjustment_reason.reason_id = item_adjustment.reason_id
-        WHERE item_adjustment_list.adjustment_id = :adjustment_id
+        SELECT 
+            material_request.material_request_id,
+            material_request.timestamp,
+            employee.first_name,
+            employee.last_name,
+            repair_request.repair_request_id,
+            maintenance.maintenance_id,
+            COALESCE(machine1.machine_name, machine2.machine_name) AS machine_name,  -- Use machine_name from second join if first is NULL
+            urgency.name AS urgency_name,
+            material_request.status,
+            item.image,
+            item.item_name, 
+            item.item_quantity,
+            material_request_items.quantity
+        FROM 
+            material_request 
+        LEFT JOIN 
+            material_request_items ON material_request.material_request_id = material_request_items.material_request_id
+        LEFT JOIN 
+            item ON material_request_items.item_id = item.item_code
+        LEFT JOIN
+            employee ON material_request.requested_by = employee.employee_id
+        LEFT JOIN
+            repair_request ON material_request.repair_request_id = repair_request.repair_request_id
+        LEFT JOIN 
+            maintenance ON material_request.maintenance_id = maintenance.maintenance_id
+        LEFT JOIN 
+            machine_parts ON machine_parts.machine_part_item_code = item.item_code
+        LEFT JOIN
+            machine AS machine1 ON machine_parts.machine_id = machine1.machine_id  -- First LEFT JOIN to machine
+        LEFT JOIN
+            machine AS machine2 ON machine_parts.machine_id = machine2.machine_id  -- Second LEFT JOIN to machine
+        LEFT JOIN
+            urgency ON machine1.machine_urgency = urgency.id  -- Using machine1 here, but could be either machine1 or machine2
+        WHERE 
+            material_request.material_request_id = :material_request_id;
     ');
 
-    $stmtAdjustmentList->bindParam(':adjustment_id', $adjustment_id, PDO::PARAM_STR);
+    $stmtAdjustmentList->bindParam(':material_request_id', $adjustment_id, PDO::PARAM_STR);
     if (!$stmtAdjustmentList->execute()) {
         throw new Exception("Failed to get adjustment details.");
     }
@@ -92,40 +123,41 @@ try {
 
     // Title and Adjustment Code
     $pdf->SetFont('helvetica', 'B', 16);
-    $pdf->Cell(0, 10, 'Inventory Adjustment', 0, 1, 'C');
+    $pdf->Cell(0, 10, 'Material Request', 0, 1, 'C');
     $pdf->SetFont('helvetica', 'I', 10);
     $pdf->SetTextColor(100, 100, 100);
-    $pdf->Cell(0, 10, 'Inventory Adjustment Code: ' . $firstRow['adjustment_id'], 0, 1, 'C');
+    $pdf->Cell(0, 10, 'Material Request Code: ' . $firstRow['material_request_id'], 0, 1, 'C');
     $pdf->Ln(10); // Line break
 
     // Reset color for details section
     $pdf->SetTextColor(0, 0, 0);
 
     // Date formatting
-    $formattedDate = date('d M Y, h:i A', strtotime($firstRow['entry_date']));
+    $formattedDate = date('d M Y, h:i A', strtotime($firstRow['timestamp']));
 
     // Adjustment Details Section
     $pdf->SetFont('helvetica', '', 12);
-    $pdf->Cell(50, 10, 'Date:', 0, 0);
+    $pdf->Cell(50, 10, 'Requested Date:', 0, 0);
     $pdf->Cell(0, 10, $formattedDate, 0, 1);
-    $pdf->Cell(50, 10, 'Reason:', 0, 0);
-    $pdf->Cell(0, 10, $firstRow['reason'], 0, 1);
-    $pdf->Cell(50, 10, 'Adjusted By:', 0, 0);
-    $pdf->Cell(0, 10, $firstRow['created_by'], 0, 1);
-    $pdf->Cell(50, 10, 'Description:', 0, 0);
-    $pdf->Cell(0, 10, $firstRow['description'], 0, 1);
-    $pdf->Cell(50, 10, 'Reference Number:', 0, 0);
-    $pdf->Cell(0, 10, $firstRow['reference_number'], 0, 1);
+    $pdf->Cell(50, 10, 'Requested By:', 0, 0);
+    $pdf->Cell(0, 10, $firstRow['first_name'] . ' ' . $firstRow['last_name'], 0, 1);
+    $pdf->Cell(50, 10, 'Repair / Maintenance No.:', 0, 0);
+    $pdf->Cell(0, 10, $firstRow['repair_request_id'] ?? $firstRow['maintenance_id'], 0, 1);
+    $pdf->Cell(50, 10, 'Urgency:', 0, 0);
+    $pdf->Cell(0, 10, $firstRow['urgency_name'] ?? 'Not Needed', 0, 1);
+    $pdf->Cell(50, 10, 'Status:', 0, 0);
+    $pdf->Cell(0, 10, $firstRow['status'], 0, 1);
     $pdf->Ln(10);
 
     // Table Header
     $pdf->SetFont('helvetica', 'B', 12);
     $pdf->SetFillColor(52, 58, 64);
     $pdf->SetTextColor(255, 255, 255);
-    $pdf->Cell(60, 10, 'Item Details', 1, 0, 'C', true);
-    $pdf->Cell(40, 10, 'New Quantity', 1, 0, 'C', true);
-    $pdf->Cell(40, 10, 'Quantity Adjusted', 1, 0, 'C', true);
-    $pdf->Cell(40, 10, 'Previous Quantity', 1, 1, 'C', true);
+
+    // Header cells (Item Details and Quantity) with fixed widths
+    $pdf->Cell(90, 10, 'Item Details', 1, 0, 'C', true);  // 90 width for 'Item Details'
+    $pdf->Cell(45, 10, 'Requested Quantity', 1, 0, 'C', true);  // 45 width for 'Requested Quantity'
+    $pdf->Cell(45, 10, 'Current Quantity', 1, 1, 'C', true);  // 45 width for 'Current Quantity'
 
     // Reset font and text color for the table content
     $pdf->SetFont('helvetica', '', 12);
@@ -133,26 +165,32 @@ try {
 
     // Loop through each item in the result and add it to the PDF table
     foreach ($result as $row) {
-        $pdf->Cell(60, 20, '', 1, 0); // Reserve space for combined image and name
-        $pdf->SetXY($pdf->GetX() - 60, $pdf->GetY());
+        // Image and item name in one row
+        $pdf->Cell(90, 20, '', 0, 0);  // Reserve space for image and item name
+        
+        // Set position to insert image (if available) and item name
+        $pdf->SetXY($pdf->GetX() - 90, $pdf->GetY());
+
+        // Check if an image exists for the item
         if (!empty($row['image'])) {
+            // Display image if available
             $pdf->Image('@' . $row['image'], $pdf->GetX() + 2, $pdf->GetY() + 2, 15, 15);
         } else {
-            $pdf->Cell(15, 20, '[No Image]', 0, 0, 'C');
+            // Display default image if no image is found
+            $pdf->Image('@' . file_get_contents('../../../images/gallery.png'), $pdf->GetX() + 2, $pdf->GetY() + 2, 15, 15);
         }
 
         // Move the cursor to the right side of the image and add the item name
         $pdf->SetXY($pdf->GetX() + 20, $pdf->GetY());
-        $pdf->Cell(40, 20, $row['item_name'], 0, 0, 'L');
+        $pdf->Cell(70, 20, $row['item_name'], 0, 0, 'L');
 
         // Quantities in separate cells
-        $pdf->Cell(40, 20, $row['item_quantity'], 1, 0, 'C');
-        $pdf->Cell(40, 20, $row['quantity_adjusted'], 1, 0, 'C');
-        $pdf->Cell(40, 20, $row['previous_quantity'], 1, 1, 'C');
+        $pdf->Cell(45, 20, $row['quantity'], 0, 0, 'C');
+        $pdf->Cell(45, 20, $row['item_quantity'], 0, 1, 'C');
     }
 
     // Output PDF to browser
-    $pdf->Output('Inventory_Adjustment_' . $adjustment_id . '.pdf', 'I');
+    $pdf->Output('Material_Request_' . $adjustment_id . '.pdf', 'I');
 
 } catch (Exception $e) {
     die('Error retrieving adjustment: ' . $e->getMessage());

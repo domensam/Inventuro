@@ -179,7 +179,6 @@ if ($user) {
                             
                             <!-- Right: Buttons and Dropdowns -->
                             <div class="d-flex justify-content-end align-items-center gap-2" style="padding-right: 20px;">
-                                <button type="button" id="addAdjustmentBtn" class="btn btn-outline-primary">New Adjustment</button>
                                 <div class="dropdown">
                                     <a class="btn btn-secondary" href="#" role="button" id="dropDownMore" 
                                     data-bs-toggle="dropdown" aria-expanded="false">
@@ -207,37 +206,54 @@ if ($user) {
                         <tr>
                             <th class="text-center" style="width: 5%;"><input type="checkbox" id="selectAll"></th>
                             <th class="text-start" style="padding-left: 13px;">Date</th>
-                            <th class="text-start" style="padding-left: 13px;">Reason</th>
-                            <th class="text-start" style="padding-left: 10px;">Description</th>
-                            <th class="text-start" style="padding-right: 13px;">Reference Number</th>
-                            <th class="text-start" style="padding-right: 13px;">Created by</th>
-                            <th class="text-start" style="padding-right: 13px;">Created at</th>
+                            <th class="text-start" style="padding-left: 13px;">Repair / Maintenance No.</th>
+                            <th class="text-start" style="padding-right: 13px;">Urgency</th>
+                            <th class="text-start" style="padding-left: 10px;">Requested By</th>
+                            <th class="text-center" style="padding-right: 13px;">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                     <?php
                         try {
-                            $sql = "SELECT * FROM item_adjustment 
-                            JOIN employee ON item_adjustment.created_by = employee.employee_id 
-                            JOIN item_adjustment_reason ON item_adjustment.reason_id = item_adjustment_reason.reason_id";
+                            $sql = "SELECT 
+                                    material_request.*,
+                                    material_request_items.*,
+                                    employee.*,
+                                    urgency.name
+                                    FROM material_request
+                                    LEFT JOIN material_request_items ON material_request.material_request_id = material_request_items.material_request_id
+                                    LEFT JOIN employee ON material_request.requested_by = employee.employee_id
+                                    LEFT JOIN item ON material_request_items.item_id = item.item_code
+                                    LEFT JOIN repair_request ON material_request.repair_request_id = repair_request.repair_request_id
+                                    LEFT JOIN maintenance ON material_request.maintenance_id = maintenance.maintenance_id
+                                    LEFT JOIN machine ON repair_request.machine_id = machine.machine_id
+                                    LEFT JOIN urgency ON machine.machine_urgency = urgency.id
+                                    ORDER BY material_request.timestamp DESC;";
+
                             $result = $conn->query($sql);
 
                             while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
                                 // Construct the table row
                                 echo "<tr
-                                    data-adjustment-id='" . htmlspecialchars($row['adjustment_id']) . "'
-                                    data-entry-date='" . htmlspecialchars($row['entry_date']) . "' 
-                                    data-reason='" . htmlspecialchars($row['reason']) . "'
-                                    data-description='" . htmlspecialchars($row['description'] ?? 'Not Specified', ENT_QUOTES, 'UTF-8') . "'
-                                    data-reference-number='" . htmlspecialchars($row['reference_number'] ?? 'Not Specified', ENT_QUOTES, 'UTF-8') . "'
-                                    data-created-by-name='" . htmlspecialchars($row['first_name'] . " " . $row['last_name']) . "'>
+                                    data-material-request-id='" . htmlspecialchars($row['material_request_id']) . "'
+                                    data-entry-date='" . htmlspecialchars($row['timestamp']) . "' 
+                                    data-reason='" . htmlspecialchars($row['first_name'] . " " . $row['last_name']) . "'
+                                    data-description='" . htmlspecialchars($row['name'] ?? 'Not Specified', ENT_QUOTES, 'UTF-8') . "'
+                                    data-reference-number='" . htmlspecialchars($row['status'] ?? 'Not Specified', ENT_QUOTES, 'UTF-8') . "'
+                                    data-status='" . htmlspecialchars($row['status']) . "'
+                                    data-created-by-name='" . htmlspecialchars($row['repair_request_id'] ?? $row['maintenance_id']). "'>
                                     <td class='text-center align-middle'><input type='checkbox' class='row-checkbox'></td>
-                                    <td class='text-start align-middle'>" . htmlspecialchars((new DateTime($row['entry_date']))->format('d M Y')) . "</td>
-                                    <td class='text-start align-middle'>" . htmlspecialchars($row['reason']) . "</td>
-                                    <td class='text-start align-middle'>" . htmlspecialchars($row['description'] ?? 'Not Specified', ENT_QUOTES, 'UTF-8') . "</td>
-                                    <td class='text-start align-middle'>" . htmlspecialchars($row['reference_number'] ?? 'Not Specified', ENT_QUOTES, 'UTF-8') . "</td>
-                                    <td class='text-start align-middle'>" . htmlspecialchars($row['first_name'] . " " . $row['last_name']) . "</td>
-                                    <td class='text-start align-middle'>" . htmlspecialchars((new DateTime($row['entry_date']))->format('d M Y g:i A')) . "</td>
+                                    <td class='text-start align-middle'>" . htmlspecialchars((new DateTime($row['timestamp']))->format('d M Y')) . "</td>
+                                    <td class='text-start align-middle'>" . htmlspecialchars($row['repair_request_id'] ?? $row['maintenance_id']) . "</td>
+                                    <td class='text-start align-middle'>" . htmlspecialchars($row['name'] ?? 'Not Specified', ENT_QUOTES, 'UTF-8') . "</td>
+                                    <td class='text-start align-middle'>" . htmlspecialchars($row['requested_by']) . "</td>
+                                    <td class='text-center align-middle'><button class='btn btn-sm btn-primary' id='viewMaterialRequest'><i class='bi bi-eye-fill'></i></button> ";
+                                    // Check if the status is NOT "Done"
+                                    if ($row['status'] !== 'Done') {
+                                        echo "<button class='btn btn-sm btn-success' id='completeMaterialRequest'><i class='bi bi-check-circle-fill'></i></button>
+                                        <button class='btn btn-sm btn-danger' id='deleteMaterialRequest'><i class='bi bi-trash3-fill'></i></button>";
+                                    }
+                                    echo "</td>
                                 </tr>";
                             }
                         } catch (PDOException $e) {
@@ -253,8 +269,8 @@ if ($user) {
             <div class="offcanvas-header d-flex justify-content-between">
                 <!-- Left Side Top: Adjustment Details -->
                 <div>
-                    <h5 class="offcanvas-title">Adjustment Details</h5>
-                    <p class="mb-0 text-muted">Adjustment ID: <span id="modalAdjustmentIDText">[Adjustment ID]</span></p>
+                    <h5 class="offcanvas-title">Material Request Details</h5>
+                    <p class="mb-0 text-muted">Material Request ID: <span id="modalAdjustmentIDText">[Adjustment ID]</span></p>
                 </div>
 
                 <!-- Right Side Top: Download, Delete, and Close Buttons -->
@@ -272,11 +288,11 @@ if ($user) {
             <div class="offcanvas-body modal-dialog-scrollable">
                 <div id="normalView" class="row d-none">
                     <div class="col-4 text-start">
-                        <p><strong>Date:</strong></p>
-                        <p><strong>Reason:</strong></p>
-                        <p><strong>Adjusted By:</strong></p>
-                        <p><strong>Description:</strong></p>
-                        <p><strong>Reference Number:</strong></p>
+                        <p><strong>Requested Date:</strong></p>
+                        <p><strong>Requested By:</strong></p>
+                        <p><strong>Repair Request No.:</strong></p>
+                        <p><strong>Urgency:</strong></p>
+                        <p><strong>Status:</strong></p>
                     </div>
                     <div class="col-8 text-start">
                         <p id="modalEntryDateText" class="text-muted">[Date]</p>
@@ -289,10 +305,9 @@ if ($user) {
                         <table class="table table-striped table-hover w-100" id="itemAdjustmentTable">
                             <thead class="table-dark">
                                 <tr>
-                                    <th scope="col">Item Details</th>
-                                    <th scope="col">New Quantity</th>
-                                    <th scope="col">Quantity Adjusted</th>
-                                    <th scope="col">Previous Quantity</th>
+                                    <th scope="col" class="text-center">Item Details</th>
+                                    <th scope="col" class="text-center">Quantity Requested</th>
+                                    <th scope="col" class="text-center">Current Quantity</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -305,16 +320,67 @@ if ($user) {
                 </div>
             </div>
         </div>
+
+        <!-- Confirmation Modal for Completion of Adjustment -->
+        <div class="modal fade" id="confirmCompleteModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" style="width: 800px; position: absolute; left: 35%; max-height: 50vh;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Confirm Completion</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to grant this material request?</p>
+                        <p>Material Request ID: <span id="modalAdjustmentID"></span></p>
+
+                        <div class="row">
+                            <div class="col-6 text-start">
+                                <p><strong>Requested Date:</strong></p>
+                                <p><strong>Requested By:</strong></p>
+                                <p><strong>Repair Request No.:</strong></p>
+                                <p><strong>Urgency:</strong></p>
+                                <p><strong>Status:</strong></p>
+                            </div>
+                            <div class="col-6 text-start">
+                                <p id="modalEntryDate" class="text-muted">[Date]</p>
+                                <p id="modalReason" class="text-muted">[Reason]</p>
+                                <p id="modalCreatedBy" class="text-muted">[Adjusted By]</p>
+                                <p id="modalDescription" class="text-muted">[Description]</p>
+                                <p id="modalReferenceNumber" class="text-muted">[Reference Number]</p>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <table class="table table-striped table-hover w-100" id="itemAdjustmentTableSmall">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th scope="col" class="text-center">Item Details</th>
+                                        <th scope="col" class="text-center">Quantity Requested</th>
+                                        <th scope="col" class="text-center">Current Quantity</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" id="confirmCompleteBtn" class="btn btn-success">Complete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Confirmation Modal for Deletion of Adjustment -->
         <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog" style="top: 10%; right: 10%;">
-                <div class="modal-content" style="max-height: 35vh; max-width: 50vh; overflow-y: auto;">
+            <div class="modal-dialog modal-dialog-centered" style="width: 500px; position: absolute; left: 35%;">
+                <div class="modal-content" style="max-height: 35vh;">
                     <div class="modal-header">
                         <h5 class="modal-title">Confirm Deletion</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <p>Are you sure you want to delete this inventory adjustment?</p>
+                        <p>Are you sure you want to delete (or reject) this material request?</p>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -344,7 +410,6 @@ if ($user) {
         <!-- Add Adjustment Offcanvas Modal -->
         <div id="addAdjustmentModal" class="offcanvas offcanvas-end" tabindex="-1" style="padding: 20px; width: 60%;" data-bs-scroll="true" aria-labelledby="addAdjustmentModalLabel" aria-modal="true" role="dialog">
             <div class="offcanvas-header d-flex justify-content-between">
-                <h5 class="offcanvas-title" id="addAdjustmentModalLabel">New Adjustment</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
             </div>
             <hr>

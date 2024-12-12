@@ -208,7 +208,9 @@ if ($user) {
                     <tbody>
                     <?php
                         try {
-                            $sql = "SELECT * FROM users JOIN employee ON users.employee_id = employee.employee_id";
+                            $sql = "SELECT * FROM users 
+                            JOIN employee ON users.employee_id = employee.employee_id
+                            JOIN department on employee.department = department.department_id";
                             $result = $conn->query($sql);
 
                             while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
@@ -242,7 +244,7 @@ if ($user) {
                                         alt='Profile Picture' class='profile-icon me-2 align-middle' style='width: 40px; height: 40px; object-fit: cover;'>
                                         <span>" . htmlspecialchars($row['first_name'] . " " . $row['last_name']) . "</span></td>
                                     <td class='text-start align-middle'>" . htmlspecialchars($row['role']) . "</td>
-                                    <td class='text-start align-middle'>" . htmlspecialchars($row['department']) . "</td>
+                                    <td class='text-start align-middle'>" . htmlspecialchars($row['department_name']) . "</td>
                                 </tr>";
                             }
                         } catch (PDOException $e) {
@@ -303,12 +305,14 @@ if ($user) {
                         <div class="mb-3">
                             <label for="modalDepartment" class="form-label"><strong>Department:</strong></label>
                             <select id="modalDepartment" class="form-select" disabled>
-                                <option value="Engineering">Engineering</option>
-                                <option value="Motorpool">Motorpool</option>
-                                <option value="Logistics">Logistics</option>
-                                <option value="HR & Admin">HR & Admin</option>
-                                <option value="Production & Packaging">Production & Packaging</option>
-                                <option value="Warehouse">Warehouse</option>
+                                <option value="1">Engineering</option>
+                                <option value="2">Warehouse</option>
+                                <option value="4">Logistics</option>
+                                <option value="7">Pre-production</option>
+                                <option value="8">Manufacturing</option>
+                                <option value="9">Flavoring</option>
+                                <option value="10">Packaging</option>
+                                <option value="11">IT</option>
                             </select>
                         </div>
 
@@ -431,13 +435,15 @@ if ($user) {
                         </div>
                         <div class="col-6 mb-3">
                             <label for="addDepartment" class="form-label">Department</label>
-                            <select class="form-select" id="addDepartment" required>
-                                <option value="Engineering">Engineering</option>
-                                <option value="Motorpool">Motorpool</option>
-                                <option value="Logistics">Logistics</option>
-                                <option value="HR & Admin">HR & Admin</option>
-                                <option value="Production & Packaging">Production & Packaging</option>
-                                <option value="Warehouse">Warehouse</option>
+                            <select id="addDepartment" class="form-select">
+                                <option value="1">Engineering</option>
+                                <option value="2">Warehouse</option>
+                                <option value="4">Logistics</option>
+                                <option value="7">Pre-production</option>
+                                <option value="8">Manufacturing</option>
+                                <option value="9">Flavoring</option>
+                                <option value="10">Packaging</option>
+                                <option value="11">IT</option>
                             </select>
                         </div>
                     </div>

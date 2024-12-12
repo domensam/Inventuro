@@ -165,146 +165,194 @@ if ($user) {
                         </ul>
                     </div>
                 </nav>
-                <div class="row">
-                    <div class="col">
-                        <div class="d-flex justify-content-between align-items-center" style="padding: 20px 0 20px 0;">
-                            <!-- Left: Heading -->
-                            <h1 class="title" style="padding-left: 20px;">Machines</h1>
-                            
-                            <!-- Right: Buttons and Dropdowns -->
-                            <div class="d-flex justify-content-end align-items-center gap-2" style="padding-right: 20px;">
-                                <button type="button" id="addItemBtn" class="btn btn-outline-primary">Add a machine</button>
-                                <div class="dropdown">
-                                    <a class="btn btn-secondary" href="#" role="button" id="dropDownMore" 
-                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="bi bi-three-dots-vertical"></i>
-                                    </a>
-                                    <div class="dropdown-menu" aria-labelledby="dropDownMore">
-                                        <a class="dropdown-item" href="#">Delete</a>
-                                        <a class="dropdown-item" href="#">Filter</a>
+                <!-- Default Look -->
+                <div class="default-view">
+                    <div class="row">
+                        <div class="col">
+                            <div class="d-flex justify-content-between align-items-center" style="padding: 20px 0 20px 0;">
+                                <!-- Left: Heading -->
+                                <h1 class="title" style="padding-left: 20px;">Machines</h1>
+                                
+                                <!-- Right: Buttons and Dropdowns -->
+                                <div class="d-flex justify-content-end align-items-center gap-2" style="padding-right: 20px;">
+                                    <button type="button" id="addItemBtn" class="btn btn-outline-primary">Add a machine</button>
+                                    <div class="dropdown">
+                                        <a class="btn btn-secondary" href="#" role="button" id="dropDownMore" 
+                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </a>
+                                        <div class="dropdown-menu" aria-labelledby="dropDownMore">
+                                            <a class="dropdown-item" href="#">Delete</a>
+                                            <a class="dropdown-item" href="#">Filter</a>
+                                        </div>
+                                    </div>
+                                    <div class="dropdown">
+                                        <a class="btn btn-warning" href="#" role="button" id="dropDownQuestion" 
+                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="bi bi-question-lg"></i>
+                                        </a>
+                                        <div aria-labelledby="dropDownQuestion"></div>
                                     </div>
                                 </div>
-                                <div class="dropdown">
-                                    <a class="btn btn-warning" href="#" role="button" id="dropDownQuestion" 
-                                    data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="bi bi-question-lg"></i>
-                                    </a>
-                                    <div aria-labelledby="dropDownQuestion"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Table -->
+                    <table id="itemTable" class="table table-striped table-hover w-100">
+                        <thead>
+                            <tr>
+                                <th class="text-center" style="width: 5%;"><input type="checkbox" id="selectAll"></th>
+                                <th class="text-start" style="padding-left: 13px;">Machine</th>
+                                <th class="text-start" style="padding-left: 13px;">Department</th>
+                                <th class="text-start" style="padding-left: 13px;">Under Repair?</th>
+                                <th class="text-start" style="padding-left: 13px;">Warranty Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <?php
+                            try {
+                                $sql = "SELECT 
+                                            machine.machine_id AS official_machine_id,
+                                            machine.*, 
+                                            warranty.*, 
+                                            department.*,
+                                            employee.*, 
+                                            repair_request.*
+                                        FROM machine 
+                                        LEFT JOIN department ON machine.machine_department_id = department.department_id 
+                                        LEFT JOIN employee ON machine.machine_created_by = employee.employee_id
+                                        -- Join with the latest warranty for each machine
+                                        LEFT JOIN warranty ON machine.machine_id = warranty.machine_id 
+                                                            AND warranty.warranty_end_date = (
+                                                                SELECT MAX(warranty_end_date) 
+                                                                FROM warranty 
+                                                                WHERE warranty.machine_id = machine.machine_id
+                                                            )
+                                        LEFT JOIN repair_request ON machine.machine_id = repair_request.machine_id
+                                                                AND repair_request.date_repaired IS NULL
+                                                                AND repair_request.date_requested = (
+                                                                    SELECT MAX(repair_request.date_requested) 
+                                                                    FROM repair_request 
+                                                                    WHERE repair_request.machine_id = machine.machine_id
+                                                                );";
+
+                                $result = $conn->query($sql);
+
+                                while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
+                                    // Initialize image-related variables
+                                    $mimeType = null;
+                                    $base64Image = null;
+                                    $imageData = '';
+
+                                    // Check if the user has an image
+                                    if (isset($row['image']) && !empty($row['image'])) {
+                                        // Detect MIME type and convert BLOB to base64
+                                        $finfo = new finfo(FILEINFO_MIME_TYPE);
+                                        $mimeType = $finfo->buffer($row['image']);
+                                        $base64Image = base64_encode($row['image']);
+                                        $imageData = "data:$mimeType;base64,$base64Image";  // Store the base64 image
+                                    }
+                                    else {
+                                        $imageData = "../../../images/gallery.png";
+                                    }
+
+                                    // Construct the table row
+                                    echo "<tr data-machine-id='" . htmlspecialchars($row['official_machine_id'] ?? '') . "' 
+                                    data-machine-name='" . htmlspecialchars($row['machine_name'] ?? '') . "'
+                                    data-type='" . htmlspecialchars($row['machine_type'] ?? '') . "'
+                                    data-model='" . htmlspecialchars($row['machine_model'] ?? '') . "'
+                                    data-manufacturer='" . htmlspecialchars($row['machine_manufacturer'] ?? '') . "'
+                                    data-image='" . htmlspecialchars($imageData) . "'
+                                    data-department-id='" . htmlspecialchars($row['department_id'] ?? '') . "'
+                                    data-department-name='" . htmlspecialchars($row['department_name'] ?? '') . "'
+                                    data-machine-description='" . htmlspecialchars($row['machine_description'] ?? 'Not available') . "'
+                                    data-machine-created-by='" . htmlspecialchars($row['first_name'] . " " . $row['last_name'] ?? 'Not available') . "'
+                                    data-machine-created-at='" . htmlspecialchars((new DateTime($row['machine_created_at']))->format('d M Y')) . "'
+                                    data-warranty-status='" . htmlspecialchars($row['warranty_status'] ?? 'No warranty') . "'
+                                    data-warranty-company-name='" . htmlspecialchars($row['warranty_provider'] ?? 'Not available') . "'
+                                    data-warranty-start-date='" . htmlspecialchars($row['warranty_start_date'] ? (new DateTime($row['warranty_start_date']))->format('d M Y') : 'Not available') . "'
+                                    data-warranty-end-date='" . htmlspecialchars($row['warranty_end_date'] ? (new DateTime($row['warranty_end_date']))->format('d M Y') : 'Not available') . "'
+                                    data-warranty-coverage-details='" . htmlspecialchars($row['warranty_coverage_details'] ?? 'Not available') . "'
+                                    data-warranty-contact-info='" . htmlspecialchars($row['warranty_contact_info'] ?? 'Not available') . "'
+                                    data-year-of-manifacture='" . htmlspecialchars($row['machine_year_of_manufacture'] ?? '0') . "'>
+
+                                    <td class='text-center align-middle'><input type='checkbox' class='row-checkbox'></td>
+
+                                    <td class='text-start'>
+                                        <img src='" . htmlspecialchars($imageData) . "' 
+                                            alt='Profile Picture' class='me-2 align-middle' style='width: 40px; object-fit: cover;'>
+                                        <span>" . htmlspecialchars($row['machine_name'] ?? '') . "</span>
+                                    </td>
+
+                                    <td class='text-start align-middle'>" . htmlspecialchars($row['department_name'] ?? '') . "</td>
+                                    <td class='text-start align-middle'>" . 
+                                        htmlspecialchars($row['date_repaired'] === null ? 'No' : 'Yes') . 
+                                    "</td>";
+                                        // Check if the warranty is active, expired, or not applicable
+                                        if($row['warranty_status'] === 'Active') {
+                                            echo "<td class='text-start align-middle text-success'>" . htmlspecialchars($row['warranty_status'] ?? '') . "</td> </tr>";
+                                        }
+                                        else if($row['warranty_status'] === 'Expired') {
+                                            echo "<td class='text-start align-middle text-danger'>" . htmlspecialchars($row['warranty_status'] ?? '') . "</td> </tr>";
+                                        }
+                                        else {
+                                            echo "<td class='text-start align-middle'>" . htmlspecialchars($row['warranty_status'] ?? 'No warranty') . "</td> </tr>";
+                                        }
+                                }
+                            } catch (PDOException $e) {
+                                echo "<tr><td colspan='5'>Error fetching data: " . htmlspecialchars($e->getMessage()) . "</td></tr>";
+                            }
+                        ?>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="add-machine-view p-2">
+                    <div class="container mt-5 w-100">
+                        <div class="row">
+                            <div class="col-md-8 offset-md-2">
+                                <!-- Stepper -->
+                                <div class="steps d-flex justify-content-between mb-4">
+                                    <button class="btn btn-primary" id="step1-button"> 1</button>
+                                    <button class="btn btn-secondary" id="step2-button"> 2</button>
+                                    <button class="btn btn-secondary" id="step3-button"> 3</button>
+                                    <button class="btn btn-secondary" id="step4-button"> 4</button>
+                                </div>
+
+                                <!-- Step 1 -->
+                                <div id="step1" class="step">
+                                    <h3>Step 1: Basic Details<span class="text-danger">*</span></h3>
+                                    <p>Add the new machine's basic details</p>
+                                    
+                                    <button class="btn btn-primary" onclick="nextStep(2)">Continue</button>
+                                </div>
+
+                                <!-- Step 2 -->
+                                <div id="step2" class="step d-none">
+                                    <h3>Step 2: Machine Parts<span class="text-danger">*</span></h3>
+                                    <p>Select a template to specify machine parts</p>
+                                    <button class="btn btn-secondary" onclick="prevStep(1)">Previous</button>
+                                    <button class="btn btn-primary" onclick="nextStep(3)">Continue</button>
+                                </div>
+
+                                <!-- Step 3 -->
+                                <div id="step3" class="step d-none">
+                                    <h3>Step 3: Warranty (Optional)</h3>
+                                    <p>If applicable, add the warranty details of the machine.</p>
+                                    <button class="btn btn-secondary" onclick="prevStep(2)">Previous</button>
+                                    <button class="btn btn-primary" onclick="nextStep(4)">Continue</button>
+                                </div>
+
+                                <!-- Step 4 -->
+                                <div id="step4" class="step d-none">
+                                    <h3>Step 4: Review and Submit</h3>
+                                    <p>Check if the machine details are correct.</p>
+                                    <button class="btn btn-secondary" onclick="prevStep(3)">Previous</button>
+                                    <button class="btn btn-success">Submit</button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <!-- Table -->
-                <table id="itemTable" class="table table-striped table-hover w-100">
-                    <thead>
-                        <tr>
-                            <th class="text-center" style="width: 5%;"><input type="checkbox" id="selectAll"></th>
-                            <th class="text-start" style="padding-left: 13px;">Machine</th>
-                            <th class="text-start" style="padding-left: 13px;">Department</th>
-                            <th class="text-start" style="padding-left: 13px;">Next Maintenance</th>
-                            <th class="text-start" style="padding-left: 13px;">Warranty Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    <?php
-                        try {
-                            $sql = "SELECT machine.*, 
-                                warranty.*, 
-                                department.*, 
-                                maintenance.*,
-                                employee.*
-                            FROM machine 
-                            LEFT JOIN department ON machine.machine_department_id = department.department_id 
-                            LEFT JOIN employee ON machine.machine_created_by = employee.employee_id
-                            -- Join with the latest warranty for each machine
-                            LEFT JOIN warranty ON machine.machine_id = warranty.machine_id 
-                                            AND warranty.warranty_end_date = (
-                                                SELECT MAX(warranty_end_date) 
-                                                FROM warranty 
-                                                WHERE warranty.machine_id = machine.machine_id
-                                            )
-
-                            -- Join with the latest maintenance record for each machine
-                            LEFT JOIN maintenance ON machine.machine_id = maintenance.machine_id 
-                                                AND maintenance.maintenance_scheduled_date = (
-                                                    SELECT MAX(maintenance_scheduled_date) 
-                                                    FROM maintenance 
-                                                    WHERE maintenance.machine_id = machine.machine_id
-                                                );";
-                            $result = $conn->query($sql);
-
-                            while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-                                // Initialize image-related variables
-                                $mimeType = null;
-                                $base64Image = null;
-                                $imageData = '';
-
-                                // Check if the user has an image
-                                if (isset($row['image']) && !empty($row['image'])) {
-                                    // Detect MIME type and convert BLOB to base64
-                                    $finfo = new finfo(FILEINFO_MIME_TYPE);
-                                    $mimeType = $finfo->buffer($row['image']);
-                                    $base64Image = base64_encode($row['image']);
-                                    $imageData = "data:$mimeType;base64,$base64Image";  // Store the base64 image
-                                }
-                                else {
-                                    $imageData = "../../../images/gallery.png";
-                                }
-
-                                // Construct the table row
-                                echo "<tr data-machine-id='" . htmlspecialchars($row['machine_id'] ?? '') . "' 
-                                data-machine-name='" . htmlspecialchars($row['machine_name'] ?? '') . "'
-                                data-type='" . htmlspecialchars($row['machine_type'] ?? '') . "'
-                                data-model='" . htmlspecialchars($row['machine_model'] ?? '') . "'
-                                data-manufacturer='" . htmlspecialchars($row['machine_manufacturer'] ?? '') . "'
-                                data-image='" . htmlspecialchars($imageData) . "'
-                                data-department-id='" . htmlspecialchars($row['department_id'] ?? '') . "'
-                                data-department-name='" . htmlspecialchars($row['department_name'] ?? '') . "'
-                                data-machine-description='" . htmlspecialchars($row['machine_description'] ?? 'Not available') . "'
-                                data-machine-created-by='" . htmlspecialchars($row['first_name'] . " " . $row['last_name'] ?? 'Not available') . "'
-                                data-machine-created-at='" . htmlspecialchars((new DateTime($row['machine_created_at']))->format('d M Y')) . "'
-                                data-warranty-status='" . htmlspecialchars($row['warranty_status'] ?? 'No warranty') . "'
-                                data-warranty-company-name='" . htmlspecialchars($row['warranty_provider'] ?? 'Not available') . "'
-                                data-warranty-start-date='" . htmlspecialchars($row['warranty_start_date'] ? (new DateTime($row['warranty_start_date']))->format('d M Y') : 'Not available') . "'
-                                data-warranty-end-date='" . htmlspecialchars($row['warranty_end_date'] ? (new DateTime($row['warranty_end_date']))->format('d M Y') : 'Not available') . "'
-                                data-warranty-coverage-details='" . htmlspecialchars($row['warranty_coverage_details'] ?? 'Not available') . "'
-                                data-warranty-contact-info='" . htmlspecialchars($row['warranty_contact_info'] ?? 'Not available') . "'
-                                data-machine-maintenance-interval-days='" . htmlspecialchars($row['machine_maintenance_interval_days'] ?? '0') . "'
-                                data-year-of-manifacture='" . htmlspecialchars($row['machine_year_of_manufacture'] ?? '0') . "'>
-
-                                <td class='text-center align-middle'><input type='checkbox' class='row-checkbox'></td>
-
-                                <td class='text-start'>
-                                    <img src='" . htmlspecialchars($imageData) . "' 
-                                        alt='Profile Picture' class='me-2 align-middle' style='width: 40px; object-fit: cover;'>
-                                    <span>" . htmlspecialchars($row['machine_name'] ?? '') . "</span>
-                                </td>
-
-                                <td class='text-start align-middle'>" . htmlspecialchars($row['department_name'] ?? '') . "</td>
-                                <td class='text-start align-middle'>" . 
-                                    (!empty($row['maintenance_scheduled_date']) 
-                                        ? htmlspecialchars((new DateTime($row['maintenance_scheduled_date']))->format('d M Y')) 
-                                        : '') . 
-                                "</td>";
-                                
-                                     // Check if the warranty is active, expired, or not applicable
-                                    if($row['warranty_status'] === 'Active') {
-                                        echo "<td class='text-start align-middle text-success'>" . htmlspecialchars($row['warranty_status'] ?? '') . "</td> </tr>";
-                                    }
-                                    else if($row['warranty_status'] === 'Expired') {
-                                        echo "<td class='text-start align-middle text-danger'>" . htmlspecialchars($row['warranty_status'] ?? '') . "</td> </tr>";
-                                    }
-                                    else {
-                                        echo "<td class='text-start align-middle'>" . htmlspecialchars($row['warranty_status'] ?? '') . "</td> </tr>";
-                                    }
-                            }
-                        } catch (PDOException $e) {
-                            echo "<tr><td colspan='5'>Error fetching data: " . htmlspecialchars($e->getMessage()) . "</td></tr>";
-                        }
-                    ?>
-                    </tbody>
-                </table>
             </div>
         </div>
         <!-- Machine Info Modal -->
@@ -339,10 +387,12 @@ if ($user) {
                             <select id="modalDepartmentName" class="form-select" disabled>
                                 <option value="1">Engineering</option>
                                 <option value="2">Warehouse</option>
-                                <option value="3">Motorpool</option>
-                                <option value="4">Logistics</option>
-                                <option value="5">HR & Admin</option>
-                                <option value="6">Production & Packaging</option>
+                                <option value="4">Motorpool</option>
+                                <option value="7">Logistics</option>
+                                <option value="8">HR & Admin</option>
+                                <option value="9">Production & Packaging</option>
+                                <option value="10">Production & Packaging</option>
+                                <option value="11">Production & Packaging</option>
                             </select>
                         </div>
                         <div class="mb-3">
@@ -371,10 +421,9 @@ if ($user) {
                             <button id="warrantyDescription" type="button" class="btn btn-warning"><i class="bi bi-info-circle"></i> Under Warranty</button>
                         </div>
                         <div class="text-start bg-light p-3 rounded border" style="padding: 10px; margin-top: 20px;">
-                            <p><strong>Maintenance:</strong></p>
-                            <p>Every <span id="modalMaintenanceScheduleText" class="mb-0 text-muted"></span> days
-                                <span><a href="#" id="editMaintenanceScheduleBtn"><i class="bi bi-pencil"></i></a></span>
-                            </p>
+                            <p><strong>Upcoming Maintenance(s):</strong></p>
+                            <p><strong><span id="modalMaintenanceDateText" class="text-muted"></span></strong></p>
+                            <p><span id="modalMaintenancePartText" class="text-muted"></span></p>
                         </div>
                     </div>
                 </div>
@@ -438,6 +487,7 @@ if ($user) {
                 </div>
             </div>
         </div>
+
         <!-- Modal for confirming image removal -->
         <div class="modal fade" id="removeImageModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog" style="top: 10%; right: 10%;">
@@ -496,6 +546,7 @@ if ($user) {
                 </div>
             </div>
         </div>
+
         <!-- Add Item Offcanvas Modal -->
         <div id="addMachineModal" class="offcanvas offcanvas-end" tabindex="-1" style="padding: 20px; width: 45%;" data-bs-scroll="true" aria-labelledby="addItemModalLabel" aria-modal="true" role="dialog">
             <div class="offcanvas-header d-flex justify-content-between">
@@ -561,7 +612,7 @@ if ($user) {
                     <div class="row">
                         <div class="mb-3 col-6"></div>
                         <div class="mb-3 col-6 align-items-center">
-                            <button type="button" class="btn btn-outline-warning">Add warranty</button>
+                            <button type="button" id="addWarrantyBtn" class="btn btn-outline-warning">Add warranty</button>
                         </div>
                     </div>
                 </form>

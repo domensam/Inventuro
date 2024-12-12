@@ -65,6 +65,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             if (isset($item['image'])) {
                 $item['image'] = base64_encode($item['image']); // Encode the image data
             }
+            else {
+                $item['image'] = base64_encode(file_get_contents('../../../images/gallery.png'));
+            }
         }
 
         // Return the result as JSON

@@ -140,7 +140,8 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(data => {
             if (data.donePercentage !== undefined) {
                 const progressCircle = document.querySelector('.radial-progress .progress');
-                const progressText = document.querySelector('.radial-progress .progress-text');
+                // const progressText = document.querySelector('.radial-progress .progress-text');
+                const progressText = 45;
                 
                 // Calculate the stroke-dashoffset based on the percentage
                 const radius = 54;

@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Basic validation
     if (empty($adjustment_id)) {
         http_response_code(400);
-        echo json_encode(['message' => 'Invalid adjustment ID.']);
+        echo json_encode(['message' => 'Invalid material request ID.']);
         exit();
     }
 
@@ -27,35 +27,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         // Prepare the SQL statement to delete from the item_adjustment_list table
         $stmtAdjustmentList = $conn->prepare('
-            DELETE FROM item_adjustment_list
-            WHERE adjustment_id = :adjustment_id');
+            DELETE FROM material_request_items
+            WHERE material_request_id = :material_request_id');
 
         // Prepare the SQL statement to delete from the item_adjustment table
         $stmtAdjustment = $conn->prepare('
-            DELETE FROM item_adjustment
-            WHERE adjustment_id = :adjustment_id');
+            DELETE FROM material_request
+            WHERE material_request_id = :material_request_id');
 
         // Bind parameters
-        $stmtAdjustmentList->bindParam(':adjustment_id', $adjustment_id);
-        $stmtAdjustment->bindParam(':adjustment_id', $adjustment_id);
+        $stmtAdjustmentList->bindParam(':material_request_id', $adjustment_id);
+        $stmtAdjustment->bindParam(':material_request_id', $adjustment_id);
 
         // Execute the delete queries
         if (!$stmtAdjustmentList->execute()) {
-            throw new Exception("Failed to delete adjustment details.");
+            throw new Exception("Failed to delete material request details.");
         }
         if (!$stmtAdjustment->execute()) {
-            throw new Exception("Failed to delete adjustment.");
+            throw new Exception("Failed to delete material request.");
         }
 
         // Commit the transaction
         $conn->commit();
         http_response_code(200);
-        echo json_encode(['message' => 'Adjustment deleted successfully!']);
+        echo json_encode(['message' => 'Material request deleted successfully!']);
     } catch (Exception $e) {
         // Rollback if any query fails
         $conn->rollBack();
         http_response_code(500);
-        echo json_encode(['message' => 'Error deleting adjustment: ' . $e->getMessage()]);
+        echo json_encode(['message' => 'Error deleting material request: ' . $e->getMessage()]);
     }
 
 } else {

@@ -138,7 +138,7 @@ try {
         if (!empty($row['image'])) {
             $pdf->Image('@' . $row['image'], $pdf->GetX() + 2, $pdf->GetY() + 2, 15, 15);
         } else {
-            $pdf->Cell(15, 20, '[No Image]', 0, 0, 'C');
+            $pdf->Image("../../../images/gallery.png", $pdf->GetX() + 2, $pdf->GetY() + 2, 15, 15);
         }
 
         // Move the cursor to the right side of the image and add the item name

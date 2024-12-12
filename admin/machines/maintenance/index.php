@@ -368,13 +368,14 @@ if ($user) {
                             <?php
                                 try {
                                     $sql = "SELECT
-                                        machine.machine_id AS official_machine_id,
+                                        machine.machine_parts_id AS official_machine_id,
                                         machine.*, 
                                         warranty.*, 
                                         department.*, 
                                         maintenance.*,
                                         employee.*
-                                    FROM machine 
+                                    FROM machine_parts
+                                    LEFT JOIN machine on machine_parts.machine_id = machine.machine_id
                                     LEFT JOIN department ON machine.machine_department_id = department.department_id 
                                     LEFT JOIN employee ON machine.machine_created_by = employee.employee_id
                                     LEFT JOIN warranty ON machine.machine_id = warranty.machine_id 
@@ -383,7 +384,7 @@ if ($user) {
                                             FROM warranty 
                                             WHERE warranty.machine_id = machine.machine_id
                                         )
-                                    LEFT JOIN maintenance ON machine.machine_id = maintenance.machine_id 
+                                    LEFT JOIN maintenance ON machine.machine_parts_id = maintenance.machine_parts_id 
                                         AND maintenance.maintenance_scheduled_date = (
                                             SELECT MAX(maintenance_scheduled_date) 
                                             FROM maintenance 

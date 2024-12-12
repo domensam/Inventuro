@@ -477,7 +477,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var itemCode = $('#modalItemCodeText').text();  // Get the item ID
 
         // Validate reorderPoint
-        if (reorderPoint <= 100 && reorderPoint >= 1) {
+        if (reorderPoint <= 1000 && reorderPoint >= 1) {
             // Proceed with AJAX request if validation passes
             $.ajax({
                 url: 'update_reorder_point.php',  // The PHP file that handles updating the reorder point

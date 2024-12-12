@@ -8,7 +8,7 @@ include '../../../connect.php';
 ob_start();
 
 // Include the file; any output it produces will be captured by the buffer
-include_once 'calculate_reorder_points.php';
+include 'calculate_reorder_points.php';
 
 // Get the contents of the buffer and assign it to a variable
 $outputMessage = ob_get_clean(); // Closes buffer and returns output as a string

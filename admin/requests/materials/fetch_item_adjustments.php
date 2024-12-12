@@ -32,20 +32,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         // Prepare the SQL statement to retrieve from the item_adjustment_list table
         $stmtAdjustmentList = $conn->prepare('
             SELECT 
-                item.item_name, 
-                item.item_quantity, 
                 item.image,
-                item_adjustment_list.quantity_adjusted,
-                item_adjustment_list.previous_quantity
+                item.item_name, 
+                item.item_quantity,
+                material_request_items.quantity
             FROM 
-                item_adjustment_list 
+                material_request 
             JOIN 
-                item ON item_adjustment_list.item_id = item.item_code
+                material_request_items ON material_request.material_request_id = material_request_items.material_request_id
+            JOIN 
+                item ON material_request_items.item_id = item.item_code
             WHERE 
-                item_adjustment_list.adjustment_id = :adjustment_id');
+                material_request.material_request_id = :material_request_id');
 
         // Bind parameters
-        $stmtAdjustmentList->bindParam(':adjustment_id', $adjustment_id, PDO::PARAM_STR);
+        $stmtAdjustmentList->bindParam(':material_request_id', $adjustment_id, PDO::PARAM_STR);
 
         // Execute the query
         if (!$stmtAdjustmentList->execute()) {
@@ -65,8 +66,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             if (isset($item['image'])) {
                 $item['image'] = base64_encode($item['image']); // Encode the image data
             }
+            else {
+                $item['image'] = base64_encode(file_get_contents('../../../images/gallery.png'));
+            }
         }
-
+        
         // Return the result as JSON
         http_response_code(200);
         echo json_encode($result);

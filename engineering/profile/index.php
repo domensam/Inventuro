@@ -38,6 +38,20 @@ if ($user) {
     $department = $user['department'];
     $role = $user['role'];
     $date_created = $user['date_created'];
+
+    $departmentStmt = $conn->prepare("
+    SELECT department_name
+    FROM department
+    WHERE department_id=?
+    LIMIT 1
+    ");
+
+    $departmentStmt->execute([$department]);
+
+    // Fetch the result
+    $departmentName = $departmentStmt->fetch(PDO::FETCH_ASSOC);
+
+    $department = $departmentName['department_name'];
 }
 
 ?>
@@ -77,17 +91,17 @@ if ($user) {
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a href="../repair/request/index.php" class="sidebar-link collapsed has-dropdown" data-bs-toggle="collapse"
+                    <a href="../repair/request_new/index.php" class="sidebar-link collapsed has-dropdown" data-bs-toggle="collapse"
                         data-bs-target="#repair" aria-expanded="false" aria-controls="repair">
                         <i class="bi bi-tools"></i>
                         <span>Repair</span>
                     </a>
                     <ul id="repair" class="sidebar-dropdown list-unstyled collapse" data-bs-parent="#sidebar">
                         <li class="sidebar-item">
-                            <a href="../repair/request/index.php" class="sidebar-link">Request</a>
+                            <a href="../repair/request_new/index.php" class="sidebar-link">Claim a Repair</a>
                         </li>
                         <li class="sidebar-item">
-                            <a href="../repair/request/index.php" class="sidebar-link">Request Material</a>
+                            <a href="../repair/claimed/index.php" class="sidebar-link">Your Claimed Repairs</a>
                         </li>
                     </ul>
                 </li>
@@ -106,12 +120,12 @@ if ($user) {
                         </li>
                     </ul>
                 </li>
-                <li class="sidebar-item">
+                <!-- <li class="sidebar-item">
                     <a href="../history/index.php" class="sidebar-link">
                         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#224d7a"><path d="M13 3a9 9 0 0 0-9 9H2l3.89 3.89.07.14L10 12H7a7 7 0 1 1 7 7 7.07 7.07 0 0 1-6-3H6.26a8.99 8.99 0 0 0 7.74 5 9 9 0 1 0 0-18Zm-1 5v6h6v-2h-4V8Z"/></svg>
                         <span>History</span>
                     </a>
-                </li>
+                </li> -->
                 <li class="sidebar-item">
                     <a href="index.php" class="sidebar-link active">
                     <i class="bi bi-person"></i>
