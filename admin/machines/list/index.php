@@ -512,6 +512,48 @@ if ($user) {
                                 <div id="step3" class="step d-none">
                                     <h3>Step 3: Warranty (Optional)</h3>
                                     <p>If applicable, add the warranty details of the machine.</p>
+                                    <!-- Warranty Checkbox -->
+                                    <div class="row mb-4">
+                                        <label>
+                                            <input type="checkbox" id="warrantyToggle"> This machine is under a warranty
+                                        </label>
+                                    </div>
+
+                                    <!-- Warranty Details Section -->
+                                    <div id="warrantyDetails" style="display:none; margin-top: 20px; margin-bottom: 20px;">
+                                        <div class="card p-2">
+                                            <div class="card-header">
+                                                <h5 class="card-title">Warranty Details</h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="form-group mb-3">
+                                                    <label for="providerName">Provider Name:</label>
+                                                    <input type="text" id="providerName" class="form-control" placeholder="Enter Provider Name">
+                                                </div>
+                                                <div class="form-group mb-3">
+                                                    <label for="coverageType">Coverage Type:</label>
+                                                    <select id="coverageType" class="form-control">
+                                                        <option value="fullMachine">Full Machine</option>
+                                                        <option value="specificParts">Specific Parts</option>
+                                                        <option value="otherServices">Other Services</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group mb-3">
+                                                    <label for="startDate">Start Date:</label>
+                                                    <input type="date" id="startDate" class="form-control">
+                                                </div>
+                                                <div class="form-group mb-3">
+                                                    <label for="expirationDate">Expiration Date:</label>
+                                                    <input type="date" id="expirationDate" class="form-control">
+                                                </div>
+                                                <div class="form-group mb-3">
+                                                    <label for="termsConditions">Terms and Conditions:</label>
+                                                    <textarea id="termsConditions" class="form-control" placeholder="Add warranty terms..."></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <button class="btn btn-secondary" onclick="prevStep(2)">Previous</button>
                                     <button class="btn btn-primary" onclick="nextStep(4)">Continue</button>
                                 </div>

@@ -500,7 +500,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 { id: 'manufacturer', name: 'Manufacturer' },
                 { id: 'manufacturedDate', name: 'Manufactured Date' }
             ];
-    
+        
+            let isValid = true; // Initialize validation flag
+        
             // Loop through the fields and validate them
             fields.forEach(field => {
                 const input = document.getElementById(field.id);
@@ -511,7 +513,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else {
                     // Remove 'is-invalid' class for valid fields
                     input.classList.remove('is-invalid');
-
+        
                     // Additional validation for the serialNumber field
                     if (field.id === 'serialNumber') {
                         const serialNumber = input.value.trim();
@@ -523,28 +525,38 @@ document.addEventListener('DOMContentLoaded', function () {
                             input.classList.remove('is-invalid');
                         }
                     }
-
-                    if(field.id === 'manufacturer') {
+        
+                    // Additional validation for the manufacturer field
+                    if (field.id === 'manufacturer') {
                         const manufacturer = input.value.trim();
-                        if (manufacturer === 'other') {
-                            newManufacturerInput = document.getElementById('newManufacturer');
-                            
-                            if(newManufacturerInput.value.trim() === '') {
-                                newManufacturerInput.classList.add('is-invalid');
-                                isValid = false; // Mark as invalid if length condition is not met
-                                input.focus();
-                            }
-                            else {
-                                input.classList.remove('is-invalid');
-                            }
+                        const newManufacturerInput = document.getElementById('newManufacturer');
+                        // Access the select element
+                        const manufacturerSelect = document.getElementById('manufacturer');
+                        // Get the selected option's text (name)
+                        const selectedOptionName = manufacturerSelect.options[manufacturerSelect.selectedIndex].textContent;
 
+                        if (manufacturer === 'other') {
+                            if (!newManufacturerInput || newManufacturerInput.value.trim() === '') {
+                                newManufacturerInput?.classList.add('is-invalid');
+                                isValid = false; // Mark as invalid if input is empty
+                                newManufacturerInput?.focus();
+                            } else {
+                                newManufacturerInput.classList.remove('is-invalid');
+                                document.getElementById('providerName').value = newManufacturerInput.value;
+                            }
                         } else {
-                            document.getElementById('newManufacturer').classList.add('d-none');
-                            document.getElementById('newManufacturer').value = ''; // Clear the input
+                            if (newManufacturerInput) {
+                                newManufacturerInput.classList.add('d-none');
+                                newManufacturerInput.classList.remove('is-invalid');
+                                newManufacturerInput.value = ''; // Clear the input
+                            }
+                            document.getElementById('providerName').value = selectedOptionName;
                         }
                     }
                 }
             });
+        
+            return isValid; // Return overall validation result
         }
 
         // Validation for Step 2
@@ -657,6 +669,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Set the value of the date input
     document.getElementById('manufacturedDate').value = formattedDate;
+    document.getElementById('startDate').value = formattedDate;
 
     function toggleManufacturerInput() {
         const manufacturerSelect = document.getElementById('manufacturer');
@@ -963,4 +976,26 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+
+    // Toggle Warranty Details Section
+    function toggleWarrantyDetails() {
+        const warrantyDetails = document.getElementById('warrantyDetails');
+        const warrantyToggle = document.getElementById('warrantyToggle');
+        warrantyDetails.style.display = warrantyToggle.checked ? 'block' : 'none';
+    }
+
+    // Handle Covered Parts Toggle
+    function togglePartWarranty(checkbox) {
+        const partCovered = checkbox.checked;
+        if (partCovered) {
+            console.log("This part is covered under warranty.");
+            // Link part to warranty record in the system (implement backend logic)
+        } else {
+            console.log("This part is not covered under warranty.");
+            // Handle exclusion logic
+        }
+    }
+
+    const warrantySelect = document.getElementById('warrantyToggle');
+    warrantySelect.addEventListener('change', toggleWarrantyDetails);
 });
