@@ -550,6 +550,10 @@ if ($user) {
                                                     <label for="termsConditions">Terms and Conditions:</label>
                                                     <textarea id="termsConditions" class="form-control" placeholder="Add warranty terms..."></textarea>
                                                 </div>
+                                                <div class="form-group mb-3">
+                                                    <label for="warrantyReceipt">Add warranty receipt:</label>
+                                                    <input type="file" id="warrantyReceipt" class="form-control">
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

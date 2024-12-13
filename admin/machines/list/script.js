@@ -656,20 +656,72 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     
     window.nextStep = nextStep;
-    window.prevStep = prevStep;    
+    window.prevStep = prevStep;
 
-    // Get today's date
-    const today = new Date();
-    const yyyy = today.getFullYear();
-    const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based
-    const dd = String(today.getDate()).padStart(2, '0');
+    const manufacturedDateInput = document.getElementById('manufacturedDate');
+    const startDateInput = document.getElementById('startDate');
+    const expirationDateInput = document.getElementById('expirationDate');
 
-    // Format the date as yyyy-mm-dd
-    const formattedDate = `${yyyy}-${mm}-${dd}`;
+    // Set current date as initial value and maximum for manufacturedDate
+    const today = new Date(); // Today's date as a Date object
+    const formattedToday = today.toISOString().split('T')[0]; // Format YYYY-MM-DD
+    const tomorrow = new Date(today); // Clone today's date
+    tomorrow.setDate(today.getDate() + 1); // Add one day to calculate tomorrow
 
-    // Set the value of the date input
-    document.getElementById('manufacturedDate').value = formattedDate;
-    document.getElementById('startDate').value = formattedDate;
+    // Set default and limits for manufacturedDate
+    manufacturedDateInput.value = formattedToday;
+    manufacturedDateInput.max = formattedToday;
+
+    // Set default and limits for startDate
+    startDateInput.min = formattedToday;
+    startDateInput.value = formattedToday;
+    startDateInput.max = formattedToday; // Start date cannot be in the future
+
+    // Set minimum for expirationDate
+    expirationDateInput.min = tomorrow.toISOString().split('T')[0]; // At least tomorrow
+
+    // Update startDate limits when manufacturedDate changes
+    manufacturedDateInput.addEventListener('change', () => {
+        const selectedManufacturedDate = new Date(manufacturedDateInput.value);
+
+        // Ensure manufacturedDate cannot set startDate earlier than itself
+        startDateInput.min = manufacturedDateInput.value;
+        if (new Date(startDateInput.value) < selectedManufacturedDate) {
+            startDateInput.value = manufacturedDateInput.value;
+        }
+    });
+
+    // Update expirationDate limits when startDate changes
+    startDateInput.addEventListener('change', () => {
+        const selectedStartDate = new Date(startDateInput.value);
+
+        // Calculate the day after the selected start date
+        const nextDay = new Date(selectedStartDate);
+        nextDay.setDate(selectedStartDate.getDate() + 1);
+
+        // Set expirationDate minimum to the next day
+        expirationDateInput.min = nextDay.toISOString().split('T')[0];
+
+        // Clear expiration date if it is invalid
+        if (expirationDateInput.value && new Date(expirationDateInput.value) < nextDay) {
+            expirationDateInput.value = ""; // Clear invalid expiration date
+        }
+    });
+
+    // Validate expirationDate when it changes
+    expirationDateInput.addEventListener('change', () => {
+        const startDate = new Date(startDateInput.value);
+        const expirationDate = new Date(expirationDateInput.value);
+
+        // Ensure expirationDate is at least one day after startDate
+        const validMinDate = new Date(startDate);
+        validMinDate.setDate(validMinDate.getDate() + 1);
+
+        if (expirationDate < validMinDate) {
+            alert("Expiration date must be at least one day after the start date.");
+            expirationDateInput.value = ""; // Clear invalid expiration date
+        }
+    });
 
     function toggleManufacturerInput() {
         const manufacturerSelect = document.getElementById('manufacturer');
