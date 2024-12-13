@@ -323,7 +323,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Open the Add User offcanvas modal
-    document.getElementById('addItemBtn').addEventListener('click', function() {
+    document.getElementById('addNewMachineBtn').addEventListener('click', function() {
         // const addMachineModal = new bootstrap.Offcanvas(document.getElementById('addMachineModal'));
         // addMachineModal.show();
         const defaultView = document.querySelector('.default-view');
@@ -333,6 +333,16 @@ document.addEventListener('DOMContentLoaded', function () {
         defaultView.style.display = 'none';
         addMachineView.style.display = 'block';
 
+    });
+
+    document.getElementById('closeAddMachineBtn').addEventListener('click', function() {
+        const defaultView = document.querySelector('.default-view');
+        const addMachineView = document.querySelector('.add-machine-view');
+
+        // Toggle visibility
+        defaultView.style.display = 'block';
+        addMachineView.style.display = 'none';
+        
     });
     
     document.getElementById('saveItemBtn').addEventListener('click', function() {
@@ -1050,4 +1060,38 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const warrantySelect = document.getElementById('warrantyToggle');
     warrantySelect.addEventListener('change', toggleWarrantyDetails);
+
+    const warrantyReceiptInput = document.getElementById('warrantyReceipt');
+
+    warrantyReceiptInput.addEventListener('change', () => {
+        const file = warrantyReceiptInput.files[0]; // Get the selected file
+
+        if (file) {
+            const maxSizeInBytes = 25 * 1024 * 1024; // 25MB in bytes
+
+            // Check file type
+            const allowedExtensions = ['pdf', 'png', 'jpg'];
+            const fileExtension = file.name.split('.').pop().toLowerCase();
+            if (!allowedExtensions.includes(fileExtension)) {
+                alert('Invalid file type. Only PDF, PNG, or JPG files are allowed.');
+                warrantyReceiptInput.value = ''; // Clear the input
+                return;
+            }
+
+            // Check file size
+            if (file.size > maxSizeInBytes) {
+                alert('File is too large. Maximum size is 25MB.');
+                warrantyReceiptInput.value = ''; // Clear the input
+                return;
+            }
+        }
+    });
+
+    const clearFileButton = document.getElementById('clearFile');
+
+    // Clear the file input when the button is clicked
+    clearFileButton.addEventListener('click', () => {
+        warrantyReceiptInput.value = ''; // Reset the file input
+        alert('File input has been cleared.');
+    });
 });

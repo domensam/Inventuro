@@ -175,7 +175,7 @@ if ($user) {
                                 
                                 <!-- Right: Buttons and Dropdowns -->
                                 <div class="d-flex justify-content-end align-items-center gap-2" style="padding-right: 20px;">
-                                    <button type="button" id="addItemBtn" class="btn btn-outline-primary">Add a machine</button>
+                                    <button type="button" id="addNewMachineBtn" class="btn btn-outline-primary">Add a machine</button>
                                     <div class="dropdown">
                                         <a class="btn btn-secondary" href="#" role="button" id="dropDownMore" 
                                         data-bs-toggle="dropdown" aria-expanded="false">
@@ -306,8 +306,14 @@ if ($user) {
                         </tbody>
                     </table>
                 </div>
+                <!-- Add Machine View -->
                 <div class="add-machine-view p-2">
-                    <div class="container mt-5 w-100">
+                <div class="text-end">
+                    <button class="btn btn-outline-secondary" id="closeAddMachineBtn" style="margin-right: 200px; margin-top: 20px;">
+                        <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                    <div class="container mt-4 w-100">
                         <div class="row">
                             <div class="col-md-8 offset-md-2">
                                 <!-- Stepper -->
@@ -548,11 +554,13 @@ if ($user) {
                                                 </div>
                                                 <div class="form-group mb-3">
                                                     <label for="termsConditions">Terms and Conditions:</label>
-                                                    <textarea id="termsConditions" class="form-control" placeholder="Add warranty terms..."></textarea>
+                                                    <textarea id="termsConditions" class="form-control" placeholder="Add important warranty terms"></textarea>
                                                 </div>
                                                 <div class="form-group mb-3">
                                                     <label for="warrantyReceipt">Add warranty receipt:</label>
-                                                    <input type="file" id="warrantyReceipt" class="form-control">
+                                                    <input type="file" id="warrantyReceipt" class="form-control" accept=".pdf,.png,.jpg">
+                                                    <small class="form-text text-muted">Only PDF, PNG, or JPG files are allowed. Maximum size: 25MB.</small>
+                                                    <button type="button" id="clearFile" class="btn btn-secondary mt-2">Clear File</button>
                                                 </div>
                                             </div>
                                         </div>
