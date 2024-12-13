@@ -325,7 +325,7 @@ if ($user) {
                                 </div>
 
                                 <!-- Step 1 -->
-                                <div id="step1" class="step">
+                                <div id="step1" class="step p-4">
                                     <h3 class="pt-4">Step 1: Basic Details<span class="text-danger">*</span></h3>
                                     <p>Add the new machine's basic details</p>
 
@@ -350,6 +350,14 @@ if ($user) {
                                         </div>
                                         <div class="col-md-8">
                                             <input type="text" class="form-control" id="serialNumber">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-4">
+                                        <div class="col-md-4">
+                                            <strong>Description:</strong>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <textarea class="form-control" id="machineDescription" style="height: 100px;"></textarea>
                                         </div>
                                     </div>
                                     <div class="row mb-4">
@@ -414,6 +422,25 @@ if ($user) {
                                             <input type="date" class="form-control" id="manufacturedDate">
                                         </div>
                                     </div>
+                                    <hr>
+                                    <p class="mb-4">Upload machine image and manual (Optional)</p>
+                                    <div class="row mb-4">
+                                        <div class="col-md-4">
+                                            <strong>Machine Image:</strong>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="file" class="form-control" id="machineImage" accept="image/*">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-4">
+                                        <div class="col-md-4">
+                                            <strong>Machine Manual:</strong>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="file" class="form-control" id="machineManual" accept="application/pdf">
+                                        </div>
+                                    </div>
+
                                     <button class="btn btn-primary" onclick="nextStep(2)">Continue</button>
                                 </div>
 
@@ -570,7 +597,7 @@ if ($user) {
                                                     <textarea id="termsConditions" class="form-control" placeholder="Add important warranty terms"></textarea>
                                                 </div>
                                                 <div class="form-group mb-3">
-                                                    <label for="warrantyReceipt">Add warranty document: 
+                                                    <label for="warrantyDocument">Add warranty document: 
                                                         <span 
                                                             class="text-muted" 
                                                             data-bs-toggle="tooltip" 
@@ -581,7 +608,7 @@ if ($user) {
                                                     </label>
                                                     <div class="d-flex align-items-center">
                                                         <div class="flex-grow-1">
-                                                            <input type="file" id="warrantyReceipt" class="form-control" accept=".pdf,.png,.jpg">
+                                                            <input type="file" id="warrantyDocument" class="form-control" accept=".pdf,.png,.jpg">
                                                             <small class="form-text text-muted">Only PDF, PNG, or JPG files are allowed. Maximum size: 25MB.</small>
                                                         </div>
                                                         <button type="button" id="clearFile" class="btn btn-danger ms-3 align-self-start">
@@ -589,7 +616,7 @@ if ($user) {
                                                         </button>
                                                     </div>
                                                 </div>
-                                                <h5 class="card-title" style="margin-top: 20px;">Contact Details</h5>
+                                                <h5 class="card-title" style="margin-top: 35px;">Contact Details</h5>
                                                 <hr>
                                                 <div class="form-group mb-3">
                                                     <label for="contactName">Contact Person:</label>

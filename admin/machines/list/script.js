@@ -506,6 +506,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const fields = [
                 { id: 'machineName', name: 'Machine Name' },
                 { id: 'serialNumber', name: 'Serial Number' },
+                { id: 'machineDescription', name: 'Machine Description' },
                 { id: 'department', name: 'Department' },
                 { id: 'manufacturer', name: 'Manufacturer' },
                 { id: 'manufacturedDate', name: 'Manufactured Date' }
@@ -620,6 +621,19 @@ document.addEventListener('DOMContentLoaded', function () {
                 alert('Please select at least one part to proceed.');
                 isValid = false;
             }
+        }
+
+        // Validation for Step 3
+        if (step === 3) {
+            const providerName = document.getElementById('providerName').value;
+            const coverageType = document.getElementById('coverageType').value;
+            const startDate = document.getElementById('startDate').value;
+            const expirationDate = document.getElementById('expirationDate').value;
+            const termsConditions = document.getElementById('termsConditions').value;
+            const warrantyDocument = document.getElementById('warrantyDocument').value;
+            const contactName = document.getElementById('contactName').value;
+            const contactNumber = document.getElementById('contactNumber').value;
+            const contactEmail = document.getElementById('contactEmail').value;
         }
     
         return isValid; // Return whether the step is valid
@@ -1061,10 +1075,10 @@ document.addEventListener('DOMContentLoaded', function () {
     const warrantySelect = document.getElementById('warrantyToggle');
     warrantySelect.addEventListener('change', toggleWarrantyDetails);
 
-    const warrantyReceiptInput = document.getElementById('warrantyReceipt');
+    const warrantyDocumentInput = document.getElementById('warrantyDocument');
 
-    warrantyReceiptInput.addEventListener('change', () => {
-        const file = warrantyReceiptInput.files[0]; // Get the selected file
+    warrantyDocumentInput.addEventListener('change', () => {
+        const file = warrantyDocumentInput.files[0]; // Get the selected file
 
         if (file) {
             const maxSizeInBytes = 25 * 1024 * 1024; // 25MB in bytes
@@ -1074,14 +1088,14 @@ document.addEventListener('DOMContentLoaded', function () {
             const fileExtension = file.name.split('.').pop().toLowerCase();
             if (!allowedExtensions.includes(fileExtension)) {
                 alert('Invalid file type. Only PDF, PNG, or JPG files are allowed.');
-                warrantyReceiptInput.value = ''; // Clear the input
+                warrantyDocumentInput.value = ''; // Clear the input
                 return;
             }
 
             // Check file size
             if (file.size > maxSizeInBytes) {
                 alert('File is too large. Maximum size is 25MB.');
-                warrantyReceiptInput.value = ''; // Clear the input
+                warrantyDocumentInput.value = ''; // Clear the input
                 return;
             }
         }
@@ -1091,7 +1105,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Clear the file input when the button is clicked
     clearFileButton.addEventListener('click', () => {
-        warrantyReceiptInput.value = ''; // Reset the file input
+        warrantyDocumentInput.value = ''; // Reset the file input
     });
 
     function handleCoverageTypeChange() {
