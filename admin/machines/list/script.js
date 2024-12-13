@@ -573,4 +573,78 @@ document.addEventListener('DOMContentLoaded', function () {
     // Set the value of the date input
     document.getElementById('manufacturedDate').value = formattedDate;
 
+    function fetchMachineParts() {
+        const templateId = document.getElementById('template').value;
+    
+        if (!templateId) return;
+    
+        fetch(`fetch_machine_parts.php?template_id=${templateId}`)
+            .then(response => response.json())
+            .then(data => {
+                const partsList = document.getElementById('machinePartsList');
+                partsList.innerHTML = ''; // Clear existing parts
+    
+                if (data.length === 0) {
+                    partsList.innerHTML = '<p>No parts found for this template.</p>';
+                } else {
+                    data.forEach(part => {
+                        const card = document.createElement('div');
+                        card.classList.add('card', 'mb-3', 'shadow-sm');
+    
+                        card.innerHTML = `
+                            <div class="card-header d-flex align-items-center">
+                                <input 
+                                    type="checkbox" 
+                                    class="form-check-input me-2" 
+                                    id="togglePart_${part.machine_type_parts_id}" 
+                                    checked
+                                >
+                                <h5 class="card-title mb-0">${part.machine_type_parts_name}</h5>
+                            </div>
+                            <div class="card-body part-details">
+                                <p class="card-text">${part.machine_type_parts_description}</p>
+                                <div class="mb-3">
+                                    <label class="form-label">Quantity:</label>
+                                    <input type="number" class="form-control" value="${part.machine_type_parts_quantity || 1}" min="1">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Maintenance Interval (hours):</label>
+                                    <input type="number" class="form-control" value="${part.machine_type_parts_maintenance_interval || 100}">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Replacement Lifespan (hours):</label>
+                                    <input type="number" class="form-control" value="${part.machine_type_parts_replacement_lifespan || 1000}">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Criticality Level:</label>
+                                    <select class="form-select">
+                                        <option value="Low" ${part.machine_type_parts_criticality_level === 'Low' ? 'selected' : ''}>Low</option>
+                                        <option value="Medium" ${part.machine_type_parts_criticality_level === 'Medium' ? 'selected' : ''}>Medium</option>
+                                        <option value="High" ${part.machine_type_parts_criticality_level === 'High' ? 'selected' : ''}>High</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Maintenance Instructions:</label>
+                                    <textarea class="form-control">${part.machine_type_parts_instructions || 'No specified instructions'}</textarea>
+                                </div>
+                            </div>
+                        `;
+    
+                        partsList.appendChild(card);
+    
+                        // Add event listener to handle toggling of part details
+                        const toggleCheckbox = card.querySelector('.form-check-input');
+                        const partDetails = card.querySelector('.part-details');
+                        toggleCheckbox.addEventListener('change', () => {
+                            partDetails.style.display = toggleCheckbox.checked ? 'block' : 'none';
+                        });
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching machine parts:', error);
+            });
+    }               
+    
+    document.getElementById('template').addEventListener('change', fetchMachineParts);    
 });

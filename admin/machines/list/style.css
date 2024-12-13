@@ -332,3 +332,10 @@ h2 {
     border: 2px solid red; /* Make the border red */
     background-color: #ffe6e6; /* Optional: Light red background */
 }
+
+.card {
+    border-radius: 10px;
+}
+.card-header {
+    border-bottom: 1px solid #dee2e6;
+}

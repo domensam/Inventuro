@@ -408,7 +408,7 @@ if ($user) {
                                         </div>
                                         <div class="col-md-8">
                                             <select class="form-select" id="template">
-                                                <option value="" disabled selected onchange="fetchMachineParts()">Select a template</option>
+                                                <option value="" disabled selected>Select a template</option>
                                                 <?php
                                                     try {
                                                         $sql = "SELECT * FROM machine_type";
@@ -425,6 +425,10 @@ if ($user) {
                                                 ?>
                                             </select>
                                         </div>
+                                    </div>
+
+                                    <div class="row mb-4">
+                                        <div id="machinePartsList" class="row"></div>
                                     </div>
 
                                     <button class="btn btn-secondary" onclick="prevStep(1)">Previous</button>
