@@ -575,7 +575,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function fetchMachineParts() {
         const templateId = document.getElementById('template').value;
-    
+
         if (!templateId) return;
     
         fetch(`fetch_machine_parts.php?template_id=${templateId}`)
@@ -644,7 +644,103 @@ document.addEventListener('DOMContentLoaded', function () {
             .catch(error => {
                 console.error('Error fetching machine parts:', error);
             });
+        document.getElementById('nextStepButton2').disabled = false;
+        document.getElementById('addPartButton').classList.remove('d-none');
     }               
+
+    document.getElementById('template').addEventListener('change', fetchMachineParts);
     
-    document.getElementById('template').addEventListener('change', fetchMachineParts);    
+    document.getElementById('addPartButton').addEventListener('click', () => {
+        // Show the form for adding a new part
+        document.getElementById('addPartForm').classList.remove('d-none');
+    });
+    
+    document.getElementById('cancelPartButton').addEventListener('click', () => {
+        // Hide the form and clear inputs
+        document.getElementById('addPartForm').classList.add('d-none');
+        clearNewPartForm();
+    });
+    
+    document.getElementById('savePartButton').addEventListener('click', () => {
+        // Get values from the form
+        const name = document.getElementById('newPartName').value.trim();
+        const description = document.getElementById('newPartDescription').value.trim();
+        const quantity = document.getElementById('newPartQuantity').value;
+        const maintenanceInterval = document.getElementById('newPartMaintenanceInterval').value;
+        const replacementLifespan = document.getElementById('newPartReplacementLifespan').value;
+        const criticalityLevel = document.getElementById('newPartCriticalityLevel').value;
+        const instructions = document.getElementById('newPartInstructions').value.trim();
+    
+        if (!name || !description) {
+            alert('Part name and description are required!');
+            return;
+        }
+    
+        // Create a new card for the part
+        const card = document.createElement('div');
+        card.classList.add('card', 'mb-3', 'shadow-sm');
+    
+        card.innerHTML = `
+            <div class="card-header d-flex align-items-center">
+                <input 
+                    type="checkbox" 
+                    class="form-check-input me-2" 
+                    checked
+                >
+                <h5 class="card-title mb-0">${name}</h5>
+            </div>
+            <div class="card-body part-details">
+                <p class="card-text">${description}</p>
+                <div class="mb-3">
+                    <label class="form-label">Quantity:</label>
+                    <input type="number" class="form-control" value="${quantity}" min="1">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Maintenance Interval (operating hours):</label>
+                    <input type="number" class="form-control" value="${maintenanceInterval}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Replacement Lifespan (operating hours):</label>
+                    <input type="number" class="form-control" value="${replacementLifespan}">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Criticality Level:</label>
+                    <select class="form-select">
+                        <option value="Low" ${criticalityLevel === 'Low' ? 'selected' : ''}>Low</option>
+                        <option value="Medium" ${criticalityLevel === 'Medium' ? 'selected' : ''}>Medium</option>
+                        <option value="High" ${criticalityLevel === 'High' ? 'selected' : ''}>High</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Maintenance Instructions:</label>
+                    <textarea class="form-control">${instructions}</textarea>
+                </div>
+            </div>
+        `;
+    
+        // Add the new card to the parts list
+        document.getElementById('machinePartsList').appendChild(card);
+    
+        // Add functionality to the checkbox
+        const toggleCheckbox = card.querySelector('.form-check-input');
+        const partDetails = card.querySelector('.part-details');
+        toggleCheckbox.addEventListener('change', () => {
+            partDetails.style.display = toggleCheckbox.checked ? 'block' : 'none';
+        });
+    
+        // Hide the form and clear inputs
+        document.getElementById('addPartForm').classList.add('d-none');
+        clearNewPartForm();
+    });
+    
+    // Utility function to clear the form inputs
+    function clearNewPartForm() {
+        document.getElementById('newPartName').value = '';
+        document.getElementById('newPartDescription').value = '';
+        document.getElementById('newPartQuantity').value = '1';
+        document.getElementById('newPartMaintenanceInterval').value = '100';
+        document.getElementById('newPartReplacementLifespan').value = '1000';
+        document.getElementById('newPartCriticalityLevel').value = 'Low';
+        document.getElementById('newPartInstructions').value = '';
+    }    
 });

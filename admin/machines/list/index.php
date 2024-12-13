@@ -428,11 +428,55 @@ if ($user) {
                                     </div>
 
                                     <div class="row mb-4">
-                                        <div id="machinePartsList" class="row"></div>
+                                        <div id="machinePartsList" class="row" style="margin-left: 4px;"></div>
+                                        <button id="addPartButton" class="btn btn-primary mt-3 d-none text-center" style="margin-left: 10px; width: 98%; position: relative;">Add Part</button>
+                                        <div id="addPartForm" class="mt-4 d-none">
+                                            <div class="card">
+                                                <div class="card-header">
+                                                    <h5>Add New Machine Part</h5>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Part Name:</label>
+                                                        <input type="text" class="form-control" id="newPartName" placeholder="Enter part name">
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Description:</label>
+                                                        <textarea class="form-control" id="newPartDescription" placeholder="Enter part description"></textarea>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Quantity:</label>
+                                                        <input type="number" class="form-control" id="newPartQuantity" value="1" min="1">
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Maintenance Interval (operating hours):</label>
+                                                        <input type="number" class="form-control" id="newPartMaintenanceInterval" value="100">
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Replacement Lifespan (operating hours):</label>
+                                                        <input type="number" class="form-control" id="newPartReplacementLifespan" value="1000">
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Criticality Level:</label>
+                                                        <select class="form-select" id="newPartCriticalityLevel">
+                                                            <option value="Low">Low</option>
+                                                            <option value="Medium">Medium</option>
+                                                            <option value="High">High</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Maintenance Instructions:</label>
+                                                        <textarea class="form-control" id="newPartInstructions" placeholder="Enter maintenance instructions"></textarea>
+                                                    </div>
+                                                    <button id="savePartButton" class="btn btn-success">Save Part</button>
+                                                    <button id="cancelPartButton" class="btn btn-secondary">Cancel</button>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
 
                                     <button class="btn btn-secondary" onclick="prevStep(1)">Previous</button>
-                                    <button class="btn btn-primary" onclick="nextStep(3)">Continue</button>
+                                    <button class="btn btn-primary" onclick="nextStep(3)" disabled id="nextStepButton2">Continue</button>
                                 </div>
 
                                 <!-- Step 3 -->
