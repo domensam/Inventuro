@@ -334,6 +334,13 @@ if ($user) {
                                     <div class="row mb-4">
                                         <div class="col-md-4">
                                             <strong>Serial Number:</strong>
+                                            <span 
+                                                class="text-muted" 
+                                                data-bs-toggle="tooltip" 
+                                                data-bs-placement="right" 
+                                                title="12 or 16-character alphanumeric code on the machine">
+                                                <i class="bi bi-question-circle"></i>
+                                            </span>
                                         </div>
                                         <div class="col-md-8">
                                             <input type="text" class="form-control" id="serialNumber">
@@ -449,11 +456,27 @@ if ($user) {
                                                         <input type="number" class="form-control" id="newPartQuantity" value="1" min="1">
                                                     </div>
                                                     <div class="mb-3">
-                                                        <label class="form-label">Maintenance Interval (operating hours):</label>
+                                                        <label class="form-label">Maintenance Interval (operating hours): 
+                                                            <span 
+                                                                class="text-muted" 
+                                                                data-bs-toggle="tooltip" 
+                                                                data-bs-placement="right" 
+                                                                title="How many hours before the part needs to be maintained/cleaned?">
+                                                                <i class="bi bi-question-circle"></i>
+                                                            </span>
+                                                        </label>
                                                         <input type="number" class="form-control" id="newPartMaintenanceInterval" value="100">
                                                     </div>
                                                     <div class="mb-3">
-                                                        <label class="form-label">Replacement Lifespan (operating hours):</label>
+                                                        <label class="form-label">Replacement Lifespan (operating hours):
+                                                            <span 
+                                                                class="text-muted" 
+                                                                data-bs-toggle="tooltip" 
+                                                                data-bs-placement="right" 
+                                                                title="How many hours before the part needs to be replaced?">
+                                                                <i class="bi bi-question-circle"></i>
+                                                            </span>
+                                                        </label>
                                                         <input type="number" class="form-control" id="newPartReplacementLifespan" value="1000">
                                                     </div>
                                                     <div class="mb-3">

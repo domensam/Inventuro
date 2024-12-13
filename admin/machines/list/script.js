@@ -511,8 +511,63 @@ document.addEventListener('DOMContentLoaded', function () {
                 } else {
                     // Remove 'is-invalid' class for valid fields
                     input.classList.remove('is-invalid');
+
+                    // Additional validation for the serialNumber field
+                    if (field.id === 'serialNumber') {
+                        const serialNumber = input.value.trim();
+                        if (serialNumber.length !== 12 && serialNumber.length !== 16) {
+                            input.classList.add('is-invalid');
+                            isValid = false; // Mark as invalid if length condition is not met
+                        } else {
+                            input.classList.remove('is-invalid');
+                        }
+                    }
                 }
             });
+        }
+
+        // Validation for Step 2
+        if (step === 2) {
+            const selectedCards = document.querySelectorAll('.card input[type="checkbox"]:checked');
+
+            selectedCards.forEach(cardCheckbox => {
+                const card = cardCheckbox.closest('.card');
+                const maintenanceField = card.querySelector('input[name="maintenanceInterval"]');
+                const replacementField = card.querySelector('input[name="replacementLifespan"]');
+                const otherFields = card.querySelectorAll('.part-details input, .part-details select, .part-details textarea');
+
+                // General validation for all fields
+                otherFields.forEach(field => {
+                    if (!field.value.trim()) {
+                        field.classList.add('is-invalid');
+                        isValid = false;
+                    } else {
+                        field.classList.remove('is-invalid');
+                    }
+                });
+
+                // Additional validation for maintenance interval
+                if (maintenanceField && maintenanceField.value < 24) {
+                    maintenanceField.classList.add('is-invalid');
+                    isValid = false;
+                } else if (maintenanceField) {
+                    maintenanceField.classList.remove('is-invalid');
+                }
+
+                // Additional validation for replacement lifespan
+                if (replacementField && replacementField.value < 24) {
+                    replacementField.classList.add('is-invalid');
+                    isValid = false;
+                } else if (replacementField) {
+                    replacementField.classList.remove('is-invalid');
+                }
+            });
+
+            // Ensure at least one card is selected
+            if (selectedCards.length === 0) {
+                alert('Please select at least one part to proceed.');
+                isValid = false;
+            }
         }
     
         return isValid; // Return whether the step is valid
@@ -608,12 +663,28 @@ document.addEventListener('DOMContentLoaded', function () {
                                     <input type="number" class="form-control" value="${part.machine_type_parts_quantity || 1}" min="1">
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label">Maintenance Interval (hours):</label>
-                                    <input type="number" class="form-control" value="${part.machine_type_parts_maintenance_interval || 100}">
+                                    <label class="form-label">Maintenance Interval (operating hours):
+                                    <span 
+                                        class="text-muted" 
+                                        data-bs-toggle="tooltip" 
+                                        data-bs-placement="right" 
+                                        title="How many hours before the part needs to be maintained/cleaned?">
+                                        <i class="bi bi-question-circle"></i>
+                                    </span>
+                                    </label>
+                                    <input type="number" name="maintenanceInterval" class="form-control" value="${part.machine_type_parts_maintenance_interval || 100}" min="24">
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label">Replacement Lifespan (hours):</label>
-                                    <input type="number" class="form-control" value="${part.machine_type_parts_replacement_lifespan || 1000}">
+                                    <label class="form-label">Replacement Lifespan (operating hours):
+                                    <span 
+                                        class="text-muted" 
+                                        data-bs-toggle="tooltip" 
+                                        data-bs-placement="right" 
+                                        title="How many hours before the part needs to be replaced?">
+                                        <i class="bi bi-question-circle"></i>
+                                    </span>
+                                    </label>
+                                    <input type="number" name="replacementLifespan" class="form-control" value="${part.machine_type_parts_replacement_lifespan || 1000}" min="24">
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Criticality Level:</label>
@@ -631,6 +702,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         `;
     
                         partsList.appendChild(card);
+                        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                        tooltipTriggerList.map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
     
                         // Add event listener to handle toggling of part details
                         const toggleCheckbox = card.querySelector('.form-check-input');
@@ -661,21 +734,98 @@ document.addEventListener('DOMContentLoaded', function () {
         clearNewPartForm();
     });
     
-    document.getElementById('savePartButton').addEventListener('click', () => {
-        // Get values from the form
-        const name = document.getElementById('newPartName').value.trim();
-        const description = document.getElementById('newPartDescription').value.trim();
-        const quantity = document.getElementById('newPartQuantity').value;
-        const maintenanceInterval = document.getElementById('newPartMaintenanceInterval').value;
-        const replacementLifespan = document.getElementById('newPartReplacementLifespan').value;
-        const criticalityLevel = document.getElementById('newPartCriticalityLevel').value;
-        const instructions = document.getElementById('newPartInstructions').value.trim();
+    function validateNewPartForm() {
+        let isValid = true; // Assume valid until a validation fails
     
-        if (!name || !description) {
-            alert('Part name and description are required!');
-            return;
+        // Get input fields
+        const nameField = document.getElementById('newPartName');
+        const descriptionField = document.getElementById('newPartDescription');
+        const quantityField = document.getElementById('newPartQuantity');
+        const maintenanceIntervalField = document.getElementById('newPartMaintenanceInterval');
+        const replacementLifespanField = document.getElementById('newPartReplacementLifespan');
+        const criticalityLevelField = document.getElementById('newPartCriticalityLevel');
+        const instructionsField = document.getElementById('newPartInstructions');
+    
+        // Validate fields and apply 'is-invalid' class if needed
+        if (!nameField.value.trim()) {
+            nameField.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            nameField.classList.remove('is-invalid');
         }
     
+        if (!descriptionField.value.trim()) {
+            descriptionField.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            descriptionField.classList.remove('is-invalid');
+        }
+    
+        if (!quantityField.value || quantityField.value < 1) {
+            quantityField.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            quantityField.classList.remove('is-invalid');
+        }
+    
+        if (!maintenanceIntervalField.value || maintenanceIntervalField.value < 24) {
+            maintenanceIntervalField.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            maintenanceIntervalField.classList.remove('is-invalid');
+        }
+    
+        if (!replacementLifespanField.value || replacementLifespanField.value < 24) {
+            replacementLifespanField.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            replacementLifespanField.classList.remove('is-invalid');
+        }
+    
+        if (!criticalityLevelField.value.trim()) {
+            criticalityLevelField.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            criticalityLevelField.classList.remove('is-invalid');
+        }
+    
+        if (!instructionsField.value.trim()) {
+            instructionsField.classList.add('is-invalid');
+            isValid = false;
+        } else {
+            instructionsField.classList.remove('is-invalid');
+        }
+    
+        return isValid; // Return overall validity
+    }
+
+    document.getElementById('savePartButton').addEventListener('click', () => {
+
+        if (validateNewPartForm()) {
+        // Proceed to save the part
+        console.log('Form is valid. Proceeding to save the new part.');
+        } else {
+            console.log('Form is invalid. Please correct the highlighted fields.');
+            return;
+        }
+
+        // Get input fields
+        const nameField = document.getElementById('newPartName');
+        const descriptionField = document.getElementById('newPartDescription');
+        const quantityField = document.getElementById('newPartQuantity');
+        const maintenanceIntervalField = document.getElementById('newPartMaintenanceInterval');
+        const replacementLifespanField = document.getElementById('newPartReplacementLifespan');
+        const criticalityLevelField = document.getElementById('newPartCriticalityLevel');
+        const instructionsField = document.getElementById('newPartInstructions');
+
+        const name = nameField.value.trim();
+        const description = descriptionField.value.trim();
+        const quantity = quantityField.value;
+        const maintenanceInterval = maintenanceIntervalField.value;
+        const replacementLifespan = replacementLifespanField.value;
+        const criticalityLevel = criticalityLevelField.value;
+        const instructions = instructionsField.value.trim();
+        
         // Create a new card for the part
         const card = document.createElement('div');
         card.classList.add('card', 'mb-3', 'shadow-sm');
@@ -696,12 +846,28 @@ document.addEventListener('DOMContentLoaded', function () {
                     <input type="number" class="form-control" value="${quantity}" min="1">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Maintenance Interval (operating hours):</label>
-                    <input type="number" class="form-control" value="${maintenanceInterval}">
+                    <label class="form-label">Maintenance Interval (operating hours):
+                    <span 
+                        class="text-muted" 
+                        data-bs-toggle="tooltip" 
+                        data-bs-placement="right" 
+                        title="How many hours before the part needs to be maintained/cleaned?">
+                        <i class="bi bi-question-circle"></i>
+                    </span>
+                    </label>
+                    <input type="number" name="maintenanceInterval" class="form-control" value="${maintenanceInterval}" min="24">
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Replacement Lifespan (operating hours):</label>
-                    <input type="number" class="form-control" value="${replacementLifespan}">
+                    <label class="form-label">Replacement Lifespan (operating hours):
+                    <span 
+                        class="text-muted" 
+                        data-bs-toggle="tooltip" 
+                        data-bs-placement="right" 
+                        title="How many hours before the part needs to be replaced?">
+                        <i class="bi bi-question-circle"></i>
+                    </span>
+                    </label>
+                    <input type="number" name="replacementLifespan" class="form-control" value="${replacementLifespan}" min="24">
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Criticality Level:</label>
@@ -720,14 +886,17 @@ document.addEventListener('DOMContentLoaded', function () {
     
         // Add the new card to the parts list
         document.getElementById('machinePartsList').appendChild(card);
-    
+
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+
         // Add functionality to the checkbox
         const toggleCheckbox = card.querySelector('.form-check-input');
         const partDetails = card.querySelector('.part-details');
         toggleCheckbox.addEventListener('change', () => {
             partDetails.style.display = toggleCheckbox.checked ? 'block' : 'none';
         });
-    
+
         // Hide the form and clear inputs
         document.getElementById('addPartForm').classList.add('d-none');
         clearNewPartForm();
@@ -742,5 +911,8 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('newPartReplacementLifespan').value = '1000';
         document.getElementById('newPartCriticalityLevel').value = 'Low';
         document.getElementById('newPartInstructions').value = '';
-    }    
+    }
+
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
 });
