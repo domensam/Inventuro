@@ -320,9 +320,81 @@ if ($user) {
 
                                 <!-- Step 1 -->
                                 <div id="step1" class="step">
-                                    <h3>Step 1: Basic Details<span class="text-danger">*</span></h3>
+                                    <h3 class="pt-4">Step 1: Basic Details<span class="text-danger">*</span></h3>
                                     <p>Add the new machine's basic details</p>
-                                    
+
+                                    <div class="row mb-4">
+                                        <div class="col-md-4">
+                                            <strong>Machine Name:</strong>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="text" class="form-control" id="machineName">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-4">
+                                        <div class="col-md-4">
+                                            <strong>Serial Number:</strong>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="text" class="form-control" id="serialNumber">
+                                        </div>
+                                    </div>
+                                    <div class="row mb-4">
+                                        <div class="col-md-4">
+                                            <strong>Department:</strong>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <select class="form-select" id="department">
+                                                <option value="" disabled selected>Select a department</option>
+                                                <?php
+                                                    try {
+                                                        $sql = "SELECT * FROM department";
+                                                        $stmt = $conn->prepare($sql);
+                                                        $stmt->execute();
+                                                        $departments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                                                        foreach ($departments as $department) {
+                                                            echo "<option value='" . htmlspecialchars($department['department_id']) . "'>" . htmlspecialchars($department['department_name']) . "</option>";
+                                                        }
+                                                    } catch (PDOException $e) {
+                                                        echo "Error fetching data: " . htmlspecialchars($e->getMessage());
+                                                    }
+                                                ?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-4">
+                                        <div class="col-md-4">
+                                            <strong>Manufacturer:</strong>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <select class="form-select" id="manufacturer">
+                                                <option value="" disabled selected>Select or insert a manufacturer</option>
+                                                <?php
+                                                    try {
+                                                        $sql = "SELECT * FROM manufacturer";
+                                                        $stmt = $conn->prepare($sql);
+                                                        $stmt->execute();
+                                                        $manufacturers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                                                        foreach ($manufacturers as $manufacturer) {
+                                                            echo "<option value='" . htmlspecialchars($manufacturer['manufacturer_id']) . "'>" . htmlspecialchars($manufacturer['manufacturer_name']) . "</option>";
+                                                        }
+                                                    } catch (PDOException $e) {
+                                                        echo "Error fetching data: " . htmlspecialchars($e->getMessage());
+                                                    }
+                                                ?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-4">
+                                        <div class="col-md-4">
+                                            <strong>Manufactured Date:</strong>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <input type="date" class="form-control" id="manufacturedDate">
+                                        </div>
+                                    </div>
                                     <button class="btn btn-primary" onclick="nextStep(2)">Continue</button>
                                 </div>
 
@@ -330,6 +402,31 @@ if ($user) {
                                 <div id="step2" class="step d-none">
                                     <h3>Step 2: Machine Parts<span class="text-danger">*</span></h3>
                                     <p>Select a template to specify machine parts</p>
+                                    <div class="row mb-4">
+                                        <div class="col-md-4">
+                                            <strong>Machine Template:</strong>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <select class="form-select" id="template">
+                                                <option value="" disabled selected onchange="fetchMachineParts()">Select a template</option>
+                                                <?php
+                                                    try {
+                                                        $sql = "SELECT * FROM machine_type";
+                                                        $stmt = $conn->prepare($sql);
+                                                        $stmt->execute();
+                                                        $templates = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                                                        foreach ($templates as $template) {
+                                                            echo "<option value='" . htmlspecialchars($template['machine_type_id']) . "'>" . htmlspecialchars($template['machine_type_name']) . "</option>";
+                                                        }
+                                                    } catch (PDOException $e) {
+                                                        echo "Error fetching data: " . htmlspecialchars($e->getMessage());
+                                                    }
+                                                ?>
+                                            </select>
+                                        </div>
+                                    </div>
+
                                     <button class="btn btn-secondary" onclick="prevStep(1)">Previous</button>
                                     <button class="btn btn-primary" onclick="nextStep(3)">Continue</button>
                                 </div>

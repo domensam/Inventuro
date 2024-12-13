@@ -327,3 +327,8 @@ h2 {
     background-color: #0d6efd;
     color: #fff;
 }
+
+.is-invalid {
+    border: 2px solid red; /* Make the border red */
+    background-color: #ffe6e6; /* Optional: Light red background */
+}

@@ -488,7 +488,60 @@ document.addEventListener('DOMContentLoaded', function () {
         document.querySelector("#sidebar").classList.toggle("expand");
     });
 
+    function validateStep(step) {
+        let isValid = true; // Assume valid until a validation fails
+    
+        // Define required fields for Step 1
+        if (step === 1) {
+            const fields = [
+                { id: 'machineName', name: 'Machine Name' },
+                { id: 'serialNumber', name: 'Serial Number' },
+                { id: 'department', name: 'Department' },
+                { id: 'manufacturer', name: 'Manufacturer' },
+                { id: 'manufacturedDate', name: 'Manufactured Date' }
+            ];
+    
+            // Loop through the fields and validate them
+            fields.forEach(field => {
+                const input = document.getElementById(field.id);
+                if (!input.value.trim()) {
+                    // Add 'is-invalid' class for invalid fields
+                    input.classList.add('is-invalid');
+                    isValid = false; // Mark as invalid
+                } else {
+                    // Remove 'is-invalid' class for valid fields
+                    input.classList.remove('is-invalid');
+                }
+            });
+        }
+    
+        return isValid; // Return whether the step is valid
+    }
+    
     function nextStep(step) {
+        // Validate the current step before proceeding
+        const currentStep = step - 1; // Assuming you're coming from the previous step
+        if (!validateStep(currentStep)) {
+            return; // Stop if validation fails
+        }
+    
+        // Hide all step contents
+        document.querySelectorAll('.step').forEach(stepDiv => stepDiv.classList.add('d-none'));
+        // Show the selected step content
+        document.getElementById(`step${step}`).classList.remove('d-none');
+    
+        // Reset all buttons to secondary
+        document.querySelectorAll('.steps button').forEach(btn => {
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-secondary');
+        });
+    
+        // Highlight the current step's button
+        document.getElementById(`step${step}-button`).classList.add('btn-primary');
+        document.getElementById(`step${step}-button`).classList.remove('btn-secondary');
+    }    
+    
+    function prevStep(step) {
         // Hide all step contents
         document.querySelectorAll('.step').forEach(stepDiv => stepDiv.classList.add('d-none'));
         // Show the selected step content
@@ -505,20 +558,19 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById(`step${step}-button`).classList.remove('btn-secondary');
     }
     
-    function prevStep(step) {
-        // Same as nextStep, for navigating backward
-        document.querySelectorAll('.step').forEach(stepDiv => stepDiv.classList.add('d-none'));
-        document.getElementById(`step${step}`).classList.remove('d-none');
-    
-        document.querySelectorAll('.steps button').forEach(btn => {
-            btn.classList.remove('btn-primary');
-            btn.classList.add('btn-secondary');
-        });
-    
-        document.getElementById(`step${step}-button`).classList.add('btn-primary');
-        document.getElementById(`step${step}-button`).classList.remove('btn-secondary');
-    }    
-
     window.nextStep = nextStep;
-    window.prevStep = prevStep;
+    window.prevStep = prevStep;    
+
+    // Get today's date
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const dd = String(today.getDate()).padStart(2, '0');
+
+    // Format the date as yyyy-mm-dd
+    const formattedDate = `${yyyy}-${mm}-${dd}`;
+
+    // Set the value of the date input
+    document.getElementById('manufacturedDate').value = formattedDate;
+
 });
