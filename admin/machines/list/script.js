@@ -322,7 +322,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    // Open the Add User offcanvas modal
+    // Switch to the add machine view
     document.getElementById('addNewMachineBtn').addEventListener('click', function() {
         // const addMachineModal = new bootstrap.Offcanvas(document.getElementById('addMachineModal'));
         // addMachineModal.show();
@@ -342,7 +342,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Toggle visibility
         defaultView.style.display = 'block';
         addMachineView.style.display = 'none';
-        
+
     });
     
     document.getElementById('saveItemBtn').addEventListener('click', function() {
@@ -1092,6 +1092,68 @@ document.addEventListener('DOMContentLoaded', function () {
     // Clear the file input when the button is clicked
     clearFileButton.addEventListener('click', () => {
         warrantyReceiptInput.value = ''; // Reset the file input
-        alert('File input has been cleared.');
     });
+
+    function handleCoverageTypeChange() {
+        const coverageType = document.getElementById('coverageType').value;
+        const specificPartsContainer = document.getElementById('specificPartsContainer');
+        const otherServicesContainer = document.getElementById('otherServicesContainer');
+    
+        if (coverageType === 'specificParts') {
+            specificPartsContainer.classList.remove('d-none');
+            otherServicesContainer.classList.add('d-none');
+            fetchSpecificPartsFromFrontend(); // Fetch from machinePartsList in the DOM
+        } else if (coverageType === 'otherServices') {
+            specificPartsContainer.classList.add('d-none');
+            otherServicesContainer.classList.remove('d-none');
+        } else {
+            specificPartsContainer.classList.add('d-none');
+            otherServicesContainer.classList.add('d-none');
+        }
+    }    
+    
+    function fetchSpecificPartsFromFrontend() {
+        const specificPartsList = document.getElementById('specificPartsList');
+        const machinePartsList = document.getElementById('machinePartsList');
+    
+        specificPartsList.innerHTML = ''; // Clear the existing list
+    
+        // Iterate through all cards in machinePartsList
+        const parts = machinePartsList.querySelectorAll('.card');
+        parts.forEach(partCard => {
+            // Get the part name and ID from the card
+            const checkbox = partCard.querySelector('.form-check-input');
+            const title = partCard.querySelector('.card-title');
+    
+            if (checkbox && title) {
+                const partId = checkbox.id; // Unique ID for the part
+                const partName = title.textContent.trim(); // Part name
+    
+                // Create a checkbox for specificPartsList
+                const checkboxWrapper = document.createElement('div');
+                checkboxWrapper.classList.add('form-check');
+    
+                checkboxWrapper.innerHTML = `
+                    <input 
+                        type="checkbox" 
+                        class="form-check-input" 
+                        id="specificPart_${partId}" 
+                        value="${partId}"
+                    >
+                    <label class="form-check-label" for="specificPart_${partId}">
+                        ${partName}
+                    </label>
+                `;
+    
+                specificPartsList.appendChild(checkboxWrapper);
+            }
+        });
+    
+        // If no parts are found, show a message
+        if (specificPartsList.children.length === 0) {
+            specificPartsList.innerHTML = '<p>No parts available.</p>';
+        }
+    }    
+    
+    document.getElementById('coverageType').addEventListener('change', handleCoverageTypeChange);    
 });

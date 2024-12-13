@@ -529,7 +529,7 @@ if ($user) {
                                     <div id="warrantyDetails" style="display:none; margin-top: 20px; margin-bottom: 20px;">
                                         <div class="card p-2">
                                             <div class="card-header">
-                                                <h5 class="card-title">Warranty Details</h5>
+                                                <h5 class="card-title">Warranty Details<span class="text-danger">*</span></h5>
                                             </div>
                                             <div class="card-body">
                                                 <div class="form-group mb-3">
@@ -544,6 +544,19 @@ if ($user) {
                                                         <option value="otherServices">Other Services</option>
                                                     </select>
                                                 </div>
+
+                                                <!-- Container for specific parts (checklist) -->
+                                                <div id="specificPartsContainer" class="d-none mb-3">
+                                                    <label>Select parts under warranty:</label>
+                                                    <div id="specificPartsList"></div>
+                                                </div>
+
+                                                <!-- Container for other services (text input) -->
+                                                <div id="otherServicesContainer" class="d-none mb-3">
+                                                    <label for="otherServiceTitle">Service Title:</label>
+                                                    <input type="text" id="otherServiceTitle" class="form-control" placeholder="Enter service title (e.g., Free 1-time deep clean)">
+                                                </div>
+
                                                 <div class="form-group mb-3">
                                                     <label for="startDate">Start Date:</label>
                                                     <input type="date" id="startDate" class="form-control">
@@ -557,10 +570,24 @@ if ($user) {
                                                     <textarea id="termsConditions" class="form-control" placeholder="Add important warranty terms"></textarea>
                                                 </div>
                                                 <div class="form-group mb-3">
-                                                    <label for="warrantyReceipt">Add warranty receipt:</label>
-                                                    <input type="file" id="warrantyReceipt" class="form-control" accept=".pdf,.png,.jpg">
-                                                    <small class="form-text text-muted">Only PDF, PNG, or JPG files are allowed. Maximum size: 25MB.</small>
-                                                    <button type="button" id="clearFile" class="btn btn-secondary mt-2">Clear File</button>
+                                                    <label for="warrantyReceipt">Add warranty documents: 
+                                                        <span 
+                                                            class="text-muted" 
+                                                            data-bs-toggle="tooltip" 
+                                                            data-bs-placement="right" 
+                                                            title="Receipts, contracts, etc.">
+                                                            <i class="bi bi-question-circle"></i>
+                                                        </span>
+                                                    </label>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="flex-grow-1">
+                                                            <input type="file" id="warrantyReceipt" class="form-control" accept=".pdf,.png,.jpg">
+                                                            <small class="form-text text-muted">Only PDF, PNG, or JPG files are allowed. Maximum size: 25MB.</small>
+                                                        </div>
+                                                        <button type="button" id="clearFile" class="btn btn-danger ms-3 align-self-start">
+                                                            <i class="bi bi-trash3-fill"></i>
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
