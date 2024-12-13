@@ -570,7 +570,7 @@ if ($user) {
                                                     <textarea id="termsConditions" class="form-control" placeholder="Add important warranty terms"></textarea>
                                                 </div>
                                                 <div class="form-group mb-3">
-                                                    <label for="warrantyReceipt">Add warranty documents: 
+                                                    <label for="warrantyReceipt">Add warranty document: 
                                                         <span 
                                                             class="text-muted" 
                                                             data-bs-toggle="tooltip" 
@@ -588,6 +588,20 @@ if ($user) {
                                                             <i class="bi bi-trash3-fill"></i>
                                                         </button>
                                                     </div>
+                                                </div>
+                                                <h5 class="card-title" style="margin-top: 20px;">Contact Details</h5>
+                                                <hr>
+                                                <div class="form-group mb-3">
+                                                    <label for="contactName">Contact Person:</label>
+                                                    <input type="text" id="contactName" class="form-control" placeholder="Enter Contact Person">
+                                                </div>
+                                                <div class="form-group mb-3">
+                                                    <label for="contactNumber">Contact Number:<span class="text-danger">*</span></label>
+                                                    <input type="text" id="contactNumber" class="form-control" placeholder="Enter Contact Number">
+                                                </div>
+                                                <div class="form-group mb-3">
+                                                    <label for="contactEmail">Contact Email:</label>
+                                                    <input type="email" id="contactEmail" class="form-control" placeholder="Enter Contact Email">
                                                 </div>
                                             </div>
                                         </div>
