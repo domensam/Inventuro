@@ -518,8 +518,29 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (serialNumber.length !== 12 && serialNumber.length !== 16) {
                             input.classList.add('is-invalid');
                             isValid = false; // Mark as invalid if length condition is not met
+                            input.focus();
                         } else {
                             input.classList.remove('is-invalid');
+                        }
+                    }
+
+                    if(field.id === 'manufacturer') {
+                        const manufacturer = input.value.trim();
+                        if (manufacturer === 'other') {
+                            newManufacturerInput = document.getElementById('newManufacturer');
+                            
+                            if(newManufacturerInput.value.trim() === '') {
+                                newManufacturerInput.classList.add('is-invalid');
+                                isValid = false; // Mark as invalid if length condition is not met
+                                input.focus();
+                            }
+                            else {
+                                input.classList.remove('is-invalid');
+                            }
+
+                        } else {
+                            document.getElementById('newManufacturer').classList.add('d-none');
+                            document.getElementById('newManufacturer').value = ''; // Clear the input
                         }
                     }
                 }
@@ -534,6 +555,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const card = cardCheckbox.closest('.card');
                 const maintenanceField = card.querySelector('input[name="maintenanceInterval"]');
                 const replacementField = card.querySelector('input[name="replacementLifespan"]');
+                const quantityField = card.querySelector('input[name="quantity"]');
                 const otherFields = card.querySelectorAll('.part-details input, .part-details select, .part-details textarea');
 
                 // General validation for all fields
@@ -545,6 +567,14 @@ document.addEventListener('DOMContentLoaded', function () {
                         field.classList.remove('is-invalid');
                     }
                 });
+
+                // Additional validation for quantity
+                if (quantityField && quantityField.value < 1) {
+                    quantityField.classList.add('is-invalid');
+                    isValid = false;
+                } else if (quantityField) {
+                    quantityField.classList.remove('is-invalid');
+                }
 
                 // Additional validation for maintenance interval
                 if (maintenanceField && maintenanceField.value < 24) {
@@ -628,6 +658,24 @@ document.addEventListener('DOMContentLoaded', function () {
     // Set the value of the date input
     document.getElementById('manufacturedDate').value = formattedDate;
 
+    function toggleManufacturerInput() {
+        const manufacturerSelect = document.getElementById('manufacturer');
+        const newManufacturerInput = document.getElementById('newManufacturer');
+    
+        // Show input field if "Other" is selected
+        if (manufacturerSelect.value === 'other') {
+            newManufacturerInput.classList.remove('d-none');
+            newManufacturerInput.required = true; // Make it required
+        } else {
+            newManufacturerInput.classList.add('d-none');
+            newManufacturerInput.value = ''; // Clear the input
+            newManufacturerInput.required = false; // Remove the required attribute
+        }
+    }
+    
+    const manufacturerSelect = document.getElementById('manufacturer');
+    manufacturerSelect.addEventListener('change', toggleManufacturerInput);
+
     function fetchMachineParts() {
         const templateId = document.getElementById('template').value;
 
@@ -660,7 +708,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 <p class="card-text">${part.machine_type_parts_description}</p>
                                 <div class="mb-3">
                                     <label class="form-label">Quantity:</label>
-                                    <input type="number" class="form-control" value="${part.machine_type_parts_quantity || 1}" min="1">
+                                    <input type="number" name="quantity" class="form-control" value="${part.machine_type_parts_quantity || 1}" min="1">
                                 </div>
                                 <div class="mb-3">
                                     <label class="form-label">Maintenance Interval (operating hours):
@@ -843,7 +891,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <p class="card-text">${description}</p>
                 <div class="mb-3">
                     <label class="form-label">Quantity:</label>
-                    <input type="number" class="form-control" value="${quantity}" min="1">
+                    <input type="number" name="quantity" class="form-control" value="${quantity}" min="1">
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Maintenance Interval (operating hours):

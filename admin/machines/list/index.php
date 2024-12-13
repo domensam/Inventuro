@@ -391,7 +391,13 @@ if ($user) {
                                                         echo "Error fetching data: " . htmlspecialchars($e->getMessage());
                                                     }
                                                 ?>
+                                                <option value="other">Other</option>
                                             </select>
+                                            <input 
+                                                type="text" 
+                                                class="form-control mt-2 d-none" 
+                                                id="newManufacturer" 
+                                                placeholder="Enter new manufacturer name">
                                         </div>
                                     </div>
                                     <div class="row mb-4">
