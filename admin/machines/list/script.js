@@ -625,15 +625,57 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Validation for Step 3
         if (step === 3) {
-            const providerName = document.getElementById('providerName').value;
-            const coverageType = document.getElementById('coverageType').value;
-            const startDate = document.getElementById('startDate').value;
-            const expirationDate = document.getElementById('expirationDate').value;
-            const termsConditions = document.getElementById('termsConditions').value;
-            const warrantyDocument = document.getElementById('warrantyDocument').value;
-            const contactName = document.getElementById('contactName').value;
-            const contactNumber = document.getElementById('contactNumber').value;
-            const contactEmail = document.getElementById('contactEmail').value;
+            const fields = [
+                { id: 'providerName', name: 'Provider Name' },
+                { id: 'coverageType', name: 'Coverage Type' },
+                { id: 'startDate', name: 'Start Date' },
+                { id: 'expirationDate', name: 'Expiration Date' },
+                { id: 'termsConditions', name: 'Terms and Conditions' },
+                { id: 'warrantyDocument', name: 'Warranty Document' },
+                { id: 'contactNumber', name: 'Contact Number' }
+            ];
+        
+            let isValid = true; // Initialize validation flag
+        
+            // Loop through the fields and validate them
+            fields.forEach(field => {
+                const input = document.getElementById(field.id);
+                if (!input.value.trim()) {
+                    // Add 'is-invalid' class for invalid fields
+                    input.classList.add('is-invalid');
+                    isValid = false; // Mark as invalid
+                } else {
+                    // Remove 'is-invalid' class for valid fields
+                    input.classList.remove('is-invalid');
+        
+                    // Additional validation for the coverage type
+                    if(field.id === 'coverageType') {
+                        const coverageType = input.value.trim();
+                        if (coverageType === 'otherServices') {
+                            const otherServiceTitle = document.getElementById('otherServiceTitle');
+                            if (!otherServiceTitle || otherServiceTitle.value.trim() === '') {
+                                otherServiceTitle?.classList.add('is-invalid');
+                                isValid = false; // Mark as invalid if input is empty
+                                otherServiceTitle?.focus();
+                            } else {
+                                otherServiceTitle.classList.remove('is-invalid');
+                            }
+                        }
+                        else if(coverageType === 'specificParts') {
+                            // Make sure that at least 1 is checked in the specificPartsList
+                            const specificPartsList = document.getElementById('specificPartsList');
+                            const checkedInputs = specificPartsList.querySelectorAll('input[type="checkbox"]:checked');
+                            if (checkedInputs.length === 0) {
+                                input?.classList.add('is-invalid');
+                                isValid = false; // Mark as invalid if input is empty
+                                input?.focus();
+                            }
+                        }
+                    }
+                }
+            });
+        
+            return isValid; // Return overall validation result
         }
     
         return isValid; // Return whether the step is valid
@@ -1139,7 +1181,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const checkbox = partCard.querySelector('.form-check-input');
             const title = partCard.querySelector('.card-title');
     
-            if (checkbox && title) {
+            if (checkbox && checkbox.checked && title) {
                 const partId = checkbox.id; // Unique ID for the part
                 const partName = title.textContent.trim(); // Part name
     

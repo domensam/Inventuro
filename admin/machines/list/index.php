@@ -574,7 +574,7 @@ if ($user) {
 
                                                 <!-- Container for specific parts (checklist) -->
                                                 <div id="specificPartsContainer" class="d-none mb-3">
-                                                    <label>Select parts under warranty:</label>
+                                                    <label>Select parts under warranty (at least 1):</label>
                                                     <div id="specificPartsList"></div>
                                                 </div>
 
