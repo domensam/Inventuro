@@ -1100,6 +1100,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const warrantyDetails = document.getElementById('warrantyDetails');
         const warrantyToggle = document.getElementById('warrantyToggle');
         warrantyDetails.style.display = warrantyToggle.checked ? 'block' : 'none';
+        notifyWarranty.style.display = warrantyToggle.checked ? 'block' : 'none';
     }
 
     // Handle Covered Parts Toggle

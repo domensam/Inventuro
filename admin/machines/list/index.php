@@ -52,7 +52,7 @@ if ($user) {
             <!-- Your Custom Stylesheet -->
             <link href="style.css" rel="stylesheet">
 
-            <title>Items</title>
+            <title>Machines | List</title>
     </head>
     <body>
         <div class="wrapper">
@@ -641,7 +641,48 @@ if ($user) {
                                 <!-- Step 4 -->
                                 <div id="step4" class="step d-none">
                                     <h3>Step 4: Review and Submit</h3>
-                                    <p>Check if the machine details are correct.</p>
+                                    <p>Set notification preferences and check the machine details.</p>
+                                    <div id="notificationDetails" style="margin-top: 20px; margin-bottom: 20px;">
+                                        <div class="card p-2">
+                                            <div class="card-header">
+                                                <h5 class="card-title">Notification Preferences<span class="text-danger">*</span></h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="form-group mb-3">
+                                                    <label for="notificationEmail">Notification Email:</label>
+                                                    <input type="email" id="notificationEmail" class="form-control" placeholder="Enter email to receive notification">
+                                                </div>
+                                                <div class="form-group mb-3">
+                                                    <label for="notificationPhone">Notification Phone (optional):</label>
+                                                    <input type="text" id="notificationPhone" class="form-control" placeholder="Enter phone number to receive notification">
+                                                </div>
+                                                <div class="form-group mb-3">
+                                                    <label>
+                                                        Notify me 
+                                                        <input type="number" class="form-control d-inline-block mx-2" id="maintenanceNotifyHours" style="width: 80px;" placeholder="7" min="7" step="1">
+                                                        day(s) before the part requires maintenance or replacement
+                                                    </label>
+                                                </div>
+                                                <div id="notifyWarranty" class="form-group mb-3" style="display: none;">
+                                                    <label>
+                                                        Notify me 
+                                                        <input type="number" class="form-control d-inline-block mx-2" id="warrantyNotifyDays" style="width: 80px;" placeholder="1" min="1" step="1">
+                                                        week(s) before the warranty expires
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="machineDetails" style="display:none; margin-top: 20px; margin-bottom: 20px;">
+                                        <div class="card p-2">
+                                            <div class="card-header">
+                                                <h5 class="card-title">Machine Details<span class="text-danger">*</span></h5>
+                                            </div>
+                                            <div class="card-body">
+                                                
+                                            </div>
+                                        </div>
+                                    </div>
                                     <button class="btn btn-secondary" onclick="prevStep(3)">Previous</button>
                                     <button class="btn btn-success">Submit</button>
                                 </div>
