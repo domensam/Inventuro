@@ -61,7 +61,6 @@ $stmt_requests = $conn->prepare("
 SELECT * FROM repair
 LEFT JOIN repair_request ON repair.repair_request_id = repair_request.repair_request_id
 LEFT JOIN machine ON machine.machine_id = repair.machine_id
-LEFT JOIN urgency ON machine.machine_urgency = urgency.id
 WHERE repair.handled_by = ?
 ORDER BY repair_request.date_requested DESC
 LIMIT 10
@@ -230,32 +229,30 @@ $recent_requests = $stmt_requests->fetchAll(PDO::FETCH_ASSOC);
                                     break;
                             }
 
-                            // Determine urgency color class
-                            $urgencyClass = '';
-                            $urgencyText = htmlspecialchars($request['name']);
-                            switch ($urgencyText) {
-                                case 'Low':
-                                    $urgencyClass = 'text-success'; // Green
-                                    break;
-                                case 'Medium':
-                                    $urgencyClass = 'text-warning'; // Yellow
-                                    break;
-                                case 'High':
-                                    $urgencyClass = 'text-danger'; // Red
-                                    break;
-                            }
+                            // // Determine urgency color class
+                            // $urgencyClass = '';
+                            // $urgencyText = htmlspecialchars($request['name']);
+                            // switch ($urgencyText) {
+                            //     case 'Low':
+                            //         $urgencyClass = 'text-success'; // Green
+                            //         break;
+                            //     case 'Medium':
+                            //         $urgencyClass = 'text-warning'; // Yellow
+                            //         break;
+                            //     case 'High':
+                            //         $urgencyClass = 'text-danger'; // Red
+                            //         break;
+                            // }
                         ?>
                             <li class="list-group-item d-flex justify-content-between align-items-start" 
                                 data-request-id="<?= htmlspecialchars($request['repair_request_id']) ?>" 
                                 data-machine="<?= htmlspecialchars($request['machine_name']) ?>"
                                 data-status="<?= $statusText ?>"
-                                data-urgency="<?= $urgencyText ?>"
                                 data-date="<?= date("d M Y", strtotime($request['date_requested'])) ?>">
                                 <div class="ms-2 me-auto">
                                     <div class="fw-bold">Request ID: <?= htmlspecialchars($request['repair_request_id']) ?></div>
                                     Machine: <?= htmlspecialchars($request['machine_name']) ?> - <?= htmlspecialchars($request['machine_serial_number']) ?> | 
                                     <span class="<?= $statusClass ?>">Status: <?= $statusText ?></span> | 
-                                    <span class="<?= $urgencyClass ?>">Urgency: <?= $urgencyText ?></span>
                                 </div>
                                 <span class="badge bg-primary rounded-pill">
                                     <?= date("d M Y", strtotime($request['date_requested'])) ?>

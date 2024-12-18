@@ -625,59 +625,65 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Validation for Step 3
         if (step === 3) {
-            const fields = [
-                { id: 'providerName', name: 'Provider Name' },
-                { id: 'coverageType', name: 'Coverage Type' },
-                { id: 'startDate', name: 'Start Date' },
-                { id: 'expirationDate', name: 'Expiration Date' },
-                { id: 'termsConditions', name: 'Terms and Conditions' },
-                { id: 'warrantyDocument', name: 'Warranty Document' },
-                { id: 'contactNumber', name: 'Contact Number' }
-            ];
-        
+            let warrantyToggle = document.getElementById('warrantyToggle')?.checked;
             let isValid = true; // Initialize validation flag
+            let focusSet = false; // To set focus only once
         
-            // Loop through the fields and validate them
-            fields.forEach(field => {
-                const input = document.getElementById(field.id);
-                if (!input.value.trim()) {
-                    // Add 'is-invalid' class for invalid fields
+            if (warrantyToggle) {
+                const fields = [
+                    { id: 'providerName', name: 'Provider Name' },
+                    { id: 'coverageType', name: 'Coverage Type' },
+                    { id: 'startDate', name: 'Start Date' },
+                    { id: 'expirationDate', name: 'Expiration Date' },
+                    { id: 'termsConditions', name: 'Terms and Conditions' },
+                    { id: 'warrantyDocument', name: 'Warranty Document' },
+                    { id: 'contactName', name: 'Contact Name' },
+                    { id: 'contactNumber', name: 'Contact Number' },
+                    { id: 'contactEmail', name: 'Contact Email' }
+                ];
+        
+                // Helper function for setting invalid state
+                const markInvalid = (input) => {
+                    if (!input) return;
                     input.classList.add('is-invalid');
-                    isValid = false; // Mark as invalid
-                } else {
-                    // Remove 'is-invalid' class for valid fields
-                    input.classList.remove('is-invalid');
+                    if (!focusSet) {
+                        input.focus();
+                        focusSet = true;
+                    }
+                    isValid = false;
+                };
         
-                    // Additional validation for the coverage type
-                    if(field.id === 'coverageType') {
-                        const coverageType = input.value.trim();
-                        if (coverageType === 'otherServices') {
-                            const otherServiceTitle = document.getElementById('otherServiceTitle');
-                            if (!otherServiceTitle || otherServiceTitle.value.trim() === '') {
-                                otherServiceTitle?.classList.add('is-invalid');
-                                isValid = false; // Mark as invalid if input is empty
-                                otherServiceTitle?.focus();
-                            } else {
-                                otherServiceTitle.classList.remove('is-invalid');
-                            }
-                        }
-                        else if(coverageType === 'specificParts') {
-                            // Make sure that at least 1 is checked in the specificPartsList
-                            const specificPartsList = document.getElementById('specificPartsList');
-                            const checkedInputs = specificPartsList.querySelectorAll('input[type="checkbox"]:checked');
-                            if (checkedInputs.length === 0) {
-                                input?.classList.add('is-invalid');
-                                isValid = false; // Mark as invalid if input is empty
-                                input?.focus();
+                fields.forEach(field => {
+                    const input = document.getElementById(field.id);
+                    if (!input?.value.trim()) {
+                        markInvalid(input);
+                    } else {
+                        input.classList.remove('is-invalid');
+        
+                        if (field.id === 'coverageType') {
+                            const coverageType = input.value.trim();
+                            if (coverageType === 'otherServices') {
+                                const otherServiceTitle = document.getElementById('otherServiceTitle');
+                                if (!otherServiceTitle?.value.trim()) {
+                                    markInvalid(otherServiceTitle);
+                                } else {
+                                    otherServiceTitle.classList.remove('is-invalid');
+                                }
+                            } else if (coverageType === 'specificParts') {
+                                const specificPartsList = document.getElementById('specificPartsList');
+                                const checkedInputs = specificPartsList?.querySelectorAll('input[type="checkbox"]:checked');
+                                if (!checkedInputs || checkedInputs.length === 0) {
+                                    markInvalid(input);
+                                }
                             }
                         }
                     }
-                }
-            });
+                });
+            }
         
-            return isValid; // Return overall validation result
-        }
-    
+            return isValid; // Optionally return the validation result
+        }        
+
         return isValid; // Return whether the step is valid
     }
     
@@ -894,9 +900,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             })
             .catch(error => {
-                console.error('Error fetching machine parts:', error);
+                const partsList = document.getElementById('machinePartsList');
+                partsList.innerHTML = `<p class="text-danger">Error fetching machine parts: ${error.message}</p>`;
             });
-        document.getElementById('nextStepButton2').disabled = false;
+        document.getElementById('nextStepButton3').disabled = false;
         document.getElementById('addPartButton').classList.remove('d-none');
     }               
 
@@ -1183,7 +1190,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const title = partCard.querySelector('.card-title');
     
             if (checkbox && checkbox.checked && title) {
-                const partId = checkbox.id; // Unique ID for the part
+                const partId = checkbox.id.replace('togglePart_', ''); // Unique ID for the part
                 const partName = title.textContent.trim(); // Part name
     
                 // Create a checkbox for specificPartsList
@@ -1213,4 +1220,219 @@ document.addEventListener('DOMContentLoaded', function () {
     }    
     
     document.getElementById('coverageType').addEventListener('change', handleCoverageTypeChange);    
+
+    function fetchFinalValues() {
+        const partsList = document.getElementById('machinePartsList');
+        const selectedParts = [];
+    
+        // Get warranty information
+        const warrantyToggle = document.getElementById('warrantyToggle')?.checked;
+        let coverageType = null;
+        let warrantyCoveredPartsIds = new Set();
+    
+        if (warrantyToggle) {
+            coverageType = document.getElementById('coverageType')?.value;
+    
+            if (coverageType === 'specificParts') {
+                const specificPartsList = document.getElementById('specificPartsList');
+                if (specificPartsList) {
+                    const checkedWarrantyCheckboxes = specificPartsList.querySelectorAll('input[type="checkbox"]:checked');
+                    checkedWarrantyCheckboxes.forEach(checkbox => {
+                        const partId = checkbox.value;
+                        warrantyCoveredPartsIds.add(partId);
+                    });
+                }
+            }
+        }
+    
+        // Iterate over each part card
+        const parts = partsList.querySelectorAll('.card');
+        parts.forEach(card => {
+            const checkbox = card.querySelector('.form-check-input');
+            if (checkbox && checkbox.checked) {
+                const partId = checkbox.id.replace('togglePart_', '');
+                const part = {
+                    id: partId,
+                    name: card.querySelector('.card-title')?.textContent.trim(),
+                    description: card.querySelector('.card-text')?.textContent.trim(),
+                    quantity: card.querySelector('input[name="quantity"]')?.value || '1',
+                    maintenanceInterval: card.querySelector('input[name="maintenanceInterval"]')?.value || '0',
+                    replacementLifespan: card.querySelector('input[name="replacementLifespan"]')?.value || '0',
+                    criticalityLevel: card.querySelector('select')?.value || 'Unknown',
+                    instructions: card.querySelector('textarea')?.value.trim() || '',
+                    warrantyCovered: "False", // Default value
+                };
+    
+                // Determine if this part is covered by warranty
+                if (warrantyToggle) {
+                    if (coverageType === 'fullMachine') {
+                        part.warrantyCovered = "True";
+                    } else if (coverageType === 'specificParts') {
+                        if (warrantyCoveredPartsIds.has(partId)) {
+                            part.warrantyCovered = "True";
+                        }
+                    }
+                    // For 'otherServices' or unhandled cases, warrantyCovered remains "False"
+                }
+    
+                selectedParts.push(part);
+            }
+        });
+    
+        return selectedParts;
+    }
+
+    // Handle the machine image to Base64 conversion
+    let machineImageBase64 = null; // Store the Base64 string globally
+
+    document.getElementById('machineImage').addEventListener('change', (event) => {
+        const file = event.target.files[0]; // Get the selected file
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = () => {
+                machineImageBase64 = reader.result.split(',')[1]; // Strip metadata prefix
+            };
+            reader.onerror = () => {
+                console.error("Error reading file.");
+            };
+            reader.readAsDataURL(file); // Convert file to Base64
+        } else {
+            machineImageBase64 = null; // Reset if no file is selected
+        }
+    });
+
+    function assignFinalValues() {
+        // Step 1 values
+        const machineName = document.getElementById('machineName').value.trim();
+        const serialNumber = document.getElementById('serialNumber').value.trim();
+        const machineDescription = document.getElementById('machineDescription').value.trim();
+        const department = document.getElementById('department').value;
+        let manufacturer = document.getElementById('manufacturer').value.trim();
+    
+        const departmentMapping = {
+            1: "Tractorco",
+            2: "Warehouse",
+            4: "Logistics",
+            7: "Pre-production",
+            8: "Manufacturing",
+            9: "Flavoring",
+            10: "Packaging",
+            11: "IT"
+        };
+        const manufacturerMapping = {
+            1: "Tractorco",
+            2: "Zhengzhou Xifu Machinery",
+            3: "Food Machinery Industrial Corporation",
+            4: "Multico Prime Power Inc",
+            5: "JSS Machinery Corporation"
+        };
+    
+        const departmentName = departmentMapping[department] || "Unknown Department";
+        const manufacturerName = manufacturer === 'other'
+            ? document.getElementById('newManufacturer').value.trim()
+            : manufacturerMapping[manufacturer];
+    
+        const manufacturedDate = document.getElementById('manufacturedDate').value.trim();
+        const machineImage = machineImageBase64;
+        const machineType = document.getElementById('template').value;
+    
+        // Step 3 values
+        const warrantyToggle = document.getElementById('warrantyToggle')?.checked;
+        let warranty = null;
+        if (warrantyToggle) {
+            warranty = {
+                providerName: document.getElementById('providerName').value.trim(),
+                coverageType: document.getElementById('coverageType').value.trim(),
+                startDate: document.getElementById('startDate').value.trim(),
+                expirationDate: document.getElementById('expirationDate').value.trim(),
+                termsConditions: document.getElementById('termsConditions').value.trim(),
+                contactPerson: document.getElementById('contactName').value.trim(),
+                contactNumber: document.getElementById('contactNumber').value.trim(),
+                contactEmail: document.getElementById('contactEmail').value.trim(),
+                otherServices: document.getElementById('otherServiceTitle').value.trim() || null
+            };
+        }
+
+        return {
+            machineName,
+            machineType,
+            serialNumber,
+            machineDescription,
+            departmentName,
+            manufacturerName,
+            manufacturedDate,
+            machineImage,
+            warrantyEnabled: warrantyToggle,
+            warranty
+        };
+    }    
+
+    document.getElementById('nextStepButton4').addEventListener('click', assignFinalValues);
+
+    document.getElementById('submitRepairUpdate').addEventListener('click', (event) => {
+        event.preventDefault();
+    
+        // Validate inputs (reuse your validation logic)
+        let isValid = true;
+    
+        if (!isValid) {
+            console.log("Validation failed. Correct the errors.");
+            return;
+        }
+    
+        // Collect parts data
+        const selectedParts = fetchFinalValues();
+    
+        // Collect machine and warranty data
+        const machineAndWarrantyData = assignFinalValues();
+    
+        // Collect notification data
+        const notificationData = {
+            email: document.getElementById('notificationEmail').value.trim(),
+            notifyDays: document.getElementById('maintenanceNotifyDays').value.trim(),
+            notifyPhone: document.getElementById('notificationPhone').value.trim(),
+            notifyWeeks: document.getElementById('warrantyNotifyWeeks').value.trim()
+        };
+    
+        // Get file inputs
+        const machineManual = document.getElementById('machineManual').files[0] || null;
+        const warrantyDocument = document.getElementById('warrantyDocument').files[0] || null;
+    
+        // Build the FormData object
+        const formData = new FormData();
+    
+        // Add JSON data
+        formData.append('data', JSON.stringify({
+            ...machineAndWarrantyData,
+            selectedParts,
+            notifications: notificationData,
+            created_by: loggedInEmployeeId
+        }));
+    
+        // Add files to FormData
+        if (machineManual) {
+            formData.append('machineManual', machineManual);
+        }
+    
+        if (warrantyDocument) {
+            formData.append('warrantyDocument', warrantyDocument);
+        }
+    
+        // Send the payload to the backend
+        fetch('add_new_machine.php', {
+            method: 'POST',
+            body: formData // FormData automatically sets the correct Content-Type
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Data submitted successfully!');
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    });
+        
+
 });

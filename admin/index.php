@@ -231,16 +231,78 @@ if ($user) {
                             </div>
                             <div class="row mt-4">
                                 <h2>Next Maintenance Schedule</h2>
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-bordered">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Machine ID</th>
+                                                <th scope="col">Machine Name</th>
+                                                <th scope="col">Next Maintenance Date</th>
+                                                <th scope="col">Maintenance Type</th>
+                                                <th scope="col">Assigned Technician</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>001</td>
+                                                <td>Hydraulic Press</td>
+                                                <td>2025-01-10</td>
+                                                <td>Full Service</td>
+                                                <td>John Doe</td>
+                                            </tr>
+                                            <tr>
+                                                <td>002</td>
+                                                <td>CNC Machine</td>
+                                                <td>2025-03-01</td>
+                                                <td>Inspection</td>
+                                                <td>Jane Smith</td>
+                                            </tr>
+                                            <tr>
+                                                <td>003</td>
+                                                <td>Conveyor Belt</td>
+                                                <td>2025-02-15</td>
+                                                <td>Lubrication</td>
+                                                <td>Mike Johnson</td>
+                                            </tr>
+                                            <tr>
+                                                <td>004</td>
+                                                <td>Forklift</td>
+                                                <td>2025-06-05</td>
+                                                <td>Battery Check</td>
+                                                <td>Emily Davis</td>
+                                            </tr>
+                                            <tr>
+                                                <td>005</td>
+                                                <td>Air Compressor</td>
+                                                <td>2025-01-20</td>
+                                                <td>Filter Replacement</td>
+                                                <td>Chris Wilson</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                         <div class="col-4">
-                            <div class="card col align-items-center card-hover p-100">
-                                <h2>Analytics Insights</h2>
-                                <div class="radial-progress-container">
+                            <div class="card col align-items-center card-hover mb-5">
+                                <h2 class="mt-2">Analytics Insights</h2>
+                                <div class="radial-progress-container m-3">
                                     <svg class="radial-progress" width="120" height="120" viewBox="0 0 120 120">
                                         <circle class="progress-bg" cx="60" cy="60" r="54" />
                                         <circle class="progress" cx="60" cy="60" r="54" transform="rotate(-90, 60, 60)" />
                                         <text x="60" y="65" class="progress-text">45%</text>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="card col align-items-center card-hover">
+                                <h2 class="mt-2">Employee Performance</h2>
+                                <div class="radial-progress-container m-3">
+                                    <svg class="radial-progress" width="120" height="120" viewBox="0 0 120 120">
+                                        <circle class="progress-bg" cx="60" cy="60" r="54" />
+                                        <!-- Static progress with pre-calculated stroke-dashoffset -->
+                                        <circle class="progress" cx="60" cy="60" r="54" transform="rotate(-90, 60, 60)" 
+                                            style="stroke-dasharray: 339.292; stroke-dashoffset: 84.823;" />
+                                        <text x="60" y="65" class="progress-text">75%</text>
                                     </svg>
                                 </div>
                             </div>

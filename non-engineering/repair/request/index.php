@@ -240,7 +240,6 @@ if ($user) {
                                 <th class="text-start" style="padding-left: 13px;">Date</th>
                                 <th class="text-start" style="padding-left: 13px;">Repair Request No.</th>
                                 <th class="text-start" style="padding-left: 13px;">Status</th>
-                                <th class="text-start" style="padding-left: 13px;">Urgency</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -252,7 +251,6 @@ if ($user) {
                                     LEFT JOIN repair ON repair_request.repair_request_id = repair.repair_request_id
                                     LEFT JOIN employee ON repair.handled_by = employee.employee_id
                                     LEFT JOIN machine ON repair_request.machine_id = machine.machine_id
-                                    LEFT JOIN urgency ON machine.machine_urgency = urgency.id
                                     WHERE repair_request.requested_by = ?
                                     ORDER BY repair_request.date_requested ASC";
 
@@ -287,19 +285,19 @@ if ($user) {
                                 }
 
                                 // Determine urgency text color class
-                                $urgencyClass = '';
-                                $urgencyText = htmlspecialchars($row['name']);
-                                switch ($row['name']) {
-                                    case 'Low':
-                                        $urgencyClass = 'text-success'; // Green
-                                        break;
-                                    case 'Medium':
-                                        $urgencyClass = 'text-warning'; // Yellow
-                                        break;
-                                    case 'High':
-                                        $urgencyClass = 'text-danger'; // Red
-                                        break;
-                                }
+                                // $urgencyClass = '';
+                                // $urgencyText = htmlspecialchars($row['name']);
+                                // switch ($row['name']) {
+                                //     case 'Low':
+                                //         $urgencyClass = 'text-success'; // Green
+                                //         break;
+                                //     case 'Medium':
+                                //         $urgencyClass = 'text-warning'; // Yellow
+                                //         break;
+                                //     case 'High':
+                                //         $urgencyClass = 'text-danger'; // Red
+                                //         break;
+                                // }
                                     // Construct the table row
                                     echo "<tr
                                         data-date-requested='" . htmlspecialchars(date("d M Y g:i A", strtotime($row['date_requested']))) . "'
@@ -307,7 +305,6 @@ if ($user) {
                                         data-machine-id='" . htmlspecialchars($row['machine_id']) . "'
                                         data-machine-name='" . htmlspecialchars($row['machine_name']) . "'
                                         data-status ='" . htmlspecialchars($row['status']) . "'
-                                        data-urgency='" . htmlspecialchars($row['name']) . "'
                                         data-department='" . htmlspecialchars($department) . "'
                                         data-requested-by='" . htmlspecialchars($first_name . " " . $last_name . " (" . $employee_id . ")") . "'
                                         data-handled-by='" . (
@@ -323,7 +320,6 @@ if ($user) {
                                         <td class='text-start align-middle'>
                                             <span class='badge $statusClass p-2 rounded fs-6'>$statusText</span>
                                         </td>
-                                        <td class='text-start align-middle $urgencyClass'>$urgencyText</td>
                                     </tr>";
                                 }
                             } catch (PDOException $e) {
@@ -378,16 +374,6 @@ if ($user) {
                     </div>
                     <div class="col-8">
                         <p><span id="modalStatus"></span></p>
-                    </div>
-                </div>
-                <div class="row mb-2">
-                    <div class="col-4">
-                        <p><strong>Urgency:</strong></p>
-                    </div>
-                    <div class="col-8">
-                        <p>
-                            <span id="modalUrgency"></span>
-                        </p>
                     </div>
                 </div>
                 <div class="row mb-2">

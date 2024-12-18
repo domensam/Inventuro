@@ -29,30 +29,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $selectedMaterials = isset($data['selected_materials']) ? $data['selected_materials'] : null;
 
         try {
-            // Step 1: Update repair table with main_description and calculated repair_date based on machine_urgency
-            // First, get the urgency value to calculate the repair date
-            $stmt = $conn->prepare("
-                SELECT machine_urgency FROM repair
-                LEFT JOIN repair_request ON repair.repair_request_id = repair_request.repair_request_id
-                LEFT JOIN machine ON repair_request.machine_id = machine.machine_id
-                WHERE repair.repair_id = ?
-            ");
+            // // Step 1: Update repair table with main_description and calculated repair_date based on machine_urgency
+            // // First, get the urgency value to calculate the repair date
+            // $stmt = $conn->prepare("
+            //     SELECT machine_urgency FROM repair
+            //     LEFT JOIN repair_request ON repair.repair_request_id = repair_request.repair_request_id
+            //     LEFT JOIN machine ON repair_request.machine_id = machine.machine_id
+            //     WHERE repair.repair_id = ?
+            // ");
 
-            $stmt->bindParam(1, $repairNo, PDO::PARAM_INT);
-            $stmt->execute();
-            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            // $stmt->bindParam(1, $repairNo, PDO::PARAM_INT);
+            // $stmt->execute();
+            // $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
-            $machineUrgency = $result['machine_urgency'];
+            // $machineUrgency = $result['machine_urgency'];
 
-            // Calculate the repair date based on urgency
-            $repairDate = null;
-            if ($machineUrgency == 1) {
-                $repairDate = date('Y-m-d', strtotime("+2 days"));
-            } elseif ($machineUrgency == 2) {
-                $repairDate = date('Y-m-d', strtotime("+4 days"));
-            } elseif ($machineUrgency == 3) {
-                $repairDate = date('Y-m-d', strtotime("+7 days"));
-            }
+            // // Calculate the repair date based on urgency
+            // $repairDate = null;
+            // if ($machineUrgency == 1) {
+            //     $repairDate = date('Y-m-d', strtotime("+2 days"));
+            // } elseif ($machineUrgency == 2) {
+            //     $repairDate = date('Y-m-d', strtotime("+4 days"));
+            // } elseif ($machineUrgency == 3) {
+            //     $repairDate = date('Y-m-d', strtotime("+7 days"));
+            // }
+
+            $repairDate = date('Y-m-d', strtotime("+2 days"));
             
             // Update the repair table with new description and calculated repair date
             $stmtUpdate = $conn->prepare("

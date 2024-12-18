@@ -207,7 +207,6 @@ if ($user) {
                             <th class="text-center" style="width: 5%;"><input type="checkbox" id="selectAll"></th>
                             <th class="text-start" style="padding-left: 13px;">Date</th>
                             <th class="text-start" style="padding-left: 13px;">Repair / Maintenance No.</th>
-                            <th class="text-start" style="padding-right: 13px;">Urgency</th>
                             <th class="text-start" style="padding-left: 10px;">Requested By</th>
                             <th class="text-center" style="padding-right: 13px;">Action</th>
                         </tr>
@@ -218,8 +217,7 @@ if ($user) {
                             $sql = "SELECT 
                                     material_request.*,
                                     material_request_items.*,
-                                    employee.*,
-                                    urgency.name
+                                    employee.*
                                     FROM material_request
                                     LEFT JOIN material_request_items ON material_request.material_request_id = material_request_items.material_request_id
                                     LEFT JOIN employee ON material_request.requested_by = employee.employee_id
@@ -227,7 +225,6 @@ if ($user) {
                                     LEFT JOIN repair_request ON material_request.repair_request_id = repair_request.repair_request_id
                                     LEFT JOIN maintenance ON material_request.maintenance_id = maintenance.maintenance_id
                                     LEFT JOIN machine ON repair_request.machine_id = machine.machine_id
-                                    LEFT JOIN urgency ON machine.machine_urgency = urgency.id
                                     ORDER BY material_request.timestamp DESC;";
 
                             $result = $conn->query($sql);
@@ -245,7 +242,6 @@ if ($user) {
                                     <td class='text-center align-middle'><input type='checkbox' class='row-checkbox'></td>
                                     <td class='text-start align-middle'>" . htmlspecialchars((new DateTime($row['timestamp']))->format('d M Y')) . "</td>
                                     <td class='text-start align-middle'>" . htmlspecialchars($row['repair_request_id'] ?? $row['maintenance_id']) . "</td>
-                                    <td class='text-start align-middle'>" . htmlspecialchars($row['name'] ?? 'Not Specified', ENT_QUOTES, 'UTF-8') . "</td>
                                     <td class='text-start align-middle'>" . htmlspecialchars($row['requested_by']) . "</td>
                                     <td class='text-center align-middle'><button class='btn btn-sm btn-primary' id='viewMaterialRequest'><i class='bi bi-eye-fill'></i></button> ";
                                     // Check if the status is NOT "Done"
@@ -291,7 +287,6 @@ if ($user) {
                         <p><strong>Requested Date:</strong></p>
                         <p><strong>Requested By:</strong></p>
                         <p><strong>Repair Request No.:</strong></p>
-                        <p><strong>Urgency:</strong></p>
                         <p><strong>Status:</strong></p>
                     </div>
                     <div class="col-8 text-start">
@@ -338,7 +333,6 @@ if ($user) {
                                 <p><strong>Requested Date:</strong></p>
                                 <p><strong>Requested By:</strong></p>
                                 <p><strong>Repair Request No.:</strong></p>
-                                <p><strong>Urgency:</strong></p>
                                 <p><strong>Status:</strong></p>
                             </div>
                             <div class="col-6 text-start">

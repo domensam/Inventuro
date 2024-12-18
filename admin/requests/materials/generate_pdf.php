@@ -69,7 +69,6 @@ try {
             repair_request.repair_request_id,
             maintenance.maintenance_id,
             COALESCE(machine1.machine_name, machine2.machine_name) AS machine_name,  -- Use machine_name from second join if first is NULL
-            urgency.name AS urgency_name,
             material_request.status,
             item.image,
             item.item_name, 
@@ -93,8 +92,6 @@ try {
             machine AS machine1 ON machine_parts.machine_id = machine1.machine_id  -- First LEFT JOIN to machine
         LEFT JOIN
             machine AS machine2 ON machine_parts.machine_id = machine2.machine_id  -- Second LEFT JOIN to machine
-        LEFT JOIN
-            urgency ON machine1.machine_urgency = urgency.id  -- Using machine1 here, but could be either machine1 or machine2
         WHERE 
             material_request.material_request_id = :material_request_id;
     ');
@@ -143,8 +140,6 @@ try {
     $pdf->Cell(0, 10, $firstRow['first_name'] . ' ' . $firstRow['last_name'], 0, 1);
     $pdf->Cell(50, 10, 'Repair / Maintenance No.:', 0, 0);
     $pdf->Cell(0, 10, $firstRow['repair_request_id'] ?? $firstRow['maintenance_id'], 0, 1);
-    $pdf->Cell(50, 10, 'Urgency:', 0, 0);
-    $pdf->Cell(0, 10, $firstRow['urgency_name'] ?? 'Not Needed', 0, 1);
     $pdf->Cell(50, 10, 'Status:', 0, 0);
     $pdf->Cell(0, 10, $firstRow['status'], 0, 1);
     $pdf->Ln(10);

@@ -213,7 +213,6 @@ if ($user) {
                                 <th class="text-start">Machine</th>
                                 <th class="text-start">Serial No.</th>
                                 <th class="text-start">Department</th>
-                                <th class="text-start">Urgency</th>
                                 <th class="text-center">Actions</th>
                             </tr>
                         </thead>
@@ -229,8 +228,7 @@ if ($user) {
                                     machine.machine_id AS m_machine_id,
                                     machine.*,
                                     department.*, 
-                                    warranty.*,
-                                    urgency.*
+                                    warranty.*
                                 FROM 
                                     repair_request 
                                 LEFT JOIN 
@@ -243,13 +241,11 @@ if ($user) {
                                     department ON machine.machine_department_id = department.department_id
                                 LEFT JOIN 
                                     warranty ON machine.machine_id = warranty.machine_id
-                                LEFT JOIN
-                                    urgency ON machine.machine_urgency = urgency.id
                                 WHERE 
                                     repair_request.status = 'Started'
                                     AND handled_by = ?
                                 ORDER BY 
-                                    repair_request.date_requested ASC, machine_urgency DESC";
+                                    repair_request.date_requested ASC";
                                 $stmt = $conn->prepare($sql);
                                 $stmt->bindParam(1, $employee_id, PDO::PARAM_STR);
                                 $stmt->execute();
@@ -259,7 +255,6 @@ if ($user) {
                                     while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                                         // Define status and urgency classes
                                         $statusClass = $row['status'] === 'Not Started' ? 'text-secondary' : ($row['status'] === 'Started' ? 'text-warning' : 'text-success');
-                                        $urgencyClass = $row['name'] === 'High' ? 'text-danger' : ($row['name'] === 'Medium' ? 'text-warning' : 'text-success');
 
                                         // Check if repair_date is not empty or null
                                         $repairDate = htmlspecialchars($row['repair_date'] ?? '');
@@ -273,7 +268,6 @@ if ($user) {
                                             data-machine-name='" . htmlspecialchars($row['machine_name']) . "'
                                             data-machine-serial-number='" . htmlspecialchars($row['machine_serial_number']) . "'
                                             data-department='" . htmlspecialchars($row['department_name']) . "'
-                                            data-urgency='" . htmlspecialchars($row['name']) . "'
                                             data-status='" . htmlspecialchars($row['status']) . "'
                                             data-repair-date='" . htmlspecialchars($row['repair_date'] ?? '') . "'
                                             data-requested-by='" .  htmlspecialchars($row['requested_by']) ."'
@@ -287,7 +281,6 @@ if ($user) {
                                             <td>" . htmlspecialchars($row['machine_name'] ?? '') . "</td>
                                             <td>" . htmlspecialchars($row['machine_serial_number'] ?? '') . "</td>
                                             <td>" . htmlspecialchars($row['department_name'] ?? '') . "</td>
-                                            <td class='$urgencyClass'>" . htmlspecialchars($row['name'] ?? '') . "</td>
                                             <td class='text-start'>
                                                 <button class='btn btn-sm btn-primary' id='viewRepairRequest'><i class='bi bi-eye-fill'></i></button>
                                                 <button class='btn btn-sm btn-success' id='completeRepairButton' $completeButtonVisbility><i class='bi bi-check-circle-fill'></i></button>
@@ -430,8 +423,7 @@ if ($user) {
                                     employee.*, 
                                     machine.*, 
                                     department.*, 
-                                    warranty.*,
-                                    urgency.*
+                                    warranty.*
                                 FROM 
                                     repair_request 
                                 LEFT JOIN 
@@ -444,8 +436,6 @@ if ($user) {
                                     department ON machine.machine_department_id = department.department_id
                                 LEFT JOIN 
                                     warranty ON machine.machine_id = warranty.machine_id
-                                LEFT JOIN
-                                    urgency ON machine.machine_urgency = urgency.id
                                 WHERE 
                                     repair_request.status = 'Done'
                                     AND handled_by = ?
@@ -466,7 +456,6 @@ if ($user) {
                                             data-machine-name='" . htmlspecialchars($row['machine_name']) . "'
                                             data-machine-serial-number='" . htmlspecialchars($row['machine_serial_number']) . "'
                                             data-department='" . htmlspecialchars($row['department_name']) . "'
-                                            data-urgency='" . htmlspecialchars($row['name']) . "'
                                             data-status='" . htmlspecialchars($row['status']) . "'
                                             data-requested-by='" .  htmlspecialchars($row['requested_by']) ."'
                                             data-requested-by-name='" . htmlspecialchars($row['first_name']) . " " . htmlspecialchars($row['last_name']) ."'
@@ -552,7 +541,6 @@ if ($user) {
             <p><strong>Machine:</strong> <span id="modalMachineName"></span></p>
             <p><strong>Serial Number:</strong> <span id="modalMachineSerialNumber"></span></p>
             <p><strong>Department:</strong> <span id="modalDepartment"></span></p>
-            <p><strong>Urgency:</strong> <span id="modalUrgency"></span></p>
             <p><strong>Status:</strong> <span id="modalStatus"></span></p>
             <p><strong>Requested By:</strong> <span id="modalRequestedBy"></span></p>
             <p><strong>Details:</strong> <span id="modalDetails"></span></p>
@@ -624,7 +612,6 @@ if ($user) {
             <p><strong>Status:</strong> <span id="materialRequestStatus"></span></p>
             <p><strong>Machine:</strong> <span id="materialRequestMachine"></span></p>
             <p><strong>Department:</strong> <span id="materialRequestDepartment"></span></p>
-            <p><strong>Urgency:</strong> <span id="materialRequestUrgency"></span></p>
 
             <div id="modalItemList" class="mt-3">
                 <table class="table table-striped">

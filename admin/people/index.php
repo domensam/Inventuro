@@ -305,7 +305,7 @@ if ($user) {
                         <div class="mb-3">
                             <label for="modalDepartment" class="form-label"><strong>Department:</strong></label>
                             <select id="modalDepartment" class="form-select" disabled>
-                                <option value="1">Engineering</option>
+                                <option default value="1">Engineering</option>
                                 <option value="2">Warehouse</option>
                                 <option value="4">Logistics</option>
                                 <option value="7">Pre-production</option>

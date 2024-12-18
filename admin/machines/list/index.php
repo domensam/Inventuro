@@ -4,6 +4,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['employee_id']) && $_SESSION[
 
 // Include the database connection file
 include '../../../connect.php';
+date_default_timezone_set('Asia/Manila');
 
 // SQL query to get the most recent BLOB from the image column
 $stmt = $conn->prepare("
@@ -308,9 +309,9 @@ if ($user) {
                 </div>
                 <!-- Add Machine View -->
                 <div class="add-machine-view p-2">
-                <div class="text-end">
-                    <button class="btn btn-outline-secondary" id="closeAddMachineBtn" style="margin-right: 200px; margin-top: 20px;">
-                        <i class="bi bi-x-lg"></i>
+                    <div class="text-end">
+                        <button class="btn btn-outline-secondary" id="closeAddMachineBtn" style="margin-right: 200px; margin-top: 20px;">
+                            <i class="bi bi-x-lg"></i>
                         </button>
                     </div>
                     <div class="container mt-4 w-100">
@@ -440,7 +441,6 @@ if ($user) {
                                             <input type="file" class="form-control" id="machineManual" accept="application/pdf">
                                         </div>
                                     </div>
-
                                     <button class="btn btn-primary" onclick="nextStep(2)">Continue</button>
                                 </div>
 
@@ -538,7 +538,7 @@ if ($user) {
                                     </div>
 
                                     <button class="btn btn-secondary" onclick="prevStep(1)">Previous</button>
-                                    <button class="btn btn-primary" onclick="nextStep(3)" disabled id="nextStepButton2">Continue</button>
+                                    <button class="btn btn-primary" onclick="nextStep(3)" disabled id="nextStepButton3">Continue</button>
                                 </div>
 
                                 <!-- Step 3 -->
@@ -616,14 +616,14 @@ if ($user) {
                                                         </button>
                                                     </div>
                                                 </div>
-                                                <h5 class="card-title" style="margin-top: 35px;">Contact Details</h5>
+                                                <h5 class="card-title" style="margin-top: 35px;">Contact Details<span class="text-danger">*</span></h5>
                                                 <hr>
                                                 <div class="form-group mb-3">
                                                     <label for="contactName">Contact Person:</label>
                                                     <input type="text" id="contactName" class="form-control" placeholder="Enter Contact Person">
                                                 </div>
                                                 <div class="form-group mb-3">
-                                                    <label for="contactNumber">Contact Number:<span class="text-danger">*</span></label>
+                                                    <label for="contactNumber">Contact Number:</label>
                                                     <input type="text" id="contactNumber" class="form-control" placeholder="Enter Contact Number">
                                                 </div>
                                                 <div class="form-group mb-3">
@@ -635,7 +635,7 @@ if ($user) {
                                     </div>
 
                                     <button class="btn btn-secondary" onclick="prevStep(2)">Previous</button>
-                                    <button class="btn btn-primary" onclick="nextStep(4)">Continue</button>
+                                    <button class="btn btn-primary" onclick="nextStep(4)" id="nextStepButton4">Continue</button>
                                 </div>
 
                                 <!-- Step 4 -->
@@ -659,32 +659,161 @@ if ($user) {
                                                 <div class="form-group mb-3">
                                                     <label>
                                                         Notify me 
-                                                        <input type="number" class="form-control d-inline-block mx-2" id="maintenanceNotifyHours" style="width: 80px;" placeholder="7" min="7" step="1">
-                                                        day(s) before the part requires maintenance or replacement
+                                                        <input type="number" class="form-control d-inline-block mx-2" id="maintenanceNotifyDays" style="width: 80px;" placeholder="7" min="7" step="1">
+                                                        days before the part requires maintenance or replacement
                                                     </label>
                                                 </div>
                                                 <div id="notifyWarranty" class="form-group mb-3" style="display: none;">
                                                     <label>
                                                         Notify me 
-                                                        <input type="number" class="form-control d-inline-block mx-2" id="warrantyNotifyDays" style="width: 80px;" placeholder="1" min="1" step="1">
+                                                        <input type="number" class="form-control d-inline-block mx-2" id="warrantyNotifyWeeks" style="width: 80px;" placeholder="1" min="1" step="1">
                                                         week(s) before the warranty expires
                                                     </label>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div id="machineDetails" style="display:none; margin-top: 20px; margin-bottom: 20px;">
-                                        <div class="card p-2">
-                                            <div class="card-header">
-                                                <h5 class="card-title">Machine Details<span class="text-danger">*</span></h5>
-                                            </div>
-                                            <div class="card-body">
-                                                
-                                            </div>
+                                    <div id="machineDetails" class="card p-2" style="margin-top: 20px; margin-bottom: 20px;">
+                                        <div class="card-header">
+                                            <h5 class="card-title">Machine Details<span class="text-danger">*</span></h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <table class="table table-hover mb-3">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Basic Information</th>
+                                                        <th></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>Machine Name</td>
+                                                        <td id="machineNameText">[Machine Name]</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Machine Serial Number</td>
+                                                        <td id="machineSerialNumberText">[Machine Serial Number]</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Machine Description</td>
+                                                        <td id="machineDescriptionText">[Machine Description]</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Machine Department</td>
+                                                        <td id="machineDepartmentText">[Machine Department]</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Machine Manufacturer</td>
+                                                        <td id="machineManufacturerText">[Machine Manufacturer]</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Machine Manufactured Date</td>
+                                                        <td id="machineManufacturedDateText">[Machine Manufactured Date]</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Machine Image</td>
+                                                        <td id="machineImageText">[Machine Image]</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Machine Manual</td>
+                                                        <td id="machineManualText">[Machine Manual]</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+
+                                            <table class="table table-hover mb-3">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Part Name</th>
+                                                        <th>Description</th>
+                                                        <th>Quantity</th>
+                                                        <th>M.I. 
+                                                            <span 
+                                                                class="text-muted" 
+                                                                data-bs-toggle="tooltip" 
+                                                                data-bs-placement="right" 
+                                                                title="Maintenance Interval Hours">
+                                                                <i class="bi bi-question-circle"></i>
+                                                            </span>
+                                                        </th>
+                                                        <th>R.L.
+                                                            <span 
+                                                                class="text-muted" 
+                                                                data-bs-toggle="tooltip" 
+                                                                data-bs-placement="right" 
+                                                                title="Replacement Lifespan Hours">
+                                                                <i class="bi bi-question-circle"></i>
+                                                            </span>
+                                                        </th>
+                                                        <th>C.L.
+                                                            <span 
+                                                                class="text-muted" 
+                                                                data-bs-toggle="tooltip" 
+                                                                data-bs-placement="right" 
+                                                                title="Critical Level">
+                                                                <i class="bi bi-question-circle"></i>
+                                                            </span></th>
+                                                        <th>Maintenance Instructions</th>
+                                                        <th>Under Warranty?</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <!-- Part details will be populated here -->
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+
+                                            <table class="table table-hover mb-3 d-none" id="warrantyTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Warranty Details</th>
+                                                        <th></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>Provider Name</td>
+                                                        <td id="warrantyProviderNameText">[Warranty Provider Name]</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Coverage Type</td>
+                                                        <td id="warrantyCoverageTypeText">[Warranty Coverage Type]</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Start Date</td>
+                                                        <td id="warrantyStartDateText">[Warranty Start Date]</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Expiration Date</td>
+                                                        <td id="warrantyExpirationDateText">[Warranty Expiration Date]</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Terms and Conditions</td>
+                                                        <td id="warrantyTermsAndConditionsText">[Warranty Terms and Conditions]</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Warranty Document</td>
+                                                        <td id="warrantyDocumentText">[Warranty Document]</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Contact Person</td>
+                                                        <td id="warrantyContactPersonText">[Warranty Contact Person]</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Contact Number</td>
+                                                        <td id="warrantyContactNumberText">[Warranty Contact Number]</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td>Contact Email</td>
+                                                        <td id="warrantyContactEmailText">[Warranty Contact Email]</td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </div>
                                     <button class="btn btn-secondary" onclick="prevStep(3)">Previous</button>
-                                    <button class="btn btn-success">Submit</button>
+                                    <button class="btn btn-success" id="submitRepairUpdate">Submit</button>
                                 </div>
                             </div>
                         </div>

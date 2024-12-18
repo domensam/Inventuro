@@ -185,7 +185,6 @@ if ($user) {
                         <tr>
                             <th class="text-center" style="width: 5%;"><input type="checkbox" id="selectAll"></th>
                             <th class="text-start" style="padding-left: 13px;">Repair Request ID</th>
-                            <th class="text-start" style="padding-left: 13px;">Urgency</th>
                             <th class="text-start" style="padding-left: 10px;">Machine Name</th>
                             <th class="text-start" style="padding-right: 13px;">Requestor Name</th>
                             <th class="text-start" style="padding-right: 13px;">Department</th>
@@ -199,7 +198,6 @@ if ($user) {
                             $sql = "SELECT 
                                         rr.repair_request_id, 
                                         m.machine_name, 
-                                        u.name,
                                         e.first_name, 
                                         e.last_name, 
                                         d.department_name, 
@@ -210,36 +208,33 @@ if ($user) {
                                         employee e ON rr.requested_by = e.employee_id
                                     JOIN 
                                         machine m ON rr.machine_id = m.machine_id
-                                    JOIN urgency u ON m.machine_urgency = u.id
                                     JOIN 
                                         department d ON m.machine_department_id = d.department_id"; // Adjust joins based on your schema
                             $result = $conn->query($sql);
 
                             while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
                                 // Set urgency color
-                                $urgencyColor = '';
-                                switch ($row['name']) {
-                                    case 'High':
-                                        $urgencyColor = 'text-danger'; // Red for high urgency
-                                        break;
-                                    case 'Medium':
-                                        $urgencyColor = 'text-warning'; // Yellow for medium urgency
-                                        break;
-                                    default:
-                                        $urgencyColor = 'text-success'; // Green or normal for low urgency
-                                }
+                                // $urgencyColor = '';
+                                // switch ($row['name']) {
+                                //     case 'High':
+                                //         $urgencyColor = 'text-danger'; // Red for high urgency
+                                //         break;
+                                //     case 'Medium':
+                                //         $urgencyColor = 'text-warning'; // Yellow for medium urgency
+                                //         break;
+                                //     default:
+                                //         $urgencyColor = 'text-success'; // Green or normal for low urgency
+                                // }
 
                                 // Construct the table row
                                 echo "<tr
                                     data-repair-request-id='" . htmlspecialchars($row['repair_request_id']) . "'
-                                    data-urgency='" . htmlspecialchars($row['name']) . "'
                                     data-machine-name='" . htmlspecialchars($row['machine_name']) . "'
                                     data-requestor-name='" . htmlspecialchars($row['first_name'] . " " . $row['last_name']) . "'
                                     data-department='" . htmlspecialchars($row['department_name']) . "'
                                     data-status='" . htmlspecialchars($row['status']) . "'>
                                     <td class='text-center align-middle'><input type='checkbox' class='row-checkbox'></td>
                                     <td class='text-start align-middle'>" . htmlspecialchars($row['repair_request_id']) . "</td>
-                                    <td class='text-start align-middle " . $urgencyColor . "'>" . htmlspecialchars($row['name']) . "</td>
                                     <td class='text-start align-middle'>" . htmlspecialchars($row['machine_name']) . "</td>
                                     <td class='text-start align-middle'>" . htmlspecialchars($row['first_name'] . " " . $row['last_name']) . "</td>
                                     <td class='text-start align-middle'>" . htmlspecialchars($row['department_name']) . "</td>
