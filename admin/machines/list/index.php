@@ -652,10 +652,10 @@ if ($user) {
                                                     <label for="notificationEmail">Notification Email:</label>
                                                     <input type="email" id="notificationEmail" class="form-control" placeholder="Enter email to receive notification">
                                                 </div>
-                                                <div class="form-group mb-3">
+                                                <!-- <div class="form-group mb-3">
                                                     <label for="notificationPhone">Notification Phone (optional):</label>
                                                     <input type="text" id="notificationPhone" class="form-control" placeholder="Enter phone number to receive notification">
-                                                </div>
+                                                </div> -->
                                                 <div class="form-group mb-3">
                                                     <label>
                                                         Notify me 
@@ -710,18 +710,18 @@ if ($user) {
                                                         <td>Machine Manufactured Date</td>
                                                         <td id="machineManufacturedDateText">[Machine Manufactured Date]</td>
                                                     </tr>
-                                                    <tr>
+                                                    <!-- <tr>
                                                         <td>Machine Image</td>
                                                         <td id="machineImageText">[Machine Image]</td>
                                                     </tr>
                                                     <tr>
                                                         <td>Machine Manual</td>
                                                         <td id="machineManualText">[Machine Manual]</td>
-                                                    </tr>
+                                                    </tr> -->
                                                 </tbody>
                                             </table>
 
-                                            <table class="table table-hover mb-3">
+                                            <table class="table table-hover mb-3" id="machinePartsTable">
                                                 <thead>
                                                     <tr>
                                                         <th>Part Name</th>
@@ -792,10 +792,10 @@ if ($user) {
                                                         <td>Terms and Conditions</td>
                                                         <td id="warrantyTermsAndConditionsText">[Warranty Terms and Conditions]</td>
                                                     </tr>
-                                                    <tr>
+                                                    <!-- <tr>
                                                         <td>Warranty Document</td>
                                                         <td id="warrantyDocumentText">[Warranty Document]</td>
-                                                    </tr>
+                                                    </tr> -->
                                                     <tr>
                                                         <td>Contact Person</td>
                                                         <td id="warrantyContactPersonText">[Warranty Contact Person]</td>
@@ -821,6 +821,26 @@ if ($user) {
                 </div>
             </div>
         </div>
+        <!--Info Modal -->
+        <div class="modal" tabindex="-1" role="dialog" id="infoModal">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Modal title</h5>
+                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Modal body text goes here.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Machine Info Modal -->
         <div id="machineInfoModal" class="offcanvas offcanvas-end" tabindex="-1" style="padding: 20px;" data-bs-scroll="true">
             <div class="offcanvas-header d-flex justify-content-between">

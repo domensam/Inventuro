@@ -112,8 +112,17 @@ try {
     // Step 2: Insert parts
     foreach ($data['selectedParts'] as $part) {
         $installationDate = date('Y-m-d H:i:s');
-        $lifespanInDays = $part['replacementLifespan'] / 12;
-        $replacementDate = date('Y-m-d H:i:s', strtotime("+$lifespanInDays days", strtotime($installationDate)));
+        // Calculate lifespan in operational days
+        $lifespanInOperationalDays = floor($part['replacementLifespan'] / 12); // Or ceil() / round()
+
+        // Debug operational days
+        error_log("Lifespan in Operational Days (Rounded): $lifespanInOperationalDays");
+
+        // Calculate replacement date
+        $replacementDate = date('Y-m-d H:i:s', strtotime("+$lifespanInOperationalDays days", strtotime($installationDate)));
+
+        // Debug replacement date
+        error_log("Replacement Date (Rounded): $replacementDate");
 
         $stmt = $conn->prepare("
             INSERT INTO machine_parts (
@@ -226,7 +235,7 @@ try {
             ':warranty_other_services' => $data['warranty']['otherServices'] ?? null,
             ':warranty_document' => $warrantyDocumentPath, // File path for warranty document
             ':warranty_notification_email' => $data['notifications']['email'] ?? null,
-            ':warranty_notification_phone' => $data['notifications']['notifyPhone'] ?? null,
+            ':warranty_notification_phone' => null,
             ':warranty_notification_maintenance' => $data['notifications']['notifyDays'] ?? null,
             ':warranty_notification_expiration' => $data['notifications']['notifyWeeks'] ?? null
         ]);

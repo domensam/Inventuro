@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 console.error('AJAX error:', textStatus, errorThrown); // Detailed logging
                 console.error('Response text:', jqXHR.responseText); // Log response text
 
-                alert(`Failed to update machine. Please try again. Error: ${textStatus}`);
+                showInfoModal('Error', 'There was an error saving the machine.');
             }
         });
     }
@@ -129,6 +129,12 @@ document.addEventListener('DOMContentLoaded', function () {
         modalDescription.disabled = true;
     }
 
+    function showInfoModal(title, message) {
+        document.querySelector('#infoModal .modal-title').textContent = title;
+        document.querySelector('#infoModal .modal-body p').textContent = message;
+        $('#infoModal').modal('show');
+    }
+
     // Edit Image button functionality
     editImageBtn.addEventListener('click', function () {
         uploadImageInput.click();
@@ -144,12 +150,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 const fileSize = selectedFile.size;
 
                 if (!allowedFileTypes.includes(fileType)) {
-                    alert('Only JPEG, PNG, and JPG images are allowed');
+                    showInfoModal('Invalid File Type', 'Please upload a JPEG, PNG, or JPG image.');
                     return;
                 }
 
                 if (fileSize > maxFileSize) {
-                    alert('Maximum file size is 20 MB');
+                    showInfoModal('File Size', 'File size exceeds the limit of 25 MB.');
                     return;
                 }
 
@@ -305,11 +311,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.getElementById('underWarrantySection').addEventListener('click', function () {
         $('#warrantyModal').modal('show');
-    })
-
-    document.getElementById('addWarrantyBtn').addEventListener('click', function() {
-        // $('#addWarrantyModal').modal('show');
-        alert('Button Clicked');
     });
 
     // Prevent opening the modal if multiple rows are selected
@@ -370,47 +371,48 @@ document.addEventListener('DOMContentLoaded', function () {
         saveMachineToDatabase(machineName, type, model, manufacturer, manufacturedYear, maintenanceInterval, description, departmentID, imageData, createdBy, createdAt);
     });
     
-    function saveMachineToDatabase(machineName, type, model, manufacturer, manufacturedYear, maintenanceInterval, description, departmentID, imageData, createdBy, createdAt) {
-        $.ajax({
-            url: 'add_machine.php',
-            method: 'POST',
-            dataType: 'json',
-            data: {
-                machine_name: machineName,
-                machine_type: type,
-                machine_model: model,
-                machine_manufacturer: manufacturer,
-                machine_year_of_manufacture: manufacturedYear,
-                machine_maintenance_interval_days: maintenanceInterval,
-                machine_description: description,
-                department_id: departmentID, // Pass department ID
-                machine_created_by: createdBy,
-                machine_created_at: createdAt,
-                image: imageData
-            },
-            success: function(response) {
-                console.log(response);
+    // function saveMachineToDatabase(machineName, type, model, manufacturer, manufacturedYear, maintenanceInterval, description, departmentID, imageData, createdBy, createdAt) {
+    //     $.ajax({
+    //         url: 'add_machine.php',
+    //         method: 'POST',
+    //         dataType: 'json',
+    //         data: {
+    //             machine_name: machineName,
+    //             machine_type: type,
+    //             machine_model: model,
+    //             machine_manufacturer: manufacturer,
+    //             machine_year_of_manufacture: manufacturedYear,
+    //             machine_maintenance_interval_days: maintenanceInterval,
+    //             machine_description: description,
+    //             department_id: departmentID, // Pass department ID
+    //             machine_created_by: createdBy,
+    //             machine_created_at: createdAt,
+    //             image: imageData
+    //         },
+    //         success: function(response) {
+    //             console.log(response);
     
-                const addMachineModal = new bootstrap.Offcanvas(document.getElementById('addMachineModal'));
-                addMachineModal.hide();
+    //             const addMachineModal = new bootstrap.Offcanvas(document.getElementById('addMachineModal'));
+    //             addMachineModal.hide();
     
-                window.location.reload();
-            },
-            error: function(xhr, status, error) {
-                console.error('Raw response:', xhr.responseText);
+    //             window.location.reload();
+    //         },
+    //         error: function(xhr, status, error) {
+    //             console.error('Raw response:', xhr.responseText);
     
-                let response;
-                try {
-                    response = JSON.parse(xhr.responseText);
-                    console.error('Error:', response.errors || response.message);
-                    alert('Error adding machine. Check console for details.');
-                } catch (e) {
-                    console.error('Failed to parse JSON. Raw response:', xhr.responseText);
-                    alert('Server returned an invalid response. Check console for details.');
-                }
-            }
-        });
-    }    
+    //             let response;
+    //             try {
+    //                 response = JSON.parse(xhr.responseText);
+    //                 console.error('Error:', response.errors || response.message);
+    //                 alert('Error adding machine. Check console for details.');
+
+    //             } catch (e) {
+    //                 console.error('Failed to parse JSON. Raw response:', xhr.responseText);
+    //                 alert('Server returned an invalid response. Check console for details.');
+    //             }
+    //         }
+    //     });
+    // }    
     
     document.getElementById('addItemImage').addEventListener('change', function (event) {
         const file = event.target.files[0];
@@ -420,12 +422,12 @@ document.addEventListener('DOMContentLoaded', function () {
             const maxFileSize = 5 * 1024 * 1024; // 5 MB limit
 
             if (!allowedFileTypes.includes(file.type)) {
-                alert('Invalid file type. Only JPEG and PNG are allowed.');
+                showInfoModal('Invalid File Type', 'Please upload a JPEG, PNG, or JPG image.');
                 return;
             }
 
             if (file.size > maxFileSize) {
-                alert('File size exceeds the limit of 5 MB.');
+                showInfoModal('File Size', 'File size exceeds the limit of 5 MB.');
                 return;
             }
 
@@ -466,13 +468,13 @@ document.addEventListener('DOMContentLoaded', function () {
                         window.location.reload();
                     },
                     error: function(xhr, status, error) {
-                        alert('Error deleting machine. Please try again.');
+                        showInfoModal('Error', 'There was an error deleting the machine.');
                         console.error('Error:', xhr.responseText);
                     }
                 });
                 $('#confirmDeleteModal').modal('hide'); // Hide modal after confirming
             } else {
-                alert('Machine name does not match. Please try again.');
+                showInfoModal('Error', 'The names do not match. Please try again.');
             }
         };
     });
@@ -618,7 +620,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Ensure at least one card is selected
             if (selectedCards.length === 0) {
-                alert('Please select at least one part to proceed.');
+                showInfoModal('Error', 'Please select at least one part.');
                 isValid = false;
             }
         }
@@ -790,7 +792,7 @@ document.addEventListener('DOMContentLoaded', function () {
         validMinDate.setDate(validMinDate.getDate() + 1);
 
         if (expirationDate < validMinDate) {
-            alert("Expiration date must be at least one day after the start date.");
+            showInfoModal('Invalid Expiration Date', 'Expiration date should be at least one day after start date.');
             expirationDateInput.value = ""; // Clear invalid expiration date
         }
     });
@@ -1137,14 +1139,14 @@ document.addEventListener('DOMContentLoaded', function () {
             const allowedExtensions = ['pdf', 'png', 'jpg'];
             const fileExtension = file.name.split('.').pop().toLowerCase();
             if (!allowedExtensions.includes(fileExtension)) {
-                alert('Invalid file type. Only PDF, PNG, or JPG files are allowed.');
+                showInfoModal('Invalid File Type', 'Please upload a PDF, PNG, or JPG file.');
                 warrantyDocumentInput.value = ''; // Clear the input
                 return;
             }
 
             // Check file size
             if (file.size > maxSizeInBytes) {
-                alert('File is too large. Maximum size is 25MB.');
+                showInfoModal('File Size Limit Exceeded', 'Please select a file smaller than 25MB.');
                 warrantyDocumentInput.value = ''; // Clear the input
                 return;
             }
@@ -1351,7 +1353,51 @@ document.addEventListener('DOMContentLoaded', function () {
                 contactEmail: document.getElementById('contactEmail').value.trim(),
                 otherServices: document.getElementById('otherServiceTitle').value.trim() || null
             };
+
+            // Populate warranty table
+            document.getElementById('warrantyProviderNameText').textContent = warranty.providerName || '[Warranty Provider Name]';
+            document.getElementById('warrantyCoverageTypeText').textContent = warranty.coverageType || '[Warranty Coverage Type]';
+            document.getElementById('warrantyStartDateText').textContent = warranty.startDate || '[Warranty Start Date]';
+            document.getElementById('warrantyExpirationDateText').textContent = warranty.expirationDate || '[Warranty Expiration Date]';
+            document.getElementById('warrantyTermsAndConditionsText').textContent = warranty.termsConditions || '[Warranty Terms and Conditions]';
+            document.getElementById('warrantyContactPersonText').textContent = warranty.contactPerson || '[Warranty Contact Person]';
+            document.getElementById('warrantyContactNumberText').textContent = warranty.contactNumber || '[Warranty Contact Number]';
+            document.getElementById('warrantyContactEmailText').textContent = warranty.contactEmail || '[Warranty Contact Email]';
+            
+            // Show the warranty table
+            document.getElementById('warrantyTable').classList.remove('d-none');
+        } else {
+            // Hide the warranty table
+            document.getElementById('warrantyTable').classList.add('d-none');
         }
+
+        // Assign values to the step 4 now
+        machineNameText.textContent = machineName;
+        machineSerialNumberText.textContent = serialNumber;
+        machineDescriptionText.textContent = machineDescription;
+        machineDepartmentText.textContent = departmentName;
+        machineManufacturerText.textContent = manufacturerName;
+        machineManufacturedDateText.textContent = manufacturedDate;
+
+        // Populate the machine parts table
+        const machinePartsTableBody = document.querySelector('#machinePartsTable tbody');
+        machinePartsTableBody.innerHTML = ''; // Clear existing rows
+
+        const selectedParts = fetchFinalValues(); // Fetch selected parts
+        selectedParts.forEach(part => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${part.name}</td>
+                <td>${part.description}</td>
+                <td>${part.quantity}</td>
+                <td>${part.maintenanceInterval}</td>
+                <td>${part.replacementLifespan}</td>
+                <td>${part.criticalityLevel}</td>
+                <td>${part.instructions}</td>
+                <td>${part.warrantyCovered}</td>
+            `;
+            machinePartsTableBody.appendChild(row);
+        });
 
         return {
             machineName,
@@ -1390,7 +1436,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const notificationData = {
             email: document.getElementById('notificationEmail').value.trim(),
             notifyDays: document.getElementById('maintenanceNotifyDays').value.trim(),
-            notifyPhone: document.getElementById('notificationPhone').value.trim(),
             notifyWeeks: document.getElementById('warrantyNotifyWeeks').value.trim()
         };
     
@@ -1426,13 +1471,46 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('Data submitted successfully!');
+                    console.log('Data submitted successfully!');
+    
+                    // Email the recipient that they will receive a notification
+                    const recipientEmail = document.getElementById('notificationEmail').value.trim();
+                    const machineName = document.getElementById('machineName').value.trim();
+                    const notifyDays = document.getElementById('maintenanceNotifyDays').value.trim();
+                    const notifyWeeks = document.getElementById('warrantyNotifyWeeks').value.trim() || 0;
+    
+                    if (recipientEmail) {
+                        $.ajax({
+                            url: 'send_email.php', // The PHP file that handles sending emails
+                            method: 'POST',
+                            data: {
+                                recipientEmail: recipientEmail,
+                                machineName: machineName,
+                                notifyDays: notifyDays,
+                                notifyWeeks: notifyWeeks
+                            }, // Send recipient email, machine name, and notify days
+                            success: function (response) {
+                                const result = JSON.parse(response);
+                                if (result.success) {
+                                    console.log('Email sent successfully:', result.message);
+                                    showInfoModal('Success', 'Machine is added successfully.');
+                                    window.location.reload();
+                                } else {
+                                    console.error('Failed to send email:', result.error);
+                                }
+                            },
+                            error: function (xhr, status, error) {
+                                console.error('Error sending email:', error);
+                            }
+                        });
+                    } else {
+                        console.error('Recipient email is required.');
+                    }
                 } else {
                     alert('Error: ' + data.error);
                 }
             })
             .catch(error => console.error('Error:', error));
-    });
-        
+    });    
 
 });
